@@ -47,9 +47,9 @@ int main() {
 			if (field.name != "Sum")
 				return;
 			if constexpr (field.ValueTypeIsSameWith(overload_v<>(&Point::Sum)))
-				cout << (p.*(field.ptr))() << endl;
+				cout << (p.*(field.value))() << endl;
 			else if constexpr (field.ValueTypeIsSameWith(overload_v<float>(&Point::Sum)))
-				cout << (p.*(field.ptr))(1.f) << endl;
+				cout << (p.*(field.value))(1.f) << endl;
 			else
 				assert(false);
 		}
