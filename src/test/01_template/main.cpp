@@ -5,19 +5,20 @@
 using namespace Ubpa::USRefl;
 using namespace std;
 
+template<typename T>
 struct [[size(8)]] Point {
 	[[not_serialize]]
-	float x;
+	T x;
 	[[info("hello")]]
-	float y;
+	T y;
 	bool a{ true };
 };
 
-template<>
-struct Type<Point> {
+template<typename T>
+struct Type<Point<T>> {
 	static constexpr FieldList fields = {
-		Field{"x", &Point::x, AttrList{ Attr{ "not_serialize", true } }},
-		Field{"y", &Point::y, AttrList{ Attr{ "info", "hello" } }}
+		Field{"x", &Point<T>::x, AttrList{ Attr{ "not_serialize", true } }},
+		Field{"y", &Point<T>::y, AttrList{ Attr{ "info", "hello" } }}
 	};
 
 	static constexpr AttrList attrs = {
@@ -26,9 +27,9 @@ struct Type<Point> {
 };
 
 int main() {
-	Point p{ 1,2 };
+	Point<float> p{ 1,2 };
 
-	Type<Point>::fields.ForEach([](auto&& field) {
+	Type<Point<float>>::fields.ForEach([](auto&& field) {
 		cout << field.name << endl;
 		field.attrs.ForEach([](auto&& attr) {
 			cout << "key   : " << attr.key << endl;
@@ -37,13 +38,13 @@ int main() {
 		});
 	});
 
-	constexpr auto y_idx = Type<Point>::fields.Find("y");
-	constexpr auto y_field = Type<Point>::fields.Get<y_idx>();
+	constexpr auto y_idx = Type<Point<float>>::fields.Find("y");
+	constexpr auto y_field = Type<Point<float>>::fields.Get<y_idx>();
 	static_assert(y_field.name == "y");
 
-	constexpr bool containX = Type<Point>::fields.Contains("x");
+	constexpr bool containX = Type<Point<float>>::fields.Contains("x");
 
-	Type<Point>::attrs.ForEach([](auto&& attr) {
+	Type<Point<float>>::attrs.ForEach([](auto&& attr) {
 		cout << "key   : " << attr.key << endl;
 		if constexpr (!attr.is_value_empty)
 			cout << "value : " << attr.value << endl;
