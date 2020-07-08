@@ -13,24 +13,11 @@ struct [[size("8")]] Point {
 };
 
 template<>
-struct FieldDecl<float, Point, &Point::x> {
-	static constexpr string_view name = "x";
-	static constexpr std::array<Meta, 1> metas{{
-		{ "not_serialize" }
-	}};
-};
-
-template<>
-struct FieldDecl<float, Point, &Point::y> {
-	static constexpr string_view name = "y";
-	static constexpr std::array<Meta, 1> metas{ {
-		{ "info", "hello" }
-	}};
-};
-
-template<>
 struct TypeDecl<Point> {
-	static constexpr std::tuple fields{ USREFL_FIELD_OF(&Point::x), USREFL_FIELD_OF(&Point::y) };
+	static constexpr std::tuple fields{
+		GenField("x", &Point::x, std::array{ Meta{ "not_serialize" } }),
+		GenField("y", &Point::y, std::array{ Meta{ "info", "hello" } }) };
+
 	static constexpr std::array<Meta, 1> metas{ {
 		{ "size", "8" }
 	} };
