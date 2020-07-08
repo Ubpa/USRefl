@@ -18,7 +18,7 @@ struct Type<Point> {
 	using type = Point;
 
 	static constexpr FieldList fields = {
-		Field{"x", &Point::x, AttrList{ Attr{ "not_serialize", true } }},
+		Field{"x", &Point::x, AttrList{ Attr{ "not_serialize" } }},
 		Field{"y", &Point::y, AttrList{ Attr{ "info", "hello" } }}
 	};
 
@@ -34,7 +34,7 @@ int main() {
 		cout << field.name << endl;
 		field.attrs.ForEach([](auto attr) {
 			cout << "name   : " << attr.name << endl;
-			if constexpr (!attr.has_value)
+			if constexpr (attr.has_value)
 				cout << "value : " << attr.value << endl;
 		});
 	});
