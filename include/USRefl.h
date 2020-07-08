@@ -181,7 +181,8 @@ namespace Ubpa::USRefl {
 	struct Attr<void> : detail::NamedValue<void> {
 		constexpr Attr(std::string_view name) : detail::NamedValue<void>{ name } {}
 	};
-	template<size_t N> Attr(std::string_view, const char[N])->Attr<std::string_view>;
+	template<size_t N>
+	Attr(std::string_view, const char[N])->Attr<std::string_view>;
 	Attr(std::string_view)->Attr<void>;
 	template<typename T> struct IsAttr : std::false_type {};
 	template<typename T> struct IsAttr<Attr<T>> : std::true_type {};
@@ -191,6 +192,7 @@ namespace Ubpa::USRefl {
 		static_assert((IsAttr<Attrs>::value&&...));
 		using detail::BaseList<Attrs...>::BaseList;
 	};
+	template<class... Attrs> AttrList(Attrs...)->AttrList<Attrs...>;
 	template<typename T> struct IsAttrList : std::false_type {};
 	template<typename... Attrs> struct IsAttrList<AttrList<Attrs...>> : std::true_type {};
 
@@ -215,6 +217,7 @@ namespace Ubpa::USRefl {
 		static_assert((IsField<Fields>::value&&...));
 		using detail::BaseList<Fields...>::BaseList;
 	};
+	template<class... Fields> FieldList(Fields...)->FieldList<Fields...>;
 
 
 	// name, type, fields, attrs, subclasses
@@ -227,6 +230,7 @@ namespace Ubpa::USRefl {
 		using detail::BaseList<Types...>::BaseList;
 		static_assert((IsType<Types>::value&&...));
 	};
+	template<class... Types> TypeList(Types...)->TypeList<Types...>;
 
 	// non-static member variables
 	template<typename T, typename Func>
