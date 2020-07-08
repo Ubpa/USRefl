@@ -41,6 +41,28 @@ namespace Ubpa::USRefl::detail {
 		}
 	}
 
+	template<typename T>
+	struct NamedValue {
+		std::string_view name;
+		T value;
+		static constexpr bool has_value{ true };
+
+		template<typename U>
+		static constexpr bool ValueTypeIs() {
+			return std::is_same_v<T, U>;
+		}
+
+		template<typename U>
+		static constexpr bool ValueTypeIsSameWith(U u) {
+			return ValueTypeIs<U>();
+		}
+	};
+	template<>
+	struct NamedValue<void> {
+		std::string_view name;
+		static constexpr bool has_value{ false };
+	};
+
 	// Elems has name
 	template<typename... Elems>
 	struct BaseList : std::tuple<Elems...> {
@@ -59,7 +81,22 @@ namespace Ubpa::USRefl::detail {
 		}
 
 		constexpr size_t Find(std::string_view name) const {
-			return FindIf([name](auto attr) { return attr.name == name; });
+			return FindIf([name](auto elem) { return elem.name == name; });
+		}
+		
+		template<typename T>
+		constexpr size_t FindByValue(T value) const {
+			return FindIf([value](auto elem) {
+				if constexpr (elem.has_value) {
+					if constexpr (elem.ValueTypeIs<T>())
+						return elem.value == value;
+					else
+						return false;
+					//return true;
+				}
+				else
+					return false;
+			});
 		}
 
 		constexpr bool Contains(std::string_view name) const {
@@ -134,23 +171,13 @@ namespace Ubpa::USRefl {
 		static constexpr bool is_function = false;
 	};
 
-	template<typename T = void>
-	struct Attr;
 	template<typename T>
-	struct Attr {
-		constexpr Attr(std::string_view name, T value)  : name{ name }, value{ value }{}
-		constexpr Attr(std::string_view name)  : Attr{ name,T{} } {}
-		constexpr Attr()  : Attr{ "",T{} } {}
-		std::string_view name;
-		T value;
-		static constexpr bool has_value = true;
+	struct Attr : detail::NamedValue<T> {
+		constexpr Attr(std::string_view name, T value) : detail::NamedValue<T>{ name,value } {}
 	};
 	template<>
-	struct Attr<void> {
-		constexpr Attr(std::string_view name) : name{ name } {}
-		constexpr Attr() : Attr{ "" } {}
-		std::string_view name;
-		static constexpr bool has_value = false;
+	struct Attr<void> : detail::NamedValue<void> {
+		constexpr Attr(std::string_view name) : detail::NamedValue<void>{ name } {}
 	};
 	using AttrStr = Attr<std::string_view>;
 	template<size_t N>
@@ -168,28 +195,14 @@ namespace Ubpa::USRefl {
 	template<typename... Attrs> struct IsAttrList<AttrList<Attrs...>> : std::true_type {};
 
 	template<typename T, typename AList>
-	struct Field : FieldTraits<T> {
+	struct Field : FieldTraits<T>, detail::NamedValue<T> {
 		static_assert(IsAttrList<AList>::value);
+		static_assert(!std::is_void_v<T>);
 
-		constexpr Field(
-			std::string_view name,
-			T value,
-			AList attrs
-		)  : name{ name }, value{ value }, attrs{ attrs }{}
+		constexpr Field(std::string_view name, T value, AList attrs)
+			: detail::NamedValue<T>{name, value}, attrs{ attrs }{}
 
-		std::string_view name;
-		T value;
 		AList attrs;
-
-		template<typename U>
-		static constexpr bool ValueTypeIs() {
-			return std::is_same_v<T, U>;
-		}
-
-		template<typename U>
-		static constexpr bool ValueTypeIsSameWith(const U& u) {
-			return ValueTypeIs<U>();
-		}
 	};
 	template<typename T, typename AList>
 	Field(std::string_view, T, AList)->Field<T, AList>;

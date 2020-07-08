@@ -15,6 +15,7 @@ struct [[size(8)]] Point {
 template<>
 struct Type<Point> {
 	static constexpr std::string_view name = "Point";
+	using type = Point;
 
 	static constexpr FieldList fields = {
 		Field{"x", &Point::x, AttrList{ Attr{ "not_serialize", true } }},
