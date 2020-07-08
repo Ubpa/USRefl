@@ -16,14 +16,9 @@ namespace Ubpa::USRefl::detail {
 		(ForNonStaticFieldOf<Ns>(obj, func), ...);
 	}
 
-	template<typename Fields, typename Func, size_t... Ns>
-	static constexpr void ForEachField(const Fields& fields, const Func& func, std::index_sequence<Ns...>) {
-		(func(std::get<Ns>(fields)), ...);
-	}
-
-	template<typename AttrList, typename Func, size_t... Ns>
-	static constexpr void ForEachAttr(const AttrList& attrs, const Func& func, std::index_sequence<Ns...>) {
-		(func(std::get<Ns>(attrs)), ...);
+	template<typename List, typename Func, size_t... Ns>
+	static constexpr void ForEach(const List& list, const Func& func, std::index_sequence<Ns...>) {
+		(func(std::get<Ns>(list)), ...);
 	}
 
 	template<typename Indices>
@@ -34,29 +29,49 @@ namespace Ubpa::USRefl::detail {
 		using tail = std::index_sequence<Ns...>;
 	};
 
-	template<typename FieldList, typename Func, size_t... Ns>
-	static constexpr size_t FindIfField(const FieldList& fields, const Func& func, std::index_sequence<Ns...>) {
+	template<typename List, typename Func, size_t... Ns>
+	static constexpr size_t FindIf(const List& list, const Func& func, std::index_sequence<Ns...>) {
 		if constexpr (sizeof...(Ns) == 0)
 			return static_cast<size_t>(-1);
 		else {
 			constexpr size_t head = IndexSequenceTraits<std::index_sequence<Ns...>>::head;
 			using tail = typename IndexSequenceTraits<std::index_sequence<Ns...>>::tail;
-			return func(std::get<head>(fields)) ?
-				head : FindIfField(fields, func, tail{});
+			return func(std::get<head>(list)) ?
+				head : FindIf(list, func, tail{});
 		}
 	}
-	
-	template<typename AttrList, typename Func, size_t... Ns>
-	static constexpr size_t FindIfAttr(const AttrList& attrs, const Func& func, std::index_sequence<Ns...>) {
-		if constexpr (sizeof...(Ns) == 0)
-			return false;
-		else {
-			constexpr size_t head = IndexSequenceTraits<std::index_sequence<Ns...>>::head;
-			using tail = typename IndexSequenceTraits<std::index_sequence<Ns...>>::tail;
-			return func(std::get<head>(attrs)) ?
-				head : FindIfAttr(attrs, func, tail{});
+
+	// Elems has name
+	template<typename... Elems>
+	struct BaseList : std::tuple<Elems...> {
+		static constexpr size_t size = sizeof...(Elems);
+
+		constexpr BaseList(Elems... elems) : std::tuple<Elems...>{ elems... } {}
+
+		template<typename Func>
+		constexpr void ForEach(const Func& func) const {
+			detail::ForEach(*this, func, std::make_index_sequence<size>{});
 		}
-	}
+
+		template<typename Func>
+		constexpr size_t FindIf(const Func& func) const {
+			return detail::FindIf(*this, func, std::make_index_sequence<size>{});
+		}
+
+		constexpr size_t Find(std::string_view name) const {
+			return FindIf([name](auto attr) { return attr.name == name; });
+		}
+
+		constexpr bool Contains(std::string_view name) const {
+			return Find(name) != static_cast<size_t>(-1);
+		}
+
+		template<size_t N>
+		constexpr auto Get() const {
+			static_assert(N != static_cast<size_t>(-1));
+			return std::get<N>(*this);
+		}
+	};
 }
 
 namespace Ubpa::USRefl {
@@ -112,60 +127,43 @@ namespace Ubpa::USRefl {
 		static constexpr bool is_function = IsFunc_v<T>;
 	};
 
-	// name = "..."
-	// metas[n] = {{"...", "..."}, ...}
+	template<typename T = void>
+	struct Attr;
 	template<typename T>
-	struct TypeDecl;
-
-	struct EmptyType {};
-
-	template<typename T = EmptyType>
 	struct Attr {
-		constexpr Attr(std::string_view key, T value)  : key{ key }, value{ value }{}
-		constexpr Attr(std::string_view key)  : Attr{ key,T{} } {}
+		constexpr Attr(std::string_view name, T value)  : name{ name }, value{ value }{}
+		constexpr Attr(std::string_view name)  : Attr{ name,T{} } {}
 		constexpr Attr()  : Attr{ "",T{} } {}
-		std::string_view key;
+		std::string_view name;
 		T value;
-		static constexpr bool is_value_empty = std::is_same_v<T, EmptyType>;
+		static constexpr bool has_value = true;
+	};
+	template<>
+	struct Attr<void> {
+		constexpr Attr(std::string_view name) : name{ name } {}
+		constexpr Attr() : Attr{ "" } {}
+		std::string_view name;
+		static constexpr bool has_value = false;
 	};
 	using AttrStr = Attr<std::string_view>;
 	template<size_t N>
 	Attr(std::string_view, const char[N])->Attr<std::string_view>;
+	template<typename T> struct IsAttr : std::false_type {};
+	template<typename T> struct IsAttr<Attr<T>> : std::true_type {};
 
 	template<typename... Attrs>
-	struct AttrList : std::tuple<Attrs...> {
-		static constexpr size_t num_attrs = sizeof...(Attrs);
-
-		constexpr AttrList(Attrs... attrs) : std::tuple<Attrs...>{ attrs... } {}
-
-		template<typename Func>
-		constexpr void ForEach(const Func& func) const {
-			detail::ForEachAttr(*this, func, std::make_index_sequence<num_attrs>{});
-		}
-
-		template<typename Func>
-		constexpr size_t FindIf(const Func& func) const {
-			return detail::FindIfAttr(*this, func, std::make_index_sequence<num_attrs>{});
-		}
-
-		constexpr size_t Find(std::string_view name) const {
-			return FindIf([key](auto attr) { return attr.key == key; });
-		}
-
-		constexpr bool Contains(std::string_view key) const {
-			return Find(key) != static_cast<size_t>(-1);
-		}
-
-		template<size_t N>
-		constexpr auto Get() const  {
-			static_assert(N != static_cast<size_t>(-1));
-			return std::get<N>(*this);
-		}
+	struct AttrList : detail::BaseList<Attrs...> {
+		static_assert((IsAttr<Attrs>::value&&...));
+		using detail::BaseList<Attrs...>::BaseList;
 	};
 	template<class... Attrs> AttrList(Attrs...)->AttrList<Attrs...>;
+	template<typename T> struct IsAttrList : std::false_type {};
+	template<typename... Attrs> struct IsAttrList<AttrList<Attrs...>> : std::true_type {};
 
 	template<typename T, typename AList>
 	struct Field : FieldTraits<T> {
+		static_assert(IsAttrList<AList>::value);
+
 		constexpr Field(
 			std::string_view name,
 			T ptr,
@@ -182,53 +180,20 @@ namespace Ubpa::USRefl {
 		}
 
 		template<typename U>
-		static constexpr bool ValueTypeIsSameWith(U u) {
+		static constexpr bool ValueTypeIsSameWith(const U& u) {
 			return ValueTypeIs<U>();
 		}
 	};
 	template<typename T, typename AList>
 	Field(std::string_view, T, AList)->Field<T, AList>;
+	template<typename T> struct IsField : std::false_type {};
+	template<typename T, typename AList> struct IsField<Field<T, AList>> : std::true_type {};
 
 	// Field's (name, value_type) must be unique
 	template<typename... Fields>
-	struct FieldList : std::tuple<Fields...> {
-		static constexpr size_t num_fields = sizeof...(Fields);
-
-		constexpr FieldList(Fields... fields) : std::tuple<Fields...>{ fields... } {}
-
-		template<typename Func>
-		constexpr void ForEach(const Func& func) const {
-			detail::ForEachField(*this, func, std::make_index_sequence<num_fields>{});
-		}
-
-		template<typename Func>
-		constexpr size_t FindIf(const Func& func) const {
-			return detail::FindIfField(*this, func, std::make_index_sequence<num_fields>{});
-		}
-
-		constexpr size_t Find(std::string_view name) const {
-			return FindIf([name](auto field) { return field.name == name; });
-		}
-		
-		template<typename T>
-		constexpr size_t Find(std::string_view name, const T& value) const {
-			return FindIf([name, value](auto field) {
-				if constexpr (std::is_same_v<std::decay_t<T>, typename field::value_type>)
-					return field.name == name && field.value == value;
-				else
-					return false;
-			});
-		}
-
-		constexpr bool Contains(std::string_view name) const {
-			return Find(name) != static_cast<size_t>(-1);
-		}
-
-		template<size_t N>
-		constexpr auto Get() const {
-			static_assert(N != static_cast<size_t>(-1));
-			return std::get<N>(*this);
-		}
+	struct FieldList : detail::BaseList<Fields...> {
+		static_assert((IsField<Fields>::value&&...));
+		using detail::BaseList<Fields...>::BaseList;
 	};
 	template<class... Fields> FieldList(Fields...)->FieldList<Fields...>;
 
@@ -236,6 +201,6 @@ namespace Ubpa::USRefl {
 	template<typename T, typename Func>
 	constexpr void ForEachVarOf(T&& obj, const Func& func) {
 		detail::ForEachVarOf(std::forward<T>(obj), func,
-			std::make_index_sequence<Type<std::decay_t<T>>::fields.num_fields>{});
+			std::make_index_sequence<Type<std::decay_t<T>>::fields.size>{});
 	}
 }

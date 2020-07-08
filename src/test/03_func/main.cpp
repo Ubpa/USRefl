@@ -25,6 +25,8 @@ struct [[size(8)]] Point {
 
 template<>
 struct Type<Point> {
+	static constexpr std::string_view name = "Point";
+
 	static constexpr FieldList fields = {
 		Field{"x", &Point::x, AttrList{ Attr{ "not_serialize", true } }},
 		Field{"y", &Point::y, AttrList{ Attr{ "info", "hello" } }},
@@ -40,14 +42,16 @@ struct Type<Point> {
 int main() {
 	Point p{ 1,2 };
 
-	Type<Point>::fields.ForEach([](auto field) {
-		if (field.name != "Sum")
-			return;
-		if constexpr (field.ValueTypeIsSameWith(overload_v<>(&Point::Sum)))
-			assert(field.ptr == overload_v<>(&Point::Sum));
-		else if constexpr (field.ValueTypeIsSameWith(overload_v<float>(&Point::Sum)))
-			assert(field.ptr == overload_v<float>(&Point::Sum));
-		else
-			assert(false);
+	Type<Point>::fields.ForEach([p](auto field) {
+		if constexpr (field.is_function) {
+			if (field.name != "Sum")
+				return;
+			if constexpr (field.ValueTypeIsSameWith(overload_v<>(&Point::Sum)))
+				cout << (p.*(field.ptr))() << endl;
+			else if constexpr (field.ValueTypeIsSameWith(overload_v<float>(&Point::Sum)))
+				cout << (p.*(field.ptr))(1.f) << endl;
+			else
+				assert(false);
+		}
 	});
 }

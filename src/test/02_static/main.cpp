@@ -16,6 +16,8 @@ struct [[size(8)]] Point {
 
 template<>
 struct Type<Point> {
+	static constexpr std::string_view name = "Point";
+
 	static constexpr FieldList fields = {
 		Field{"x", &Point::x, AttrList{ Attr{ "not_serialize", true } }},
 		Field{"y", &Point::y, AttrList{ Attr{ "info", "hello" } }},
@@ -33,8 +35,8 @@ int main() {
 	Type<Point>::fields.ForEach([](auto field) {
 		cout << field.name << endl;
 		field.attrs.ForEach([](auto attr) {
-			cout << "key   : " << attr.key << endl;
-			if constexpr (!attr.is_value_empty)
+			cout << "name   : " << attr.name << endl;
+			if constexpr (!attr.has_value)
 				cout << "value : " << attr.value << endl;
 		});
 	});
@@ -46,13 +48,13 @@ int main() {
 	static_assert(Type<Point>::fields.Contains("x"));
 
 	Type<Point>::attrs.ForEach([](auto attr) {
-		cout << "key   : " << attr.key << endl;
-		if constexpr (!attr.is_value_empty)
+		cout << "name   : " << attr.name << endl;
+		if constexpr (!attr.has_value)
 			cout << "value : " << attr.value << endl;
 	});
 
-	ForEachVarOf(p, [](auto field) {
-		cout << field << endl;
+	ForEachVarOf(p, [](auto&& var) {
+		cout << var << endl;
 	});
 
 	Type<Point>::fields.ForEach([](auto field) {
