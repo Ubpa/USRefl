@@ -48,7 +48,7 @@ int main() {
 			cout << "value : " << attr.value << endl;
 	});
 
-	ForEachFieldOf(p, [](auto field) {
+	ForEachVarOf(p, [](auto field) {
 		cout << field << endl;
 	});
 }
