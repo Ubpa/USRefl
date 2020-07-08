@@ -41,7 +41,7 @@ int main() {
 	constexpr auto y_field = Type<Point>::fields.Get<y_idx>();
 	static_assert(y_field.name == "y");
 
-	constexpr bool containX = Type<Point>::fields.Contains("x");
+	static_assert(Type<Point>::fields.Contains("x"));
 
 	Type<Point>::attrs.ForEach([](auto&& attr) {
 		cout << "key   : " << attr.key << endl;
@@ -49,7 +49,7 @@ int main() {
 			cout << "value : " << attr.value << endl;
 	});
 
-	ForEachNonStaticFieldOf(p, [](auto&& field) {
+	ForEachFieldOf(p, [](auto&& field) {
 		cout << field << endl;
 	});
 }
