@@ -10,7 +10,6 @@ struct [[size(8)]] Point {
 	float x;
 	[[info("hello")]]
 	float y;
-	bool a{ true };
 
 	static constexpr size_t id = 1024;
 };
@@ -31,9 +30,9 @@ struct Type<Point> {
 int main() {
 	Point p{ 1,2 };
 
-	Type<Point>::fields.ForEach([](auto&& field) {
+	Type<Point>::fields.ForEach([](auto field) {
 		cout << field.name << endl;
-		field.attrs.ForEach([](auto&& attr) {
+		field.attrs.ForEach([](auto attr) {
 			cout << "key   : " << attr.key << endl;
 			if constexpr (!attr.is_value_empty)
 				cout << "value : " << attr.value << endl;
@@ -46,17 +45,17 @@ int main() {
 
 	static_assert(Type<Point>::fields.Contains("x"));
 
-	Type<Point>::attrs.ForEach([](auto&& attr) {
+	Type<Point>::attrs.ForEach([](auto attr) {
 		cout << "key   : " << attr.key << endl;
 		if constexpr (!attr.is_value_empty)
 			cout << "value : " << attr.value << endl;
 	});
 
-	ForEachFieldOf(p, [](auto&& field) {
+	ForEachFieldOf(p, [](auto field) {
 		cout << field << endl;
 	});
 
-	Type<Point>::fields.ForEach([](auto&& field) {
+	Type<Point>::fields.ForEach([](auto field) {
 		if constexpr (field.is_static)
 			cout << field.name << ": " << *field.ptr << endl;
 	});
