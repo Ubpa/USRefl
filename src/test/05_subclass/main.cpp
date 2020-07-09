@@ -31,8 +31,8 @@ struct Type<A> {
 	}.UnionTypeList(subclasses);
 
 	static constexpr AttrList attrs = {};
-
 };
+
 template<>
 struct Type<B> {
 	static constexpr std::string_view name = "B";
@@ -44,8 +44,8 @@ struct Type<B> {
 	}.UnionTypeList(subclasses);
 
 	static constexpr AttrList attrs = {};
-
 };
+
 template<>
 struct Type<C> {
 	static constexpr std::string_view name = "C";
@@ -58,6 +58,7 @@ struct Type<C> {
 
 	static constexpr AttrList attrs = {};
 };
+
 template<>
 struct Type<D> {
 	static constexpr std::string_view name = "D";

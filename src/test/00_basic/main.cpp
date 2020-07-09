@@ -33,9 +33,9 @@ int main() {
 	Type<Point>::fields.ForEach([](auto field) {
 		cout << field.name << endl;
 		field.attrs.ForEach([](auto attr) {
-			cout << "name   : " << attr.name << endl;
+			cout << attr.name << endl;
 			if constexpr (attr.has_value)
-				cout << "value : " << attr.value << endl;
+				cout << ": " << attr.value << endl;
 		});
 	});
 

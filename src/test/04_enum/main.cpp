@@ -8,9 +8,7 @@ using namespace Ubpa::USRefl;
 using namespace std;
 
 template<size_t N>
-constexpr size_t Func() {
-	return N;
-}
+constexpr size_t Func() { return N; }
 
 enum class [[enum_attr("enum_attr_value")]] Color {
 	RED [[enumerator_attr("enumerator_attr_value"), func(&Func<1>)]] = 1,
