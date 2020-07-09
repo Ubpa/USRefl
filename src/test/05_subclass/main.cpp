@@ -24,64 +24,67 @@ template<>
 struct Type<A> {
 	static constexpr std::string_view name = "A";
 	using type = A;
+	static constexpr TypeList subclasses = {};
 
-	static constexpr FieldList fields = {
+	static constexpr FieldList fields = FieldList{
 		Field{"a", &A::a, AttrList{} }
-	};
+	}.UnionTypeList(subclasses);
 
 	static constexpr AttrList attrs = {};
 
-	static constexpr TypeList subclasses = {};
 };
 template<>
 struct Type<B> {
 	static constexpr std::string_view name = "B";
 	using type = B;
+	static constexpr TypeList subclasses = {};
 
-	static constexpr FieldList fields = {
+	static constexpr FieldList fields = FieldList{
 		Field{"b", &B::b, AttrList{} }
-	};
+	}.UnionTypeList(subclasses);
 
 	static constexpr AttrList attrs = {};
 
-	static constexpr TypeList subclasses = { };
 };
 template<>
 struct Type<C> {
 	static constexpr std::string_view name = "C";
 	using type = C;
+	static constexpr TypeList subclasses = { Type<A>{} };
 
-	static constexpr FieldList fields = {
+	static constexpr FieldList fields = FieldList{
 		Field{"c", &C::c, AttrList{} }
-	};
+	}.UnionTypeList(subclasses);
 
 	static constexpr AttrList attrs = {};
-
-	static constexpr TypeList subclasses = { Type<A>{} };
 };
 template<>
 struct Type<D> {
 	static constexpr std::string_view name = "D";
 	using type = D;
+	static constexpr TypeList subclasses = { Type<B>{}, Type<C>{} };
 
-	static constexpr FieldList fields = {
+	static constexpr FieldList fields = FieldList{
 		Field{"d", &D::d, AttrList{} }
-	};
+	}.UnionTypeList(subclasses);
 
 	static constexpr AttrList attrs = {};
-
-	static constexpr TypeList subclasses = { Type<B>{}, Type<C>{} };
 };
 
 template<typename T>
-void dump() {
-	cout << Type<T>::name << "(";
-	Type<T>::subclasses.ForEach([](auto t) {
-		dump<typename decltype(t)::type>();
+void dump(size_t depth = 0) {
+	for (size_t i = 0; i < depth; i++)
+		cout << "  ";
+	cout << Type<T>::name << endl;
+	Type<T>::subclasses.ForEach([depth](auto t) {
+		dump<typename decltype(t)::type>(depth + 1);
 	});
-	cout << ")";
 }
 
 int main() {
-	dump<D>(); // D(B()C(A()))
+	dump<D>();
+
+	Type<D>::fields.ForEach([](auto field){
+		cout << field.name << endl;
+	});
 }

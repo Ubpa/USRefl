@@ -4,20 +4,25 @@
 #include <string_view>
 
 namespace Ubpa::USRefl::detail {
+	template<typename T, template<typename...>class U>
+	struct IsInstance : std::false_type {};
+	template<template<typename...>class U, typename... Ts>
+	struct IsInstance<U<Ts...>, U> : std::true_type {};
+
 	template<size_t idx, typename T, typename Func>
-	static constexpr void ForNonStaticFieldOf(T&& obj, const Func& func) {
-		const auto& field = std::get<idx>(Type<std::decay_t<T>>::fields);
+	constexpr void ForNonStaticFieldOf(T&& obj, const Func& func) {
+		const auto& field = Type<std::decay_t<T>>::fields.Get<idx>();
 		if constexpr (!field.is_static)
 			func(obj.*(field.value));
 	}
 
 	template<typename T, typename Func, size_t... Ns>
-	static constexpr void ForEachVarOf(T&& obj, const Func& func, std::index_sequence<Ns...>) {
+	constexpr void ForEachVarOf(T&& obj, const Func& func, std::index_sequence<Ns...>) {
 		(ForNonStaticFieldOf<Ns>(obj, func), ...);
 	}
 
 	template<typename List, typename Func, size_t... Ns>
-	static constexpr void ForEach(const List& list, const Func& func, std::index_sequence<Ns...>) {
+	constexpr void ForEach(const List& list, const Func& func, std::index_sequence<Ns...>) {
 		(func(std::get<Ns>(list)), ...);
 	}
 
@@ -30,7 +35,7 @@ namespace Ubpa::USRefl::detail {
 	};
 
 	template<typename List, typename Func, size_t... Ns>
-	static constexpr size_t FindIf(const List& list, const Func& func, std::index_sequence<Ns...>) {
+	constexpr size_t FindIf(const List& list, const Func& func, std::index_sequence<Ns...>) {
 		if constexpr (sizeof...(Ns) == 0)
 			return static_cast<size_t>(-1);
 		else {
@@ -38,6 +43,17 @@ namespace Ubpa::USRefl::detail {
 			using tail = typename IndexSequenceTraits<std::index_sequence<Ns...>>::tail;
 			return func(std::get<head>(list)) ?
 				head : FindIf(list, func, tail{});
+		}
+	}
+
+	template<typename FList, typename TList, size_t... Ns>
+	constexpr auto FieldListUnionTypeList(FList flist, TList tlist, std::index_sequence<Ns...>) {
+		if constexpr (sizeof...(Ns) == 0)
+			return flist;
+		else {
+			constexpr size_t head = IndexSequenceTraits<std::index_sequence<Ns...>>::head;
+			using tail = typename IndexSequenceTraits<std::index_sequence<Ns...>>::tail;
+			return FieldListUnionTypeList(flist.Union(tlist.Get<head>().fields), tlist, tail{});
 		}
 	}
 
@@ -70,20 +86,22 @@ namespace Ubpa::USRefl::detail {
 	};
 
 	// Elems has name
-	template<typename... Elems>
-	struct BaseList : std::tuple<Elems...> {
+	template<template<typename...>class ImplT, typename... Elems>
+	struct BaseList {
+		std::tuple<Elems...> list;
 		static constexpr size_t size = sizeof...(Elems);
 
-		constexpr BaseList(Elems... elems) : std::tuple<Elems...>{ elems... } {}
+		constexpr BaseList(Elems... elems) : list{ elems... } {}
+		constexpr BaseList(std::tuple<Elems...> elems) : list{ elems } {}
 
 		template<typename Func>
 		constexpr void ForEach(const Func& func) const {
-			detail::ForEach(*this, func, std::make_index_sequence<size>{});
+			detail::ForEach(list, func, std::make_index_sequence<size>{});
 		}
 
 		template<typename Func>
 		constexpr size_t FindIf(const Func& func) const {
-			return detail::FindIf(*this, func, std::make_index_sequence<size>{});
+			return detail::FindIf(list, func, std::make_index_sequence<size>{});
 		}
 
 		constexpr size_t Find(std::string_view name) const {
@@ -111,7 +129,13 @@ namespace Ubpa::USRefl::detail {
 		template<size_t N>
 		constexpr auto Get() const {
 			static_assert(N != static_cast<size_t>(-1));
-			return std::get<N>(*this);
+			return std::get<N>(list);
+		}
+
+		template<typename ImplList>
+		constexpr auto Union(ImplList implList) const {
+			static_assert(IsInstance<ImplList, ImplT>::value);
+			return ImplT{ std::tuple_cat(list, implList.list) };
 		}
 	};
 }
@@ -145,8 +169,7 @@ namespace Ubpa::USRefl {
 		}
 	};
 
-	template <typename... Args>
-	constexpr Overload<Args...> overload_v{};
+	template <typename... Args> constexpr Overload<Args...> overload_v{};
 
 	template<typename T>
 	struct FieldTraits;
@@ -184,21 +207,18 @@ namespace Ubpa::USRefl {
 	template<size_t N>
 	Attr(std::string_view, const char[N])->Attr<std::string_view>;
 	Attr(std::string_view)->Attr<void>;
-	template<typename T> struct IsAttr : std::false_type {};
-	template<typename T> struct IsAttr<Attr<T>> : std::true_type {};
 
 	template<typename... Attrs>
-	struct AttrList : detail::BaseList<Attrs...> {
-		static_assert((IsAttr<Attrs>::value&&...));
-		using detail::BaseList<Attrs...>::BaseList;
+	struct AttrList : detail::BaseList<AttrList, Attrs...> {
+		static_assert((detail::IsInstance<Attrs, Attr>::value&&...));
+		using detail::BaseList<AttrList, Attrs...>::BaseList;
 	};
-	template<class... Attrs> AttrList(Attrs...)->AttrList<Attrs...>;
-	template<typename T> struct IsAttrList : std::false_type {};
-	template<typename... Attrs> struct IsAttrList<AttrList<Attrs...>> : std::true_type {};
+	template<typename... Attrs> AttrList(Attrs...)->AttrList<Attrs...>;
+	template<typename... Attrs> AttrList(std::tuple<Attrs...>)->AttrList<Attrs...>;
 
 	template<typename T, typename AList>
 	struct Field : FieldTraits<T>, detail::NamedValue<T> {
-		static_assert(IsAttrList<AList>::value);
+		static_assert(detail::IsInstance<AList, AttrList>::value);
 		static_assert(!std::is_void_v<T>);
 
 		constexpr Field(std::string_view name, T value, AList attrs)
@@ -208,29 +228,33 @@ namespace Ubpa::USRefl {
 	};
 	template<typename T, typename AList>
 	Field(std::string_view, T, AList)->Field<T, AList>;
-	template<typename T> struct IsField : std::false_type {};
-	template<typename T, typename AList> struct IsField<Field<T, AList>> : std::true_type {};
+
+	template<typename... Types> struct TypeList; // forward declaration
 
 	// Field's (name, value_type) must be unique
 	template<typename... Fields>
-	struct FieldList : detail::BaseList<Fields...> {
-		static_assert((IsField<Fields>::value&&...));
-		using detail::BaseList<Fields...>::BaseList;
+	struct FieldList : detail::BaseList<FieldList, Fields...> {
+		static_assert((detail::IsInstance<Fields, Field>::value&&...));
+		using detail::BaseList<FieldList, Fields...>::BaseList;
+		template<typename TList>
+		constexpr auto UnionTypeList(TList typeList) const {
+			static_assert(detail::IsInstance<TList, TypeList>::value);
+			return detail::FieldListUnionTypeList(*this, typeList, std::make_index_sequence<typeList.size>{});
+		}
 	};
-	template<class... Fields> FieldList(Fields...)->FieldList<Fields...>;
+	template<typename... Fields> FieldList(Fields...)->FieldList<Fields...>;
+	template<typename... Fields> FieldList(std::tuple<Fields...>)->FieldList<Fields...>;
 
-
-	// name, type, fields, attrs, subclasses
+	// name, type, subclasses, fields, attrs, 
 	template<typename T> struct Type;
-	template<typename T> struct IsType : std::false_type {};
-	template<typename T> struct IsType<Type<T>> : std::true_type {};
 
 	template<typename... Types>
-	struct TypeList : detail::BaseList<Types...> {
-		using detail::BaseList<Types...>::BaseList;
-		static_assert((IsType<Types>::value&&...));
+	struct TypeList : detail::BaseList<TypeList, Types...> {
+		static_assert((detail::IsInstance<Types, Type>::value&&...));
+		using detail::BaseList<TypeList, Types...>::BaseList;
 	};
-	template<class... Types> TypeList(Types...)->TypeList<Types...>;
+	template<typename... Types> TypeList(Types...)->TypeList<Types...>;
+	template<typename... Types> TypeList(std::tuple<Types...>)->TypeList<Types...>;
 
 	// non-static member variables
 	template<typename T, typename Func>
