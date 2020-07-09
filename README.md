@@ -11,15 +11,13 @@
   - (non-static / static) member variable
   - (non-static / static) member function
 - attribute
-  - class
-    - member variable
-    - member function
-  - enum
-    - enumerator
+- enum
+  - string <-> key
+  - static dispatch
 - template
 - inheritance
   - inherit field (member variable, member function)
-  - iterate subclasses recursively
+  - iterate bases recursively
 
 ## Example
 
@@ -30,50 +28,50 @@ using namespace Ubpa::USRefl;
 using namespace std;
 
 struct [[size(8)]] Point {
-	[[not_serialize]]
-	float x;
-	[[info("hello")]]
-	float y;
+  [[not_serialize]]
+  float x;
+  [[info("hello")]]
+  float y;
 };
 
 template<>
 struct Type<Point> {
-	static constexpr std::string_view name = "Point";
-	using type = Point;
+  static constexpr std::string_view name = "Point";
+  using type = Point;
 
-	static constexpr FieldList fields = {
-		Field{"x", &Point::x, AttrList{ Attr{ "not_serialize" } }},
-		Field{"y", &Point::y, AttrList{ Attr{ "info", "hello" } }}
-	};
+  static constexpr FieldList fields = {
+    Field{"x", &Point::x, AttrList{ Attr{ "not_serialize" } }},
+    Field{"y", &Point::y, AttrList{ Attr{ "info", "hello" } }}
+  };
 
-	static constexpr AttrList attrs = {
-		Attr{ "size", 8 }
-	};
+  static constexpr AttrList attrs = {
+    Attr{ "size", 8 }
+  };
 };
 
 int main() {
-	Point p{ 1,2 };
+  Point p{ 1,2 };
 
-	Type<Point>::fields.ForEach([](auto field) {
-		cout << field.name << endl;
-		field.attrs.ForEach([](auto attr) {
-			cout << attr.name << endl;
-			if constexpr (attr.has_value)
-				cout << ": " << attr.value << endl;
-		});
-	});
+  Type<Point>::fields.ForEach([](auto field) {
+    cout << field.name << endl;
+    field.attrs.ForEach([](auto attr) {
+      cout << attr.name << endl;
+      if constexpr (attr.has_value)
+        cout << ": " << attr.value << endl;
+    });
+  });
 
-	static_assert(Type<Point>::fields.Contains("x"));
+  static_assert(Type<Point>::fields.Contains("x"));
 
-	Type<Point>::attrs.ForEach([](auto attr) {
-		cout << "name   : " << attr.name << endl;
-		if constexpr (!attr.has_value)
-			cout << "value : " << attr.value << endl;
-	});
+  Type<Point>::attrs.ForEach([](auto attr) {
+    cout << "name   : " << attr.name << endl;
+    if constexpr (!attr.has_value)
+      cout << "value : " << attr.value << endl;
+  });
 
-	ForEachVarOf(p, [](auto&& var) {
-		cout << var << endl;
-	});
+  ForEachVarOf(p, [](auto&& var) {
+    cout << var << endl;
+  });
 }
 ```
 
