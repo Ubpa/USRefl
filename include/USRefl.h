@@ -8,6 +8,18 @@ namespace Ubpa::USRefl::detail {
 	struct IsInstance : std::false_type {};
 	template<template<typename...>class U, typename... Ts>
 	struct IsInstance<U<Ts...>, U> : std::true_type {};
+	template<typename Dst, typename Src>
+	constexpr auto&& forward_cast(Src&& src) noexcept {
+		using DecaySrc = std::decay_t<Src>;
+		if constexpr (std::is_same_v<const DecaySrc&, Src>)
+			return static_cast<const Dst&>(src);
+		else if constexpr (std::is_same_v<DecaySrc&, Src>)
+			return static_cast<Dst&>(src);
+		else if constexpr (std::is_same_v<DecaySrc, Src>)
+			return static_cast<Dst&&>(src);
+		else
+			static_assert(true); // volitile
+	}
 
 	template<typename Indices> struct IndexSequenceTraits;
 	template<size_t N0, size_t... Ns>
@@ -28,6 +40,14 @@ namespace Ubpa::USRefl::detail {
 			return func(list.Get<IST::head>()) ? IST::head : FindIf(list, func, IST::tail);
 		}
 		else return static_cast<size_t>(-1);
+	}
+
+	template<typename T, typename Func>
+	constexpr void DFSof(T&& obj, const Func& func, size_t depth) {
+		func(std::forward<T>(obj));
+		Type<std::decay_t<T>>::bases.ForEach([&](auto base) {
+			DFSof(detail::forward_cast<typename decltype(base)::type>(std::forward<T>(obj)), func, depth + 1);
+		});
 	}
 
 	template<typename T>
@@ -218,11 +238,30 @@ namespace Ubpa::USRefl {
 	template<typename... Types> TypeList(Types...)->TypeList<Types...>;
 	template<typename... Types> TypeList(std::tuple<Types...>)->TypeList<Types...>;
 
+	template<typename T, typename Func>
+	constexpr void DFS(const Func& func) {
+		func(Type<T>{});
+		Type<T>::bases.ForEach([&](auto base) {
+			DFS<decltype(base)>(func);
+		});
+	}
+	template<typename T, typename Func>
+	constexpr void DFSof(T&& obj, const Func& func) {
+		func(std::forward<T>(obj));
+		Type<std::decay_t<T>>::bases.ForEach([&](auto base) {
+			DFSof(detail::forward_cast<typename decltype(base)::type>(std::forward<T>(obj)), func);
+		});
+	}
+
 	// non-static member variables
 	template<typename T, typename Func>
 	constexpr void ForEachVarOf(T&& obj, const Func& func) {
-		Type<std::decay_t<T>>::fields.ForEach ([&](auto field) {
-			if constexpr (!field.is_static && !field.is_function) func(obj.*(field.value));
-		});
+		auto rec_func = [&](auto&& rec_obj) {
+			Type<std::decay_t<decltype(rec_obj)>>::fields.ForEach([&inner_obj = rec_obj, &func](auto field) {
+				if constexpr (!field.is_static && !field.is_function)
+					func(std::forward<decltype(rec_obj)>(inner_obj).*(field.value));
+			});
+		};
+		DFSof(std::forward<T>(obj), rec_func);
 	}
 }

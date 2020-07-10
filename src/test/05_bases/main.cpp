@@ -10,7 +10,7 @@ using namespace std;
 struct A {
 	float a;
 };
-struct B {
+struct B : A {
 	float b;
 };
 struct C : A {
@@ -37,7 +37,7 @@ template<>
 struct Type<B> {
 	static constexpr std::string_view name = "B";
 	using type = B;
-	static constexpr TypeList bases = {};
+	static constexpr TypeList bases = { Type<A>{} };
 
 	static constexpr FieldList fields = FieldList{
 		Field{"b", &B::b, AttrList{} }
@@ -85,8 +85,18 @@ void dump(size_t depth = 0) {
 int main() {
 	dump<D>();
 
-	// TODO: walk recursively
 	Type<D>::fields.ForEach([](auto field){
 		cout << field.name << endl;
+	});
+
+	D d;
+	d.B::a = 1;
+	d.C::a = 2;
+	d.b = 3;
+	d.c = 4;
+	d.d = 5;
+	ForEachVarOf(std::move(d), [](auto&& var) {
+		static_assert(std::is_rvalue_reference_v<decltype(var)>);
+		cout << var << endl;
 	});
 }
