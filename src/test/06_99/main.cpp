@@ -236,11 +236,64 @@ void test_enum() {
 	static_assert(c_attr.Get<c_attr.Find("func")>().value() == 2);
 }
 
+// ==============
+//  function
+// ==============
+struct FuncList {
+	void Func0(float a, float b) {}
+	void Func1(int x = 1) {}
+};
+
+template<>
+struct Type<FuncList> {
+	static constexpr FieldList fields = {
+		Field{"Func0", &FuncList::Func0, AttrList{
+			Attr{"argument_list", AttrList{
+				Attr{"@0", detail::NamedValue<void>{"a"}},
+				Attr{"@1", detail::NamedValue<void>{"b"}},
+			}}
+		}},
+		Field{"Func1", &FuncList::Func1, AttrList{
+			Attr{"argument_list", AttrList{
+				Attr{"@0", detail::NamedValue<int>{"x", 1}}
+			}}
+		}}
+	};
+};
+
+void test_function() {
+	cout
+		<< "====================" << endl
+		<< " function" << endl
+		<< "====================" << endl;
+
+	constexpr auto f0 = Type<FuncList>::fields.Get<Type<FuncList>::fields.Find("Func0")>();
+	cout << f0.name << endl;
+	constexpr auto f0_args = f0.attrs.Get<f0.attrs.Find("argument_list")>();
+	f0_args.value.ForEach([](auto arg){
+		cout << arg.name << ": " << arg.value.name;
+		if constexpr (arg.value.has_value)
+			cout << " = " << arg.value.value;
+		cout << endl;
+	});
+
+	constexpr auto f1 = Type<FuncList>::fields.Get<Type<FuncList>::fields.Find("Func1")>();
+	cout << f1.name << endl;
+	constexpr auto f1_args = f1.attrs.Get<f1.attrs.Find("argument_list")>();
+	f1_args.value.ForEach([](auto arg) {
+		cout << arg.name << ": " << arg.value.name;
+		if constexpr (arg.value.has_value)
+			cout << " = " << arg.value.value;
+		cout << endl;
+	});
+}
+
 int main() {
 	test_basic();
 	test_template();
 	test_enum();
 	test_inheritance();
+	test_function();
 
 	return 0;
 }
