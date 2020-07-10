@@ -8,18 +8,6 @@ namespace Ubpa::USRefl::detail {
 	struct IsInstance : std::false_type {};
 	template<template<typename...>class U, typename... Ts>
 	struct IsInstance<U<Ts...>, U> : std::true_type {};
-	template<typename Dst, typename Src>
-	constexpr auto&& forward_cast(Src&& src) noexcept {
-		using DecaySrc = std::decay_t<Src>;
-		if constexpr (std::is_same_v<const DecaySrc&, Src>)
-			return static_cast<const Dst&>(src);
-		else if constexpr (std::is_same_v<DecaySrc&, Src>)
-			return static_cast<Dst&>(src);
-		else if constexpr (std::is_same_v<DecaySrc, Src>)
-			return static_cast<Dst&&>(src);
-		else
-			static_assert(true); // volitile
-	}
 
 	template<typename Indices> struct IndexSequenceTraits;
 	template<size_t N0, size_t... Ns>
@@ -40,14 +28,6 @@ namespace Ubpa::USRefl::detail {
 			return func(list.Get<IST::head>()) ? IST::head : FindIf(list, func, IST::tail);
 		}
 		else return static_cast<size_t>(-1);
-	}
-
-	template<typename T, typename Func>
-	constexpr void DFSof(T&& obj, const Func& func, size_t depth) {
-		func(std::forward<T>(obj));
-		TypeInfo<std::decay_t<T>>::bases.ForEach([&](auto base) {
-			DFSof(detail::forward_cast<typename decltype(base)::type>(std::forward<T>(obj)), func, depth + 1);
-		});
 	}
 
 	template<typename T>
@@ -249,6 +229,20 @@ namespace Ubpa::USRefl {
 		using type = typename TypeInfoType<Impl>::type;
 		static constexpr TypeInfoList bases = { TypeInfo<Bases>{}... };
 
+		template<typename T>
+		constexpr auto&& Forward(T&& derived) noexcept {
+			static_assert(std::is_base_of_v<type, std::decay_t<T>>);
+			using DecayT = std::decay_t<T>;
+			if constexpr (std::is_same_v<const DecayT&, T>)
+				return static_cast<const type&>(derived);
+			else if constexpr (std::is_same_v<DecayT&, T>)
+				return static_cast<type&>(derived);
+			else if constexpr (std::is_same_v<DecayT, T>)
+				return static_cast<type&&>(derived);
+			else
+				static_assert(true); // volitile
+		}
+
 		template<typename Func>
 		static constexpr void DFS(const Func& func) {
 			func(Impl{});
@@ -258,24 +252,15 @@ namespace Ubpa::USRefl {
 		}
 
 		template<typename T, typename Func>
-		static constexpr void DFSof(T&& obj, const Func& func) {
-			static_assert(std::is_same_v<type, std::decay_t<T>>);
-			func(std::forward<T>(obj));
-			Impl::bases.ForEach([&](auto base) {
-				base.DFSof(detail::forward_cast<typename decltype(base)::type>(std::forward<T>(obj)), func);
-			});
-		}
-
-		template<typename T, typename Func>
 		static constexpr void DFS_ForEachVarOf(T&& obj, const Func& func) {
 			static_assert(std::is_same_v<type, std::decay_t<T>>);
-			auto rec_func = [&](auto&& rec_obj) {
-				TypeInfoOf(rec_obj).fields.ForEach([&inner_obj = rec_obj, &func](auto field) {
-					if constexpr (!field.is_static && !field.is_function)
-						func(std::forward<decltype(rec_obj)>(inner_obj).*(field.value));
-				});
-			};
-			Impl::DFSof(std::forward<T>(obj), rec_func);
+			Impl::fields.ForEach([&](auto field) {
+				if constexpr (!field.is_static && !field.is_function)
+					func(std::forward<T>(obj).*(field.value));
+			});
+			Impl::bases.ForEach([&](auto base) {
+				base.DFS_ForEachVarOf(base.Forward(std::forward<T>(obj)), func);
+			});
 		}
 	};
 }
