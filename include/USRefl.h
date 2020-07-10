@@ -186,13 +186,15 @@ namespace Ubpa::USRefl {
 		static_assert(detail::IsInstance<AList, AttrList>::value);
 		static_assert(!std::is_void_v<T>);
 
-		constexpr Field(std::string_view name, T value, AList attrs)
+		constexpr Field(std::string_view name, T value, AList attrs = {})
 			: detail::NamedValue<T>{name, value}, attrs{ attrs }{}
 
 		AList attrs;
 	};
 	template<typename T, typename AList>
 	Field(std::string_view, T, AList)->Field<T, AList>;
+	template<typename T>
+	Field(std::string_view, T)->Field<T, AttrList<>>;
 
 	template<typename... TypeInfos> struct TypeInfoList; // forward declaration
 

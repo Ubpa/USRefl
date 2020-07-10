@@ -31,8 +31,8 @@ struct TypeInfo<Point> {
 	static constexpr FieldList fields = {
 		Field{"x", &Point::x, AttrList{ Attr{ "not_serialize", true } }},
 		Field{"y", &Point::y, AttrList{ Attr{ "info", "hello" } }},
-		Field{"Sum", overload_v<>(&Point::Sum), AttrList{}},
-		Field{"Sum", overload_v<float>(&Point::Sum), AttrList{}}
+		Field{"Sum", overload_v<>(&Point::Sum)},
+		Field{"Sum", overload_v<float>(&Point::Sum)}
 	};
 
 	static constexpr AttrList attrs = {

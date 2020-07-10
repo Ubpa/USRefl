@@ -38,10 +38,9 @@ namespace detail {
 		{ return detail::FindIf(*this, func, std::make_index_sequence<size>{}); }
 		constexpr size_t Find(std::string_view n) const { return FindIf([n](auto e){return e.name == n;}); }
 		template<typename T> constexpr size_t FindByValue(T value) const {
-			return FindIf([value](auto elem) {
-				if constexpr (elem.has_value) {
-					if constexpr (std::is_same_v<decltype(elem.value), T>)
-						return elem.value == value;
+			return FindIf([value](auto e) {
+				if constexpr (e.has_value) {
+					if constexpr (std::is_same_v<decltype(e.value), T>) return e.value == value;
 					else return false;
 				} else return false;
 			});
@@ -67,9 +66,10 @@ template<typename U, typename T> struct FTraits<T U::*> : FTraitsB<false, detail
 template<typename T> struct FTraits<T*> : FTraitsB<true, detail::IsFunc<T>::value>{}; // static member
 template<typename T, typename AList> struct Field : FTraits<T>, detail::NamedValue<T> {
 	AList attrs;
-	constexpr Field(std::string_view n, T v, AList as) : detail::NamedValue<T>{n,v}, attrs{as} {}
+	constexpr Field(std::string_view n, T v, AList as = {}) : detail::NamedValue<T>{ n,v }, attrs{ as } {}
 };
 template<typename T, typename AList> Field(std::string_view, T, AList)->Field<T, AList>;
+template<typename T> Field(std::string_view, T)->Field<T, AttrList<>>;
 template<typename... Fields> struct FieldList : detail::BaseList<Fields...> {
 	using detail::BaseList<Fields...>::BaseList;
 };
