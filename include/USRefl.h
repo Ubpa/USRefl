@@ -224,20 +224,20 @@ namespace Ubpa::USRefl {
 	template<typename... TypeInfos> TypeInfoList(TypeInfos...)->TypeInfoList<TypeInfos...>;
 	template<typename... TypeInfos> TypeInfoList(std::tuple<TypeInfos...>)->TypeInfoList<TypeInfos...>;
 
-	template<typename Impl, typename... Bases>
+	template<typename T, typename... Bases>
 	struct TypeInfoBase {
-		using type = typename TypeInfoType<Impl>::type;
+		using type = T;
 		static constexpr TypeInfoList bases = { TypeInfo<Bases>{}... };
 
-		template<typename T>
-		constexpr auto&& Forward(T&& derived) noexcept {
-			static_assert(std::is_base_of_v<type, std::decay_t<T>>);
-			using DecayT = std::decay_t<T>;
-			if constexpr (std::is_same_v<const DecayT&, T>)
+		template<typename Derived>
+		constexpr auto&& Forward(Derived&& derived) noexcept {
+			static_assert(std::is_base_of_v<type, std::decay_t<Derived>>);
+			using DecayDerived = std::decay_t<Derived>;
+			if constexpr (std::is_same_v<const DecayDerived&, Derived>)
 				return static_cast<const type&>(derived);
-			else if constexpr (std::is_same_v<DecayT&, T>)
+			else if constexpr (std::is_same_v<DecayDerived&, Derived>)
 				return static_cast<type&>(derived);
-			else if constexpr (std::is_same_v<DecayT, T>)
+			else if constexpr (std::is_same_v<DecayDerived, Derived>)
 				return static_cast<type&&>(derived);
 			else
 				static_assert(true); // volitile
@@ -245,21 +245,21 @@ namespace Ubpa::USRefl {
 
 		template<typename Func>
 		static constexpr void DFS(const Func& func) {
-			func(Impl{});
-			Impl::bases.ForEach([&](auto base) {
+			func(TypeInfo<type>{});
+			TypeInfo<type>::bases.ForEach([&](auto base) {
 				base.DFS(func);
 			});
 		}
 
-		template<typename T, typename Func>
-		static constexpr void DFS_ForEachVarOf(T&& obj, const Func& func) {
-			static_assert(std::is_same_v<type, std::decay_t<T>>);
-			Impl::fields.ForEach([&](auto field) {
+		template<typename U, typename Func>
+		static constexpr void DFS_ForEachVarOf(U&& obj, const Func& func) {
+			static_assert(std::is_same_v<type, std::decay_t<U>>);
+			TypeInfo<type>::fields.ForEach([&](auto field) {
 				if constexpr (!field.is_static && !field.is_function)
-					func(std::forward<T>(obj).*(field.value));
+					func(std::forward<U>(obj).*(field.value));
 			});
-			Impl::bases.ForEach([&](auto base) {
-				base.DFS_ForEachVarOf(base.Forward(std::forward<T>(obj)), func);
+			TypeInfo<type>::bases.ForEach([&](auto base) {
+				base.DFS_ForEachVarOf(base.Forward(std::forward<U>(obj)), func);
 			});
 		}
 	};

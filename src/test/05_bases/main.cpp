@@ -21,7 +21,7 @@ struct D : B, C {
 };
 
 template<>
-struct TypeInfo<A> : TypeInfoBase<TypeInfo<A>> {
+struct TypeInfo<A> : TypeInfoBase<A> {
 	static constexpr std::string_view name = "A";
 
 	static constexpr FieldList fields = FieldList{
@@ -32,7 +32,7 @@ struct TypeInfo<A> : TypeInfoBase<TypeInfo<A>> {
 };
 
 template<>
-struct TypeInfo<B> : TypeInfoBase<TypeInfo<B>, A> {
+struct TypeInfo<B> : TypeInfoBase<B, A> {
 	static constexpr std::string_view name = "B";
 
 	static constexpr FieldList fields = FieldList{
@@ -43,7 +43,7 @@ struct TypeInfo<B> : TypeInfoBase<TypeInfo<B>, A> {
 };
 
 template<>
-struct TypeInfo<C> : TypeInfoBase<TypeInfo<C>, A> {
+struct TypeInfo<C> : TypeInfoBase<C, A> {
 	static constexpr std::string_view name = "C";
 
 	static constexpr FieldList fields = FieldList{
@@ -54,7 +54,7 @@ struct TypeInfo<C> : TypeInfoBase<TypeInfo<C>, A> {
 };
 
 template<>
-struct TypeInfo<D> : TypeInfoBase<TypeInfo<D>, B, C> {
+struct TypeInfo<D> : TypeInfoBase<D, B, C> {
 	static constexpr std::string_view name = "D";
 
 	static constexpr FieldList fields = FieldList{

@@ -14,9 +14,8 @@ struct [[size(8)]] Point {
 };
 
 template<typename T>
-struct Type<Point<T>> {
+struct TypeInfo<Point<T>> : TypeInfoBase<Point<T>> {
 	static constexpr std::string_view name = "Point"; // use nameof
-	using type = Point<T>;
 
 	static constexpr FieldList fields = {
 		Field{"x", &Point<T>::x, AttrList{ Attr{ "not_serialize", true } }},
@@ -31,7 +30,7 @@ struct Type<Point<T>> {
 int main() {
 	Point<float> p{ 1,2 };
 
-	Type<Point<float>>::fields.ForEach([](auto field) {
+	TypeInfo<Point<float>>::fields.ForEach([](auto field) {
 		cout << field.name << endl;
 		field.attrs.ForEach([](auto attr) {
 			cout << "name   : " << attr.name << endl;
@@ -40,19 +39,19 @@ int main() {
 		});
 	});
 
-	constexpr auto y_idx = Type<Point<float>>::fields.Find("y");
-	constexpr auto y_field = Type<Point<float>>::fields.Get<y_idx>();
+	constexpr auto y_idx = TypeInfo<Point<float>>::fields.Find("y");
+	constexpr auto y_field = TypeInfo<Point<float>>::fields.Get<y_idx>();
 	static_assert(y_field.name == "y");
 
-	static_assert(Type<Point<float>>::fields.Contains("x"));
+	static_assert(TypeInfo<Point<float>>::fields.Contains("x"));
 
-	Type<Point<float>>::attrs.ForEach([](auto attr) {
+	TypeInfo<Point<float>>::attrs.ForEach([](auto attr) {
 		cout << "name   : " << attr.name << endl;
 		if constexpr (attr.has_value)
 			cout << "value : " << attr.value << endl;
 	});
 
-	ForEachVarOf(p, [](auto&& var) {
+	TypeInfo<Point<float>>::DFS_ForEachVarOf(p, [](auto&& var) {
 		cout << var << endl;
 	});
 }
