@@ -64,7 +64,7 @@ void test_basic() {
 	});
 
 	TypeInfo<Point>::fields.ForEach([p](auto field) {
-		if constexpr (field.is_function) {
+		if constexpr (field.is_func) {
 			if (field.name != "Sum")
 				return;
 			cout << (p.*(field.value))() << endl;
