@@ -45,7 +45,7 @@ namespace Ubpa::USRefl::detail {
 	template<typename T, typename Func>
 	constexpr void DFSof(T&& obj, const Func& func, size_t depth) {
 		func(std::forward<T>(obj));
-		Type<std::decay_t<T>>::bases.ForEach([&](auto base) {
+		TypeInfo<std::decay_t<T>>::bases.ForEach([&](auto base) {
 			DFSof(detail::forward_cast<typename decltype(base)::type>(std::forward<T>(obj)), func, depth + 1);
 		});
 	}
@@ -216,7 +216,7 @@ namespace Ubpa::USRefl {
 	template<typename T, typename AList>
 	Field(std::string_view, T, AList)->Field<T, AList>;
 
-	template<typename... Types> struct TypeList; // forward declaration
+	template<typename... TypeInfos> struct TypeInfoList; // forward declaration
 
 	// Field's (name, value_type) must be unique
 	template<typename... Fields>
@@ -228,18 +228,27 @@ namespace Ubpa::USRefl {
 	template<typename... Fields> FieldList(std::tuple<Fields...>)->FieldList<Fields...>;
 
 	// name, type, bases, fields, attrs, 
-	template<typename T> struct Type;
+	template<typename T> struct TypeInfo;
+	template<typename Info> struct TypeInfoType;
+	template<typename T> struct TypeInfoType<TypeInfo<T>> { using type = T; };
+	template<typename T>
+	constexpr auto TypeInfoOf(T&&) {
+		return TypeInfo<std::decay_t<T>>{};
+	}
 
-	template<typename... Types>
-	struct TypeList : detail::BaseList<Types...> {
-		static_assert((detail::IsInstance<Types, Type>::value&&...));
-		using detail::BaseList<Types...>::BaseList;
+	template<typename... TypeInfos>
+	struct TypeInfoList : detail::BaseList<TypeInfos...> {
+		static_assert((detail::IsInstance<TypeInfos, TypeInfo>::value&&...));
+		using detail::BaseList<TypeInfos...>::BaseList;
 	};
-	template<typename... Types> TypeList(Types...)->TypeList<Types...>;
-	template<typename... Types> TypeList(std::tuple<Types...>)->TypeList<Types...>;
+	template<typename... TypeInfos> TypeInfoList(TypeInfos...)->TypeInfoList<TypeInfos...>;
+	template<typename... TypeInfos> TypeInfoList(std::tuple<TypeInfos...>)->TypeInfoList<TypeInfos...>;
 
-	template<typename Impl>
-	struct TypeBase {
+	template<typename Impl, typename... Bases>
+	struct TypeInfoBase {
+		using type = typename TypeInfoType<Impl>::type;
+		static constexpr TypeInfoList bases = { TypeInfo<Bases>{}... };
+
 		template<typename Func>
 		static constexpr void DFS(const Func& func) {
 			func(Impl{});
@@ -250,23 +259,23 @@ namespace Ubpa::USRefl {
 
 		template<typename T, typename Func>
 		static constexpr void DFSof(T&& obj, const Func& func) {
-			static_assert(std::is_same_v<typename Impl::type, std::decay_t<T>>);
+			static_assert(std::is_same_v<type, std::decay_t<T>>);
 			func(std::forward<T>(obj));
 			Impl::bases.ForEach([&](auto base) {
 				base.DFSof(detail::forward_cast<typename decltype(base)::type>(std::forward<T>(obj)), func);
 			});
 		}
-	};
 
-	// non-static member variables
-	template<typename T, typename Func>
-	constexpr void ForEachVarOf(T&& obj, const Func& func) {
-		auto rec_func = [&](auto&& rec_obj) {
-			Type<std::decay_t<decltype(rec_obj)>>::fields.ForEach([&inner_obj = rec_obj, &func](auto field) {
-				if constexpr (!field.is_static && !field.is_function)
-					func(std::forward<decltype(rec_obj)>(inner_obj).*(field.value));
-			});
-		};
-		Type<std::decay_t<T>>::DFSof(std::forward<T>(obj), rec_func);
-	}
+		template<typename T, typename Func>
+		static constexpr void DFS_ForEachVarOf(T&& obj, const Func& func) {
+			static_assert(std::is_same_v<type, std::decay_t<T>>);
+			auto rec_func = [&](auto&& rec_obj) {
+				TypeInfoOf(rec_obj).fields.ForEach([&inner_obj = rec_obj, &func](auto field) {
+					if constexpr (!field.is_static && !field.is_function)
+						func(std::forward<decltype(rec_obj)>(inner_obj).*(field.value));
+				});
+			};
+			Impl::DFSof(std::forward<T>(obj), rec_func);
+		}
+	};
 }
