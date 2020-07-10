@@ -92,7 +92,7 @@ int main() {
 	d.b = 3;
 	d.c = 4;
 	d.d = 5;
-	TypeInfo<D>::DFS_ForEachVarOf(std::move(d), [](auto&& var) {
+	TypeInfo<D>::ForEachVarOf(std::move(d), [](auto&& var) {
 		static_assert(std::is_rvalue_reference_v<decltype(var)>);
 		cout << var << endl;
 	});

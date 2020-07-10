@@ -44,7 +44,7 @@ int main() {
 	Point p{ 1,2 };
 
 	TypeInfo<Point>::fields.ForEach([p](auto field) {
-		if constexpr (field.is_function) {
+		if constexpr (field.is_func) {
 			if (field.name != "Sum")
 				return;
 			if constexpr (field.ValueTypeIsSameWith(overload_v<>(&Point::Sum)))

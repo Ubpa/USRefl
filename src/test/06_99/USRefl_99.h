@@ -1,3 +1,4 @@
+#pragma once // Ubpa Static Reflection 99
 #include <tuple>
 #include <string_view>
 namespace detail {
@@ -19,13 +20,6 @@ namespace detail {
 			return func(list.Get<IST::head>()) ? IST::head : FindIf(list, func, IST::tail);
 		} else return static_cast<size_t>(-1);
 	}
-	template<typename FList, typename TList, size_t... Ns>
-	constexpr auto FieldListUnionTypeList(FList flist, TList tlist, std::index_sequence<Ns...>) {
-		if constexpr (sizeof...(Ns) > 0) {
-			using IST = ISTraits<std::index_sequence<Ns...>>;
-			return FieldListUnionTypeList(flist.Union(tlist.Get<IST::head>().fields), tlist, IST::tail);
-		} else return flist;
-	}
 	template<typename T> struct NamedValue {
 		std::string_view name; T value;
 		static constexpr bool has_value = !std::is_void_v<T>;
@@ -34,11 +28,10 @@ namespace detail {
 		std::string_view name; /*T value;*/
 		static constexpr bool has_value = false;
 	};
-	template<template<typename...>class ImplT,typename...Elems> struct BaseList {
+	template<typename...Elems> struct BaseList {
 		std::tuple<Elems...> list;
 		static constexpr size_t size = sizeof...(Elems);
 		constexpr BaseList(Elems... elems) : list{ elems... } {}
-		constexpr BaseList(std::tuple<Elems...> elems) : list{ elems } {}
 		template<typename Func> constexpr void ForEach(const Func& func) const
 		{ detail::ForEach(*this, func, std::make_index_sequence<size>{}); }
 		template<typename Func> constexpr size_t FindIf(const Func& func) const
@@ -55,7 +48,6 @@ namespace detail {
 		}
 		constexpr bool Contains(std::string_view name) const { return Find(name) != static_cast<size_t>(-1); }
 		template<size_t N> constexpr auto Get() const { return std::get<N>(list); }
-		template<typename L> constexpr auto Union(L l) const { return ImplT{ std::tuple_cat(list, l.list) }; }
 	};
 }
 template<typename T> struct Attr : detail::NamedValue<T>
@@ -64,36 +56,44 @@ template<> struct Attr<void> : detail::NamedValue<void>
 { constexpr Attr(std::string_view name) : detail::NamedValue<void>{ name } {} };
 template<size_t N> Attr(std::string_view, const char[N])->Attr<std::string_view>;
 Attr(std::string_view)->Attr<void>;
-template<typename... Attrs> struct AttrList : detail::BaseList<AttrList, Attrs...>
-{ using detail::BaseList<AttrList, Attrs...>::BaseList; };
+template<typename... Attrs> struct AttrList : detail::BaseList<Attrs...>
+{ using detail::BaseList<Attrs...>::BaseList; };
 template<typename... Attrs> AttrList(Attrs...)->AttrList<Attrs...>;
-template<typename... Attrs> AttrList(std::tuple<Attrs...>)->AttrList<Attrs...>;
-template<typename U, typename V, bool s, bool f> struct FTraitsB {
-	using object_type = U; using value_type = V;
-	static constexpr bool is_static = s, is_function = f;
+template<bool s, bool f> struct FTraitsB {
+	static constexpr bool is_static = s, is_func = f;
 };
-template<typename T> struct FTraits; // Field Traits
-template<typename U, typename T> struct FTraits<T U::*> : FTraitsB<U, T, false, detail::IsFunc<T>::value> {};
-template<typename T> struct FTraits<T*> : FTraitsB<void, T, true, detail::IsFunc<T>::value>{}; // static member
-template<typename T> struct FTraits : FTraitsB<void, T, true, false> {}; // enum
+template<typename T> struct FTraits : FTraitsB<true, false> {}; // default is enum
+template<typename U, typename T> struct FTraits<T U::*> : FTraitsB<false, detail::IsFunc<T>::value> {};
+template<typename T> struct FTraits<T*> : FTraitsB<true, detail::IsFunc<T>::value>{}; // static member
 template<typename T, typename AList> struct Field : FTraits<T>, detail::NamedValue<T> {
 	AList attrs;
 	constexpr Field(std::string_view n, T v, AList as) : detail::NamedValue<T>{n,v}, attrs{as} {}
 };
 template<typename T, typename AList> Field(std::string_view, T, AList)->Field<T, AList>;
-template<typename... Fields> struct FieldList : detail::BaseList<FieldList, Fields...> {
-	using detail::BaseList<FieldList, Fields...>::BaseList;
-	template<typename TList> constexpr auto UnionTypeList(TList typeList) const
-	{ return detail::FieldListUnionTypeList(*this, typeList, std::make_index_sequence<typeList.size>{}); }
+template<typename... Fields> struct FieldList : detail::BaseList<Fields...> {
+	using detail::BaseList<Fields...>::BaseList;
 };
 template<typename... Fields> FieldList(Fields...)->FieldList<Fields...>;
-template<typename... Fields> FieldList(std::tuple<Fields...>)->FieldList<Fields...>;
-template<typename T> struct Type; // name, type, bases, fields, attrs
-template<typename... Ts> struct TypeList : detail::BaseList<TypeList, Ts...>
-{ using detail::BaseList<TypeList, Ts...>::BaseList; };
-template<typename... Ts> TypeList(Ts...)->TypeList<Ts...>;
-template<typename... Ts> TypeList(std::tuple<Ts...>)->TypeList<Ts...>;
-template<typename T, typename Func> constexpr void ForEachVarOf(T&& obj, const Func& func) {
-	Type<std::decay_t<T>>::fields.ForEach
-	([&](auto field) { if constexpr (!field.is_static && !field.is_function) func(obj.*(field.value)); });
-}
+template<typename T> struct TypeInfo; // name, TypeInfoBase, fields, attrs
+template<typename... Ts> struct TypeInfoList : detail::BaseList<Ts...>
+{ using detail::BaseList<Ts...>::BaseList; };
+template<typename... Ts> TypeInfoList(Ts...)->TypeInfoList<Ts...>;
+template<typename T, typename... Bases> struct TypeInfoBase {
+	using type = T;
+	static constexpr TypeInfoList bases = { TypeInfo<Bases>{}... };
+	template<typename U> constexpr auto&& Forward(U&& derived) noexcept {
+		if constexpr (std::is_same_v<const std::decay_t<U>&, U>) return static_cast<const type&>(derived);
+		else if constexpr (std::is_same_v<std::decay_t<U>&, U>) return static_cast<type&>(derived);
+		else return static_cast<type&&>(derived); // if constexpr (std::is_same_v<DecayU, U>)
+	}
+	template<typename Func> static constexpr void DFS(const Func& func, size_t depth = 0) {
+		func(TypeInfo<type>{}, depth);
+		TypeInfo<type>::bases.ForEach([&](auto base) { base.DFS(func, depth + 1); });
+	}
+	template<typename U, typename Func> static constexpr void ForEachVarOf(U&& obj, const Func& func) {
+		TypeInfo<type>::fields.ForEach([&](auto f)
+		{ if constexpr (!f.is_static && !f.is_func)func(std::forward<U>(obj).*(f.value)); });
+		TypeInfo<type>::bases.ForEach([&](auto base)
+		{ base.ForEachVarOf(base.Forward(std::forward<U>(obj)), func); });
+	}
+};
