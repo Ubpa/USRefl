@@ -30,15 +30,6 @@ namespace Ubpa::USRefl::detail {
 		else return static_cast<size_t>(-1);
 	}
 
-	template<typename FList, typename TList, size_t... Ns>
-	constexpr auto FieldListUnionTypeList(FList flist, TList tlist, std::index_sequence<Ns...>) {
-		if constexpr (sizeof...(Ns) > 0) {
-			using IST = IndexSequenceTraits<std::index_sequence<Ns...>>;
-			return FieldListUnionTypeList(flist.Union(tlist.Get<IST::head>().fields), tlist, IST::tail);
-		}
-		else return flist;
-	}
-
 	template<typename T>
 	struct NamedValueBase {
 		std::string_view name;
@@ -68,7 +59,7 @@ namespace Ubpa::USRefl::detail {
 	};
 
 	// Elems has name
-	template<template<typename...>class ImplT, typename... Elems>
+	template<typename... Elems>
 	struct BaseList {
 		std::tuple<Elems...> list;
 		static constexpr size_t size = sizeof...(Elems);
@@ -112,12 +103,6 @@ namespace Ubpa::USRefl::detail {
 		constexpr auto Get() const {
 			static_assert(N != static_cast<size_t>(-1));
 			return std::get<N>(list);
-		}
-
-		template<typename ImplList>
-		constexpr auto Union(ImplList implList) const {
-			static_assert(IsInstance<ImplList, ImplT>::value);
-			return ImplT{ std::tuple_cat(list, implList.list) };
 		}
 	};
 }
@@ -191,9 +176,9 @@ namespace Ubpa::USRefl {
 	Attr(std::string_view)->Attr<void>;
 
 	template<typename... Attrs>
-	struct AttrList : detail::BaseList<AttrList, Attrs...> {
+	struct AttrList : detail::BaseList<Attrs...> {
 		static_assert((detail::IsInstance<Attrs, Attr>::value&&...));
-		using detail::BaseList<AttrList, Attrs...>::BaseList;
+		using detail::BaseList<Attrs...>::BaseList;
 	};
 	template<typename... Attrs> AttrList(Attrs...)->AttrList<Attrs...>;
 	template<typename... Attrs> AttrList(std::tuple<Attrs...>)->AttrList<Attrs...>;
@@ -215,14 +200,9 @@ namespace Ubpa::USRefl {
 
 	// Field's (name, value_type) must be unique
 	template<typename... Fields>
-	struct FieldList : detail::BaseList<FieldList, Fields...> {
+	struct FieldList : detail::BaseList<Fields...> {
 		static_assert((detail::IsInstance<Fields, Field>::value&&...));
-		using detail::BaseList<FieldList, Fields...>::BaseList;
-		template<typename TList>
-		constexpr auto UnionTypeList(TList typeList) const {
-			static_assert(detail::IsInstance<TList, TypeList>::value);
-			return detail::FieldListUnionTypeList(*this, typeList, std::make_index_sequence<typeList.size>{});
-		}
+		using detail::BaseList<Fields...>::BaseList;
 	};
 	template<typename... Fields> FieldList(Fields...)->FieldList<Fields...>;
 	template<typename... Fields> FieldList(std::tuple<Fields...>)->FieldList<Fields...>;
@@ -231,9 +211,9 @@ namespace Ubpa::USRefl {
 	template<typename T> struct Type;
 
 	template<typename... Types>
-	struct TypeList : detail::BaseList<TypeList, Types...> {
+	struct TypeList : detail::BaseList<Types...> {
 		static_assert((detail::IsInstance<Types, Type>::value&&...));
-		using detail::BaseList<TypeList, Types...>::BaseList;
+		using detail::BaseList<Types...>::BaseList;
 	};
 	template<typename... Types> TypeList(Types...)->TypeList<Types...>;
 	template<typename... Types> TypeList(std::tuple<Types...>)->TypeList<Types...>;

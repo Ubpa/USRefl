@@ -28,7 +28,7 @@ struct Type<A> {
 
 	static constexpr FieldList fields = FieldList{
 		Field{"a", &A::a, AttrList{} }
-	}.UnionTypeList(subclasses);
+	};
 
 	static constexpr AttrList attrs = {};
 };
@@ -41,7 +41,7 @@ struct Type<B> {
 
 	static constexpr FieldList fields = FieldList{
 		Field{"b", &B::b, AttrList{} }
-	}.UnionTypeList(subclasses);
+	};
 
 	static constexpr AttrList attrs = {};
 };
@@ -54,7 +54,7 @@ struct Type<C> {
 
 	static constexpr FieldList fields = FieldList{
 		Field{"c", &C::c, AttrList{} }
-	}.UnionTypeList(subclasses);
+	};
 
 	static constexpr AttrList attrs = {};
 };
@@ -67,7 +67,7 @@ struct Type<D> {
 
 	static constexpr FieldList fields = FieldList{
 		Field{"d", &D::d, AttrList{} }
-	}.UnionTypeList(subclasses);
+	};
 
 	static constexpr AttrList attrs = {};
 };
@@ -85,6 +85,7 @@ void dump(size_t depth = 0) {
 int main() {
 	dump<D>();
 
+	// TODO: walk recursively
 	Type<D>::fields.ForEach([](auto field){
 		cout << field.name << endl;
 	});
