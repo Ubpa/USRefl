@@ -17,6 +17,7 @@
   - static dispatch
 - template
 - inheritance
+  - diamond inheritance
   - inherit field (member variable, member function)
   - iterate bases recursively
 
@@ -28,6 +29,8 @@
 using namespace Ubpa::USRefl;
 using namespace std;
 
+// [[...]] act as (structured) command
+// they are useless in code
 struct [[size(8)]] Point {
   [[not_serialize]]
   float x;
@@ -36,9 +39,8 @@ struct [[size(8)]] Point {
 };
 
 template<>
-struct Type<Point> {
+struct TypeInfo<Point> : TypeInfoBase<Point> {
   static constexpr std::string_view name = "Point";
-  using type = Point;
 
   static constexpr FieldList fields = {
     Field{"x", &Point::x, AttrList{ Attr{ "not_serialize" } }},
@@ -51,26 +53,26 @@ struct Type<Point> {
 };
 
 int main() {
-  Point p{ 1,2 };
-
-  Type<Point>::fields.ForEach([](auto field) {
+  TypeInfo<Point>::fields.ForEach([](auto field) {
     cout << field.name << endl;
     field.attrs.ForEach([](auto attr) {
       cout << attr.name << endl;
       if constexpr (attr.has_value)
-        cout << ": " << attr.value << endl;
+        cout << ": " << attr.value;
+      cout << endl;
     });
   });
 
   static_assert(Type<Point>::fields.Contains("x"));
 
-  Type<Point>::attrs.ForEach([](auto attr) {
-    cout << "name   : " << attr.name << endl;
+  TypeInfo<Point>::attrs.ForEach([](auto attr) {
+    cout << attr.name;
     if constexpr (!attr.has_value)
-      cout << "value : " << attr.value << endl;
+      cout << ": " << attr.value;
+    cout << endl;
   });
-
-  ForEachVarOf(p, [](auto&& var) {
+  
+  TypeInfo<Point>::ForEachVarOf(Point{ 1,2 }, [](auto&& var) {
     cout << var << endl;
   });
 }
