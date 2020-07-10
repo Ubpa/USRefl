@@ -74,7 +74,7 @@ template<typename... Fields> struct FieldList : detail::BaseList<Fields...> {
 	using detail::BaseList<Fields...>::BaseList;
 };
 template<typename... Fields> FieldList(Fields...)->FieldList<Fields...>;
-template<typename T> struct TypeInfo; // name, TypeInfoBase, fields, attrs
+template<typename T> struct TypeInfo; // TypeInfoBase, name, fields, attrs
 template<typename... Ts> struct TypeInfoList : detail::BaseList<Ts...>
 { using detail::BaseList<Ts...>::BaseList; };
 template<typename... Ts> TypeInfoList(Ts...)->TypeInfoList<Ts...>;

@@ -18,7 +18,6 @@
 - template
 - inheritance
   - diamond inheritance
-  - inherit field (member variable, member function)
   - iterate bases recursively
 
 ## Example
@@ -85,9 +84,8 @@ int main() {
 - [func](src/test/03_func/main.cpp) 
 - [enum](src/test/04_enum/main.cpp) 
 - [inheritance](src/test/05_subclass/main.cpp) 
-- 99 line: [USRefl_99.h](src/test/06_99/USRefl_99.h)，test [USRefl_99.h](src/test/06_99/main.h) 
+- 99 line: [USRefl_99.h](src/test/06_99/USRefl_99.h)，[test](src/test/06_99/main.cpp) 
 
 ## Integration
 
-You should add required file [USRefl.h](include/USRefl.h) 
-
+You should add required file [USRefl.h](include/USRefl.h) or [USRefl_99.h](src/test/06_99/USRefl_99.h) 
