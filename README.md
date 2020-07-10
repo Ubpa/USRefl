@@ -7,6 +7,7 @@
 
 - the **best** C++ static reflection libliray in the whole world
 - tiny, handy, elegant
+- noninvasive
 - basic
   - (non-static / static) member variable
   - (non-static / static) member function
@@ -83,4 +84,8 @@ int main() {
 - [enum](src/test/04_enum/main.cpp) 
 - [inheritance](src/test/05_subclass/main.cpp) 
 - 99 line: [USRefl_99.h](src/test/06_99/USRefl_99.h)，test [USRefl_99.h](src/test/06_99/main.h) 
+
+## Integration
+
+You should add required file [USRefl.h](include/USRefl.h) 
 
