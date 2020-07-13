@@ -32,9 +32,10 @@ int main() {
 	TypeInfo<Point>::fields.ForEach([](auto field) {
 		cout << field.name << endl;
 		field.attrs.ForEach([](auto attr) {
-			cout << attr.name << endl;
+			cout << attr.name;
 			if constexpr (attr.has_value)
-				cout << ": " << attr.value << endl;
+				cout << ": " << attr.value;
+			cout << endl;
 		});
 	});
 
