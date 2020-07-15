@@ -84,7 +84,7 @@ int main() {
 - [static](src/test/02_static/main.cpp) 
 - [func](src/test/03_func/main.cpp) 
 - [enum](src/test/04_enum/main.cpp) 
-- [inheritance](src/test/05_subclass/main.cpp) 
+- [inheritance](src/test/05_inheritance/main.cpp) 
 - 99 line: [USRefl_99.h](include/USRefl_99.h)，[test](src/test/06_99/main.cpp) 
 
 ## Integration
