@@ -53,7 +53,7 @@ template<typename T> struct Attr : detail::NamedValue<T>
 { constexpr Attr(std::string_view name, T value) : detail::NamedValue<T>{ name,value } {} };
 template<> struct Attr<void> : detail::NamedValue<void>
 { constexpr Attr(std::string_view name) : detail::NamedValue<void>{ name } {} };
-template<size_t N> Attr(std::string_view, const char[N])->Attr<std::string_view>;
+template<size_t N> Attr(std::string_view, const char(&)[N])->Attr<std::string_view>;
 Attr(std::string_view)->Attr<void>;
 template<typename... Attrs> struct AttrList : detail::BaseList<Attrs...>
 { using detail::BaseList<Attrs...>::BaseList; };

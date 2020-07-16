@@ -84,7 +84,7 @@ namespace Ubpa::USRefl::detail {
 		constexpr size_t FindByValue(T value) const {
 			return FindIf([value](auto elem) {
 				if constexpr (elem.has_value) {
-					if constexpr (elem.ValueTypeIs<T>())
+					if constexpr (elem.template ValueTypeIs<T>())
 						return elem.value == value;
 					else
 						return false;
@@ -171,7 +171,7 @@ namespace Ubpa::USRefl {
 		constexpr Attr(std::string_view name) : detail::NamedValue<void>{ name } {}
 	};
 	template<size_t N>
-	Attr(std::string_view, const char[N])->Attr<std::string_view>;
+	Attr(std::string_view, const char(&)[N])->Attr<std::string_view>;
 	Attr(std::string_view)->Attr<void>;
 
 	template<typename... Attrs>
@@ -242,10 +242,10 @@ namespace Ubpa::USRefl {
 		}
 
 		template<typename Func>
-		static constexpr void DFS(const Func& func) {
-			func(TypeInfo<type>{});
+		static constexpr void DFS(const Func& func, size_t depth = 0) {
+			func(TypeInfo<type>{}, depth);
 			TypeInfo<type>::bases.ForEach([&](auto base) {
-				base.DFS(func);
+				base.DFS(func, depth + 1);
 			});
 		}
 

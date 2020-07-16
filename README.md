@@ -8,16 +8,16 @@
 ## Feature
 
 - **header-only**, **tiny (99 lines)** and **powerful** ([USRefl_99.h](https://github.com/Ubpa/USRefl/blob/master/include/USRefl_99.h))
-- **noninvasive**
+- **noninvasive** 
 - basic
   - (non-static / static) member variable
   - (non-static / static) member function
-- **attribute**
-- **enum**
+- **attribute** 
+- **enum** 
   - string <-> key
   - static dispatch
-- **template**
-- **inheritance**
+- **template** 
+- **inheritance** 
   - diamond inheritance
   - iterate bases recursively
 
@@ -90,6 +90,12 @@ int main() {
 ## Integration
 
 You should add required file [USRefl.h](include/USRefl.h) or [USRefl_99.h](include/USRefl_99.h) 
+
+## Compiler compatibility
+
+- Clang/LLVM >= 6
+- GCC >= 7.3
+- MSVC++ >= 19.20 / VS 2019 +
 
 ## Licensing
 
