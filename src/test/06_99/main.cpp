@@ -185,13 +185,15 @@ void test_inheritance() {
 	d.b = 3;
 	d.c = 4;
 	d.d = 5;
-	TypeInfo<D>::ForEachVarOf(std::move(d), [](auto&& var) {
+	TypeInfo<D>::ForEachVarOf(std::move(d), [cnt = 0](auto&& var) mutable {
 		static_assert(std::is_rvalue_reference_v<decltype(var)>);
-		cout << var << endl;
+		cout << cnt << ": " << var << endl;
+		cnt++;
 	});
-	TypeInfo<D>::ForEachVarOf(d, [](auto&& var) {
+	TypeInfo<D>::ForEachVarOf(d, [cnt = 0](auto&& var) mutable {
 		static_assert(std::is_lvalue_reference_v<decltype(var)>);
-		cout << var << endl;
+		cout << cnt << ": " << var << endl;
+		cnt++;
 	});
 }
 

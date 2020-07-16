@@ -17,15 +17,15 @@ namespace Ubpa::USRefl::detail {
 	};
 
 	template<typename List, typename Func, size_t... Ns>
-	constexpr void ForEach(const List& list, const Func& func, std::index_sequence<Ns...>) {
+	constexpr void ForEach(const List& list, Func&& func, std::index_sequence<Ns...>) {
 		(func(list.template Get<Ns>()), ...);
 	}
 
 	template<typename List, typename Func, size_t... Ns>
-	constexpr size_t FindIf(const List& list, const Func& func, std::index_sequence<Ns...>) {
+	constexpr size_t FindIf(const List& list, Func&& func, std::index_sequence<Ns...>) {
 		if constexpr (sizeof...(Ns) > 0) {
 			using IST = IndexSequenceTraits<std::index_sequence<Ns...>>;
-			return func(list.template Get<IST::head>()) ? IST::head : FindIf(list, func, IST::tail);
+			return func(list.template Get<IST::head>()) ? IST::head : FindIf(list, std::forward<Func>(func), IST::tail);
 		}
 		else return static_cast<size_t>(-1);
 	}
@@ -67,13 +67,13 @@ namespace Ubpa::USRefl::detail {
 		constexpr BaseList(Elems... elems) : list{ elems... } {}
 
 		template<typename Func>
-		constexpr void ForEach(const Func& func) const {
-			detail::ForEach(*this, func, std::make_index_sequence<size>{});
+		constexpr void ForEach(Func&& func) const {
+			detail::ForEach(*this, std::forward<Func>(func), std::make_index_sequence<size>{});
 		}
 
 		template<typename Func>
-		constexpr size_t FindIf(const Func& func) const {
-			return detail::FindIf(*this, func, std::make_index_sequence<size>{});
+		constexpr size_t FindIf(Func&& func) const {
+			return detail::FindIf(*this, std::forward<Func>(func), std::make_index_sequence<size>{});
 		}
 
 		constexpr size_t Find(std::string_view name) const {
@@ -82,15 +82,14 @@ namespace Ubpa::USRefl::detail {
 		
 		template<typename T>
 		constexpr size_t FindByValue(T value) const {
-			return FindIf([value](auto elem) {
-				if constexpr (elem.has_value) {
-					if constexpr (elem.template ValueTypeIs<T>())
-						return elem.value == value;
+			return FindIf([value](auto e) {
+				if constexpr (e.has_value) {
+					if constexpr (std::is_same_v<decltype(e.value), T>)
+						return e.value == value;
 					else
 						return false;
 				}
-				else
-					return false;
+				else return false;
 			});
 		}
 
@@ -242,22 +241,22 @@ namespace Ubpa::USRefl {
 		}
 
 		template<typename Func>
-		static constexpr void DFS(const Func& func, size_t depth = 0) {
+		static constexpr void DFS(Func&& func, size_t depth = 0) {
 			func(TypeInfo<type>{}, depth);
 			TypeInfo<type>::bases.ForEach([&](auto base) {
-				base.DFS(func, depth + 1);
+				base.DFS(std::forward<Func>(func), depth + 1);
 			});
 		}
 
 		template<typename U, typename Func>
-		static constexpr void ForEachVarOf(U&& obj, const Func& func) {
+		static constexpr void ForEachVarOf(U&& obj, Func&& func) {
 			static_assert(std::is_same_v<type, std::decay_t<U>>);
 			TypeInfo<type>::fields.ForEach([&](auto field) {
 				if constexpr (!field.is_static && !field.is_func)
-					func(std::forward<U>(obj).*(field.value));
+					std::forward<Func>(func)(std::forward<U>(obj).*(field.value));
 			});
 			TypeInfo<type>::bases.ForEach([&](auto base) {
-				base.ForEachVarOf(base.Forward(std::forward<U>(obj)), func);
+				base.ForEachVarOf(base.Forward(std::forward<U>(obj)), std::forward<Func>(func));
 			});
 		}
 	};
