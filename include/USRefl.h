@@ -102,6 +102,12 @@ namespace Ubpa::USRefl::detail {
 			static_assert(N != static_cast<size_t>(-1));
 			return std::get<N>(list);
 		}
+
+// name must be constexpr std::string_view
+#define USRefl_BaseList_GetByName(list, name) list.Get<list.Find(name)>()
+
+// value must be constexpr
+#define USRefl_BaseList_GetByValue(list, value) list.Get<list.FindByValue(value)>()
 	};
 }
 
@@ -176,9 +182,8 @@ namespace Ubpa::USRefl {
 	template<typename... Attrs>
 	struct AttrList : detail::BaseList<Attrs...> {
 		static_assert((detail::IsInstance<Attrs, Attr>::value&&...));
-		using detail::BaseList<Attrs...>::BaseList;
+		constexpr AttrList(Attrs... attrs) : detail::BaseList<Attrs...>{ attrs... } {}
 	};
-	template<typename... Attrs> AttrList(Attrs...)->AttrList<Attrs...>;
 
 	template<typename T, typename AList>
 	struct Field : FieldTraits<T>, detail::NamedValue<T> {
@@ -201,9 +206,8 @@ namespace Ubpa::USRefl {
 	template<typename... Fields>
 	struct FieldList : detail::BaseList<Fields...> {
 		static_assert((detail::IsInstance<Fields, Field>::value&&...));
-		using detail::BaseList<Fields...>::BaseList;
+		constexpr FieldList(Fields... fields) : detail::BaseList<Fields...>{ fields... } {};
 	};
-	template<typename... Fields> FieldList(Fields...)->FieldList<Fields...>;
 
 	// name, type, bases, fields, attrs, 
 	template<typename T> struct TypeInfo;
@@ -217,9 +221,8 @@ namespace Ubpa::USRefl {
 	template<typename... TypeInfos>
 	struct TypeInfoList : detail::BaseList<TypeInfos...> {
 		static_assert((detail::IsInstance<TypeInfos, TypeInfo>::value&&...));
-		using detail::BaseList<TypeInfos...>::BaseList;
+		constexpr TypeInfoList(TypeInfos... typeInfos) : detail::BaseList<TypeInfos...>{ typeInfos... } {};
 	};
-	template<typename... TypeInfos> TypeInfoList(TypeInfos...)->TypeInfoList<TypeInfos...>;
 
 	template<typename T, typename... Bases>
 	struct TypeInfoBase {

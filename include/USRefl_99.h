@@ -11,8 +11,7 @@ namespace detail {
 	template<typename R, typename... Args> struct IsFunc<R(Args...)> : std::true_type {};
 	template<typename R, typename... Args> struct IsFunc<R(Args...)const> : std::true_type {};
 	template<typename List, typename Func, size_t... Ns>
-	constexpr void ForEach(List list, Func&& func, std::index_sequence<Ns...>)
-	{ (func(list.template Get<Ns>()), ...); }
+	constexpr void ForEach(List list, Func&& func, std::index_sequence<Ns...>){(func(list.template Get<Ns>()), ...);}
 	template<typename List, typename Func, size_t... Ns>
 	constexpr size_t FindIf(const List& list, Func&& func, std::index_sequence<Ns...>) {
 		if constexpr (sizeof...(Ns) > 0) {
@@ -47,6 +46,8 @@ namespace detail {
 		}
 		constexpr bool Contains(std::string_view name) const { return Find(name) != static_cast<size_t>(-1); }
 		template<size_t N> constexpr auto Get() const { return std::get<N>(list); }
+#define USRefl_BaseList_GetByName(list, name) list.Get<list.Find(name)>()
+#define USRefl_BaseList_GetByValue(list, value) list.Get<list.FindByValue(value)>()
 	};
 }
 template<typename T> struct Attr : detail::NamedValue<T>
@@ -56,11 +57,8 @@ template<> struct Attr<void> : detail::NamedValue<void>
 template<size_t N> Attr(std::string_view, const char(&)[N])->Attr<std::string_view>;
 Attr(std::string_view)->Attr<void>;
 template<typename... Attrs> struct AttrList : detail::BaseList<Attrs...>
-{ using detail::BaseList<Attrs...>::BaseList; };
-template<typename... Attrs> AttrList(Attrs...)->AttrList<Attrs...>;
-template<bool s, bool f> struct FTraitsB {
-	static constexpr bool is_static = s, is_func = f;
-};
+{ constexpr AttrList(Attrs... attrs) : detail::BaseList<Attrs...>{ attrs... } {} };
+template<bool s, bool f> struct FTraitsB { static constexpr bool is_static = s, is_func = f; };
 template<typename T> struct FTraits : FTraitsB<true, false> {}; // default is enum
 template<typename U, typename T> struct FTraits<T U::*> : FTraitsB<false, detail::IsFunc<T>::value> {};
 template<typename T> struct FTraits<T*> : FTraitsB<true, detail::IsFunc<T>::value>{}; // static member
@@ -70,14 +68,11 @@ template<typename T, typename AList> struct Field : FTraits<T>, detail::NamedVal
 };
 template<typename T, typename AList> Field(std::string_view, T, AList)->Field<T, AList>;
 template<typename T> Field(std::string_view, T)->Field<T, AttrList<>>;
-template<typename... Fields> struct FieldList : detail::BaseList<Fields...> {
-	using detail::BaseList<Fields...>::BaseList;
-};
-template<typename... Fields> FieldList(Fields...)->FieldList<Fields...>;
+template<typename... Fields> struct FieldList : detail::BaseList<Fields...>
+{ constexpr FieldList(Fields... fields) : detail::BaseList<Fields...>{ fields... } {}; };
 template<typename T> struct TypeInfo; // TypeInfoBase, name, fields, attrs
-template<typename... Ts> struct TypeInfoList : detail::BaseList<Ts...>
-{ using detail::BaseList<Ts...>::BaseList; };
-template<typename... Ts> TypeInfoList(Ts...)->TypeInfoList<Ts...>;
+template<typename... TypeInfos> struct TypeInfoList : detail::BaseList<TypeInfos...>
+{ constexpr TypeInfoList(TypeInfos... typeInfos) : detail::BaseList<TypeInfos...>{ typeInfos... } {}; };
 template<typename T, typename... Bases> struct TypeInfoBase {
 	using type = T;
 	static constexpr TypeInfoList bases = { TypeInfo<Bases>{}... };

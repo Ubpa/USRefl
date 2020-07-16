@@ -35,12 +35,11 @@ int main() {
 	TypeInfo<Color>::fields.ForEach([](auto field) {
 		cout << field.name << endl;
 	});
-	constexpr size_t idx = TypeInfo<Color>::fields.Find("RED");
-	constexpr size_t idx2 = TypeInfo<Color>::fields.FindByValue(Color::RED);
-	static_assert(TypeInfo<Color>::fields.Get<TypeInfo<Color>::fields.Find("RED")>().value == Color::RED);
-	static_assert(TypeInfo<Color>::fields.Get<TypeInfo<Color>::fields.FindByValue(Color::RED)>().name == "RED");
+
+	static_assert(USRefl_BaseList_GetByName(TypeInfo<Color>::fields, "RED").value == Color::RED);
+	static_assert(USRefl_BaseList_GetByValue(TypeInfo<Color>::fields, Color::RED).name == "RED");
 
 	constexpr Color c = Color::GREEN;
-	constexpr auto c_attr = TypeInfo<Color>::fields.Get<TypeInfo<Color>::fields.FindByValue(c)>().attrs;
-	static_assert(c_attr.Get<c_attr.Find("func")>().value() == 2);
+	constexpr auto c_attr = USRefl_BaseList_GetByValue(TypeInfo<Color>::fields, c).attrs;
+	static_assert(USRefl_BaseList_GetByName(c_attr, "func").value() == 2);
 }
