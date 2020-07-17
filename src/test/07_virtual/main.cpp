@@ -10,10 +10,10 @@ using namespace std;
 struct A {
 	float a;
 };
-struct B : A {
+struct B : virtual A {
 	float b;
 };
-struct C : A {
+struct C : virtual A {
 	float c;
 };
 struct D : B, C {
@@ -32,7 +32,7 @@ struct TypeInfo<A> : TypeInfoBase<A> {
 };
 
 template<>
-struct TypeInfo<B> : TypeInfoBase<B, Base<A>> {
+struct TypeInfo<B> : TypeInfoBase<B, Base<A, true>> {
 	static constexpr std::string_view name = "B";
 
 	static constexpr FieldList fields = FieldList{
@@ -43,7 +43,7 @@ struct TypeInfo<B> : TypeInfoBase<B, Base<A>> {
 };
 
 template<>
-struct TypeInfo<C> : TypeInfoBase<C, Base<A>> {
+struct TypeInfo<C> : TypeInfoBase<C, Base<A, true>> {
 	static constexpr std::string_view name = "C";
 
 	static constexpr FieldList fields = FieldList{
@@ -54,7 +54,7 @@ struct TypeInfo<C> : TypeInfoBase<C, Base<A>> {
 };
 
 template<>
-struct TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
+struct Ubpa::USRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
 	static constexpr std::string_view name = "D";
 
 	static constexpr FieldList fields = FieldList{
@@ -65,37 +65,32 @@ struct TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
 };
 
 int main() {
+	cout << "[Tree]" << endl;
 	TypeInfo<D>::DFS([](auto t, size_t depth) {
 		for (size_t i = 0; i < depth; i++)
 			cout << "  ";
 		cout << t.name << endl;
-	});
+		});
 
-	cout << "[non DFS]" << endl;
-	TypeInfo<D>::fields.ForEach([](auto field){
-		cout << field.name << endl;
-	});
-
-	cout << "[DFS]" << endl;
+	cout << "[field]" << endl;
 	TypeInfo<D>::DFS([](auto t, size_t) {
 		t.fields.ForEach([](auto field) {
 			cout << field.name << endl;
+			});
 		});
-	});
 
 	cout << "[var]" << endl;
 	D d;
-	d.B::a = 1;
-	d.C::a = 2;
-	d.b = 3;
-	d.c = 4;
-	d.d = 5;
-	auto tt = TypeInfo<D>::fields;
-	TypeInfo<D>::ForEachVarOf(std::move(d), [cnt = 0](auto&& var) mutable {
+	d.a = 1;
+	d.b = 2;
+	d.c = 3;
+	d.d = 4;
+	cout << "[var : left]" << endl;
+	TypeInfo<D>::ForEachVarOf(std::move(d), [](auto&& var) {
 		static_assert(std::is_rvalue_reference_v<decltype(var)>);
-		cout << cnt << ": " << var << endl;
-		cnt++;
+		cout << var << endl;
 	});
+	cout << "[var : right]" << endl;
 	TypeInfo<D>::ForEachVarOf(d, [cnt = 0](auto&& var) mutable {
 		static_assert(std::is_lvalue_reference_v<decltype(var)>);
 		cout << cnt << ": " << var << endl;

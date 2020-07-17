@@ -36,10 +36,10 @@ int main() {
 		cout << field.name << endl;
 	});
 
-	static_assert(USRefl_BaseList_GetByName(TypeInfo<Color>::fields, "RED").value == Color::RED);
-	static_assert(USRefl_BaseList_GetByValue(TypeInfo<Color>::fields, Color::RED).name == "RED");
+	static_assert(USRefl_ElemList_GetByName(TypeInfo<Color>::fields, "RED").value == Color::RED);
+	static_assert(USRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::RED).name == "RED");
 
 	constexpr Color c = Color::GREEN;
-	constexpr auto c_attr = USRefl_BaseList_GetByValue(TypeInfo<Color>::fields, c).attrs;
-	static_assert(USRefl_BaseList_GetByName(c_attr, "func").value() == 2);
+	constexpr auto c_attr = USRefl_ElemList_GetByValue(TypeInfo<Color>::fields, c).attrs;
+	static_assert(USRefl_ElemList_GetByName(c_attr, "func").value() == 2);
 }
