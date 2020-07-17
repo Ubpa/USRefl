@@ -1,7 +1,7 @@
 #pragma once // Ubpa Static Reflection 99 (now 96)
 #include <string_view>
 #include <tuple>
-template<typename L, typename F> constexpr size_t detail_FindIf(L list, F&& func, std::index_sequence<>) { return -1; }
+template<typename L, typename F> constexpr size_t detail_FindIf(L, F&&, std::index_sequence<>) { return -1; }
 template<typename L, typename F, size_t N0, size_t... Ns>
 constexpr size_t detail_FindIf(L l, F&& f, std::index_sequence<N0, Ns...>)
 { return f(l.template Get<N0>()) ? N0 : detail_FindIf(l, std::forward<F>(f), std::index_sequence<Ns...>{}); }
@@ -73,19 +73,19 @@ template<typename T, typename... Bases> struct TypeInfoBase {
     else if constexpr (std::is_same_v<std::decay_t<U>&, U>) return static_cast<type&>(derived); // left
     else return static_cast<const std::decay_t<U>&>(derived); // std::is_same_v<const std::decay_t<U>&, U>
   }
-  static constexpr auto GetVirtualBases() {
+  static constexpr auto VirtualBases() {
     return bases.Accumulate(ElemList<>{}, [](auto acc, auto base) {
-      auto concated = base.info.GetVirtualBases().Accumulate(acc, [](auto acc, auto b) { return acc.UniqueInsert(b); });
+      auto concated = base.info.VirtualBases().Accumulate(acc, [](auto acc, auto b) { return acc.UniqueInsert(b); });
       if constexpr (!base.is_virtual) return concated; else return concated.UniqueInsert(base.info);
     });
   }
   template<typename F, size_t Depth = 0> static constexpr void DFS(F&& f) {
     f(TypeInfo<type>{}, Depth);
-    if constexpr (Depth == 0) GetVirtualBases().ForEach([&](auto vb) { std::forward<F>(f)(vb, 1); });
+    if constexpr (Depth == 0) VirtualBases().ForEach([&](auto vb) { std::forward<F>(f)(vb, 1); });
     bases.ForEach([&](auto b) { if constexpr (!b.is_virtual) b.info.template DFS<F, Depth + 1>(std::forward<F>(f)); });
   }
   template<typename U, typename Func> static constexpr void ForEachVarOf(U&& obj, Func&& func) {
-    GetVirtualBases().ForEach([&](auto vb) { vb.fields.ForEach([&](auto fld)
+    VirtualBases().ForEach([&](auto vb) { vb.fields.ForEach([&](auto fld)
     { if constexpr (!fld.is_static && !fld.is_func) std::forward<Func>(func)(std::forward<U>(obj).*(fld.value)); }); });
     detail_NV_Var(TypeInfo<type>{}, std::forward<U>(obj), std::forward<Func>(func));
   }

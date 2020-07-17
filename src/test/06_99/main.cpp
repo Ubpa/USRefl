@@ -295,18 +295,10 @@ void test_function() {
 // ==============
 //  virtual
 // ==============
-struct VA {
-	float a;
-};
-struct VB : virtual VA {
-	float b;
-};
-struct VC : virtual VA {
-	float c;
-};
-struct VD : VB, VC {
-	float d;
-};
+struct VA { float a; };
+struct VB : virtual VA { float b; };
+struct VC : virtual VA { float c; };
+struct VD : VB, VC { float d; };
 
 template<>
 struct TypeInfo<VA> : TypeInfoBase<VA> {
@@ -357,8 +349,15 @@ void test_virtual() {
 		<< "====================" << endl
 		<< " virtual" << endl
 		<< "====================" << endl;
-	cout << "// not support in MSVC++ 19.26 because of a bug (2020/07/17)" << endl;
+
+	cout << "// not full support in MSVC++ 19.26 because of a bug (2020/07/17)" << endl;
 	cout << "// https://developercommunity.visualstudio.com/content/problem/1116835/member-pointer-of-a-class-with-a-virtual-base-1.html" << endl;
+
+	cout << "[Virtual Bases]" << endl;
+	constexpr auto vbs = TypeInfo<D>::VirtualBases();
+	vbs.ForEach([](auto info) {
+		cout << info.name << endl;
+	});
 
 	cout << "[Tree]" << endl;
 	TypeInfo<VD>::DFS([](auto t, size_t depth) {
@@ -392,7 +391,6 @@ void test_virtual() {
 		cnt++;
 	});
 }
-
 
 int main() {
 	test_basic();

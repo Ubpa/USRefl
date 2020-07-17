@@ -267,9 +267,9 @@ namespace Ubpa::USRefl {
 				static_assert(true); // volitile
 		}
 
-		static constexpr auto GetVirtualBases() {
+		static constexpr auto VirtualBases() {
 			return bases.Accumulate(detail::ElemList<>{}, [](auto acc, auto base) {
-				constexpr auto vbs = base.info.GetVirtualBases();
+				constexpr auto vbs = base.info.VirtualBases();
 				auto concated = vbs.Accumulate(acc, [](auto acc, auto vb){
 					return acc.UniqueInsert(vb);
 				});
@@ -284,7 +284,7 @@ namespace Ubpa::USRefl {
 		static constexpr void DFS(Func&& func) {
 			func(TypeInfo<type>{}, Depth);
 			if constexpr (Depth == 0) {
-				GetVirtualBases().ForEach([&](auto vb) {
+				VirtualBases().ForEach([&](auto vb) {
 					func(vb, 1);
 				});
 			}
@@ -297,7 +297,7 @@ namespace Ubpa::USRefl {
 		template<typename U, typename Func>
 		static constexpr void ForEachVarOf(U&& obj, Func&& func) {
 			static_assert(std::is_same_v<type, std::decay_t<U>>);
-			GetVirtualBases().ForEach([&](auto vb) {
+			VirtualBases().ForEach([&](auto vb) {
 				vb.fields.ForEach([&](auto field) {
 					if constexpr (!field.is_static && !field.is_func)
 						std::forward<Func>(func)(std::forward<U>(obj).*(field.value));

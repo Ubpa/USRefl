@@ -7,18 +7,10 @@
 using namespace Ubpa::USRefl;
 using namespace std;
 
-struct A {
-	float a;
-};
-struct B : virtual A {
-	float b;
-};
-struct C : virtual A {
-	float c;
-};
-struct D : B, C {
-	float d;
-};
+struct A { float a; };
+struct B : virtual A { float b; };
+struct C : virtual A { float c; };
+struct D : B, C { float d; };
 
 template<>
 struct TypeInfo<A> : TypeInfoBase<A> {
@@ -65,19 +57,25 @@ struct Ubpa::USRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
 };
 
 int main() {
+	cout << "[Virtual Bases]" << endl;
+	constexpr auto vbs = TypeInfo<D>::VirtualBases();
+	vbs.ForEach([](auto info) {
+		cout << info.name << endl;
+	});
+
 	cout << "[Tree]" << endl;
 	TypeInfo<D>::DFS([](auto t, size_t depth) {
 		for (size_t i = 0; i < depth; i++)
 			cout << "  ";
 		cout << t.name << endl;
-		});
+	});
 
 	cout << "[field]" << endl;
 	TypeInfo<D>::DFS([](auto t, size_t) {
 		t.fields.ForEach([](auto field) {
 			cout << field.name << endl;
 			});
-		});
+	});
 
 	cout << "[var]" << endl;
 	D d;

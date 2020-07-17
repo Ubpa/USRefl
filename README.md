@@ -20,6 +20,7 @@
 - **inheritance** 
   - diamond inheritance
   - iterate bases recursively
+  - virtual inheritance
 
 ## Example
 
@@ -38,6 +39,7 @@ struct [[size(8)]] Point {
   float y;
 };
 
+// declaration
 template<>
 struct TypeInfo<Point> : TypeInfoBase<Point> {
   static constexpr std::string_view name = "Point";
@@ -85,6 +87,7 @@ int main() {
 - [func](src/test/03_func/main.cpp) 
 - [enum](src/test/04_enum/main.cpp) 
 - [inheritance](src/test/05_inheritance/main.cpp) 
+- [virtual inheritance](src/test/06_virtual/main.cpp) 
 - 99 line: [USRefl_99.h](include/USRefl_99.h)，[test](src/test/06_99/main.cpp) 
 
 ## Integration
