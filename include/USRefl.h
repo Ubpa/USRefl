@@ -90,7 +90,7 @@ namespace Ubpa::USRefl::detail {
 		}
 		
 		template<typename T>
-		constexpr size_t FindByValue(T value) const {
+		constexpr size_t FindValue(T value) const {
 			return FindIf([value](auto e) {
 				if constexpr (e.has_value) {
 					if constexpr (std::is_same_v<decltype(e.value), T>)
@@ -124,25 +124,17 @@ namespace Ubpa::USRefl::detail {
 		}
 
 // name must be constexpr std::string_view
+// C++20 support string literal as template arguments
 #define USRefl_ElemList_GetByName(list, name) list.Get<list.Find(name)>()
 
 // value must be constexpr
-#define USRefl_ElemList_GetByValue(list, value) list.Get<list.FindByValue(value)>()
+// C++20 support string literal as template arguments
+#define USRefl_ElemList_GetByValue(list, value) list.Get<list.FindValue(value)>()
 	};
 }
 
 namespace Ubpa::USRefl {
 	// field : member variable/function, static or non-static
-
-	// Ret(Args...)[const]
-	template<typename Func>
-	struct IsFunc : std::false_type {};
-	template<typename Ret, typename... Args>
-	struct IsFunc<Ret(Args...)> : std::true_type {};
-	template<typename Ret, typename... Args>
-	struct IsFunc<Ret(Args...)const> : std::true_type {};
-	template<typename Func>
-	static constexpr bool IsFunc_v = IsFunc<Func>::value;
 
 	template <typename... Args>
 	struct Overload {
@@ -169,14 +161,14 @@ namespace Ubpa::USRefl {
 		using object_type = Object;
 		using value_type = T;
 		static constexpr bool is_static = false;
-		static constexpr bool is_func = IsFunc_v<T>;
+		static constexpr bool is_func = std::is_function_v<T>;
 	};
 	template<typename T>
 	struct FieldTraits<T*> {
 		using object_type = void;
 		using value_type = T;
 		static constexpr bool is_static = true;
-		static constexpr bool is_func = IsFunc_v<T>;
+		static constexpr bool is_func = std::is_function_v<T>;
 	};
 	template<typename T>
 	struct FieldTraits {

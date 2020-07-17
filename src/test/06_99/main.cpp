@@ -1,6 +1,5 @@
 #include "USRefl_99.h"
 #include <iostream>
-#include <vector>
 using namespace std;
 
 // ==============
@@ -49,7 +48,7 @@ void test_basic() {
 		});
 	});
 
-	constexpr auto y_field = USRefl_BaseList_GetByName(TypeInfo<Point>::fields, "y");
+	constexpr auto y_field = USRefl_ElemList_GetByName(TypeInfo<Point>::fields, "y");
 	static_assert(y_field.name == "y");
 
 	static_assert(TypeInfo<Point>::fields.Contains("x"));
@@ -99,8 +98,8 @@ void test_template() {
 		<< "====================" << endl;
 
 	cout << TypeInfo<Data<float>>::name << endl;
-	constexpr auto valueAttrs = USRefl_BaseList_GetByName(TypeInfo<Data<float>>::fields, "value").attrs;
-	constexpr auto range = USRefl_BaseList_GetByName(valueAttrs, "range").value;
+	constexpr auto valueAttrs = USRefl_ElemList_GetByName(TypeInfo<Data<float>>::fields, "value").attrs;
+	constexpr auto range = USRefl_ElemList_GetByName(valueAttrs, "range").value;
 	constexpr float range_min = range.first;
 	constexpr float range_max = range.second;
 	cout << "range min :" << range_min << endl;
@@ -233,12 +232,12 @@ void test_enum() {
 	TypeInfo<Color>::fields.ForEach([](auto field) {
 		cout << field.name << endl;
 	});
-	static_assert(USRefl_BaseList_GetByName(TypeInfo<Color>::fields, "RED").value == Color::RED);
-	static_assert(USRefl_BaseList_GetByValue(TypeInfo<Color>::fields, Color::RED).name == "RED");
+	static_assert(USRefl_ElemList_GetByName(TypeInfo<Color>::fields, "RED").value == Color::RED);
+	static_assert(USRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::RED).name == "RED");
 
 	constexpr Color c = Color::GREEN;
-	constexpr auto c_attr = USRefl_BaseList_GetByValue(TypeInfo<Color>::fields, c).attrs;
-	static_assert(USRefl_BaseList_GetByName(c_attr, "func").value() == 2);
+	constexpr auto c_attr = USRefl_ElemList_GetByValue(TypeInfo<Color>::fields, c).attrs;
+	static_assert(USRefl_ElemList_GetByName(c_attr, "func").value() == 2);
 }
 
 // ==============
@@ -254,13 +253,13 @@ struct TypeInfo<FuncList> : TypeInfoBase<FuncList> {
 	static constexpr FieldList fields = {
 		Field{"Func0", &FuncList::Func0, AttrList{
 			Attr{"argument_list", AttrList{
-				Attr{"@0", detail::NamedValue<void>{"a"}},
-				Attr{"@1", detail::NamedValue<void>{"b"}},
+				Attr{"@0", NamedValue<void>{"a"}},
+				Attr{"@1", NamedValue<void>{"b"}},
 			}}
 		}},
 		Field{"Func1", &FuncList::Func1, AttrList{
 			Attr{"argument_list", AttrList{
-				Attr{"@0", detail::NamedValue<int>{"x", 1}}
+				Attr{"@0", NamedValue<int>{"x", 1}}
 			}}
 		}}
 	};
@@ -272,9 +271,9 @@ void test_function() {
 		<< " function" << endl
 		<< "====================" << endl;
 
-	constexpr auto f0 = USRefl_BaseList_GetByName(TypeInfo<FuncList>::fields, "Func0");
+	constexpr auto f0 = USRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func0");
 	cout << f0.name << endl;
-	constexpr auto f0_args = USRefl_BaseList_GetByName(f0.attrs, "argument_list");
+	constexpr auto f0_args = USRefl_ElemList_GetByName(f0.attrs, "argument_list");
 	f0_args.value.ForEach([](auto arg){
 		cout << arg.name << ": " << arg.value.name;
 		if constexpr (arg.value.has_value)
@@ -282,9 +281,9 @@ void test_function() {
 		cout << endl;
 	});
 
-	constexpr auto f1 = USRefl_BaseList_GetByName(TypeInfo<FuncList>::fields, "Func1");
+	constexpr auto f1 = USRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func1");
 	cout << f1.name << endl;
-	constexpr auto f1_args = USRefl_BaseList_GetByName(f1.attrs, "argument_list");
+	constexpr auto f1_args = USRefl_ElemList_GetByName(f1.attrs, "argument_list");
 	f1_args.value.ForEach([](auto arg) {
 		cout << arg.name << ": " << arg.value.name;
 		if constexpr (arg.value.has_value)
