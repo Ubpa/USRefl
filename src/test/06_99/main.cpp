@@ -124,7 +124,7 @@ struct TypeInfo<A> : TypeInfoBase<A> {
 };
 
 template<>
-struct TypeInfo<B> : TypeInfoBase<B, A> {
+struct TypeInfo<B> : TypeInfoBase<B, Base<A>> {
 	static constexpr std::string_view name = "B";
 
 	static constexpr FieldList fields = { Field{"b", &B::b } };
@@ -133,7 +133,7 @@ struct TypeInfo<B> : TypeInfoBase<B, A> {
 };
 
 template<>
-struct TypeInfo<C> : TypeInfoBase<C, A> {
+struct TypeInfo<C> : TypeInfoBase<C, Base<A>> {
 	static constexpr std::string_view name = "C";
 
 	static constexpr FieldList fields = FieldList{ Field{"c", &C::c } };
@@ -142,7 +142,7 @@ struct TypeInfo<C> : TypeInfoBase<C, A> {
 };
 
 template<>
-struct TypeInfo<D> : TypeInfoBase<D, B, C> {
+struct TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
 	static constexpr std::string_view name = "D";
 
 	static constexpr FieldList fields = FieldList{ Field{"d", &D::d } };
@@ -292,12 +292,115 @@ void test_function() {
 	});
 }
 
+// ==============
+//  virtual
+// ==============
+struct VA {
+	float a;
+};
+struct VB : virtual VA {
+	float b;
+};
+struct VC : virtual VA {
+	float c;
+};
+struct VD : VB, VC {
+	float d;
+};
+
+template<>
+struct TypeInfo<VA> : TypeInfoBase<VA> {
+	static constexpr std::string_view name = "VA";
+
+	static constexpr FieldList fields = FieldList{
+		Field{"a", &VA::a }
+	};
+
+	static constexpr AttrList attrs = {};
+};
+
+template<>
+struct TypeInfo<VB> : TypeInfoBase<VB, Base<VA, true>> {
+	static constexpr std::string_view name = "VB";
+
+	static constexpr FieldList fields = FieldList{
+		Field{"b", &VB::b }
+	};
+
+	static constexpr AttrList attrs = {};
+};
+
+template<>
+struct TypeInfo<VC> : TypeInfoBase<VC, Base<VA, true>> {
+	static constexpr std::string_view name = "VC";
+
+	static constexpr FieldList fields = FieldList{
+		Field{"c", &VC::c }
+	};
+
+	static constexpr AttrList attrs = {};
+};
+
+template<>
+struct TypeInfo<VD> : TypeInfoBase<VD, Base<VB>, Base<VC>> {
+	static constexpr std::string_view name = "VD";
+
+	static constexpr FieldList fields = FieldList{
+		Field{"d", &VD::d }
+	};
+
+	static constexpr AttrList attrs = {};
+};
+
+void test_virtual() {
+	cout
+		<< "====================" << endl
+		<< " virtual" << endl
+		<< "====================" << endl;
+	cout << "// not support in MSVC++ 19.26 because of a bug (2020/07/17)" << endl;
+	cout << "// https://developercommunity.visualstudio.com/content/problem/1116835/member-pointer-of-a-class-with-a-virtual-base-1.html" << endl;
+
+	cout << "[Tree]" << endl;
+	TypeInfo<VD>::DFS([](auto t, size_t depth) {
+		for (size_t i = 0; i < depth; i++)
+			cout << "  ";
+		cout << t.name << endl;
+	});
+
+	cout << "[field]" << endl;
+	TypeInfo<VD>::DFS([](auto t, size_t) {
+		t.fields.ForEach([](auto field) {
+			cout << field.name << endl;
+			});
+	});
+
+	cout << "[var]" << endl;
+	VD d;
+	d.a = 1;
+	d.b = 2;
+	d.c = 3;
+	d.d = 4;
+	cout << "[var : left]" << endl;
+	TypeInfo<VD>::ForEachVarOf(std::move(d), [](auto&& var) {
+		static_assert(std::is_rvalue_reference_v<decltype(var)>);
+		cout << var << endl;
+	});
+	cout << "[var : right]" << endl;
+	TypeInfo<VD>::ForEachVarOf(d, [cnt = 0](auto&& var) mutable {
+		static_assert(std::is_lvalue_reference_v<decltype(var)>);
+		cout << cnt << ": " << var << endl;
+		cnt++;
+	});
+}
+
+
 int main() {
 	test_basic();
 	test_template();
 	test_enum();
 	test_inheritance();
 	test_function();
+	test_virtual();
 
 	return 0;
 }

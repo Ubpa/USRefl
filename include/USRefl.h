@@ -34,6 +34,18 @@ namespace Ubpa::USRefl::detail {
 		else return static_cast<size_t>(-1);
 	}
 
+	template<typename TI, typename U, typename Func>
+	static constexpr void ForEachNonVirtualVarOf(TI info, U&& obj, Func&& func) {
+		info.fields.ForEach([&](auto field) {
+			if constexpr (!field.is_static && !field.is_func)
+				std::forward<Func>(func)(std::forward<U>(obj).*(field.value));
+		});
+		info.bases.ForEach([&](auto base) {
+			if constexpr (!base.is_virtual)
+				ForEachNonVirtualVarOf(base.info, base.info.Forward(std::forward<U>(obj)), std::forward<Func>(func));
+		});
+	}
+
 	template<typename T>
 	struct NamedValueBase {
 		std::string_view name;
@@ -278,21 +290,10 @@ namespace Ubpa::USRefl {
 			}
 			bases.ForEach([&](auto base) {
 				if constexpr (!base.is_virtual)
-					base.info.DFS<Func, Depth + 1>(std::forward<Func>(func));
+					base.info.template DFS<Func, Depth + 1>(std::forward<Func>(func));
 			});
 		}
-		template<typename U, typename Func>
-		static constexpr void ForEachNonVirtualVarOf(U&& obj, Func&& func) {
-			static_assert(std::is_same_v<type, std::decay_t<U>>);
-			TypeInfo<type>::fields.ForEach([&](auto field) {
-				if constexpr (!field.is_static && !field.is_func)
-					std::forward<Func>(func)(std::forward<U>(obj).*(field.value));
-			});
-			TypeInfo<type>::bases.ForEach([&](auto base) {
-				if constexpr (!base.is_virtual)
-					base.info.ForEachNonVirtualVarOf(base.info.Forward(std::forward<U>(obj)), std::forward<Func>(func));
-			});
-		}
+
 		template<typename U, typename Func>
 		static constexpr void ForEachVarOf(U&& obj, Func&& func) {
 			static_assert(std::is_same_v<type, std::decay_t<U>>);
@@ -302,7 +303,7 @@ namespace Ubpa::USRefl {
 						std::forward<Func>(func)(std::forward<U>(obj).*(field.value));
 				});
 			});
-			ForEachNonVirtualVarOf(std::forward<U>(obj), std::forward<Func>(func));
+			detail::ForEachNonVirtualVarOf(TypeInfo<type>{}, std::forward<U>(obj), std::forward<Func>(func));
 		}
 	};
 }
