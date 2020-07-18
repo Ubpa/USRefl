@@ -102,7 +102,7 @@ int main() {
 - [func](src/test/03_func/main.cpp) 
 - [enum](src/test/04_enum/main.cpp) 
 - [inheritance](src/test/05_inheritance/main.cpp) 
-- [virtual inheritance](src/test/06_virtual/main.cpp) 
+- [virtual inheritance](src/test/07_virtual/main.cpp) 
 - 99 line: [USRefl_99.h](include/USRefl_99.h)，[test](src/test/06_99/main.cpp) 
 
 ## Documentation
@@ -111,7 +111,12 @@ int main() {
 
 ## Integration
 
-You should add required file [USRefl.h](include/USRefl.h) or [USRefl_99.h](include/USRefl_99.h) 
+- You can choose one of the following three methods
+
+- **method 0**: add required file [USRefl_99.h](include/USRefl_99.h) ⭐
+- run CMake (download [nameof.hpp](https://github.com/Neargye/nameof/blob/master/include/nameof.hpp) to [include/USRefl/_deps/](include/USRefl/_deps/))
+  - **method 1**: directly use [include/USRefl/](include/USRefl/) 
+  - **method 2**: cmake install, `find package(USRefl REQUIRED)` to get imported target `Ubpa::USRefl_core` ⭐
 
 ## Compiler compatibility
 

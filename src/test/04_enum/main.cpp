@@ -1,4 +1,4 @@
-#include <USRefl.h>
+#include <USRefl/USRefl.h>
 
 #include <iostream>
 
@@ -18,8 +18,6 @@ enum class [[enum_attr("enum_attr_value")]] Color {
 
 template<>
 struct TypeInfo<Color> : TypeInfoBase<Color> {
-	static constexpr std::string_view name = "Color";
-
 	static constexpr FieldList fields = {
 		Field{"RED", Color::RED, AttrList{ Attr{ "enumerator_attr", "enumerator_attr_value" },Attr{"func", &Func<1>} }},
 		Field{"GREEN", Color::GREEN, AttrList{ Attr{"func", &Func<2>} }},
@@ -32,6 +30,8 @@ struct TypeInfo<Color> : TypeInfoBase<Color> {
 };
 
 int main() {
+	cout << TypeInfo<Color>::name << endl;
+
 	TypeInfo<Color>::fields.ForEach([](auto field) {
 		cout << field.name << endl;
 	});

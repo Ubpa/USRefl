@@ -350,7 +350,7 @@ void test_virtual() {
 		<< " virtual" << endl
 		<< "====================" << endl;
 
-	cout << "// not full support in MSVC++ 19.26 because of a bug (2020/07/17)" << endl;
+	cout << "// not fully support in MSVC++ 19.26 because of a bug (2020/07/17)" << endl;
 	cout << "// https://developercommunity.visualstudio.com/content/problem/1116835/member-pointer-of-a-class-with-a-virtual-base-1.html" << endl;
 
 	cout << "[Virtual Bases]" << endl;

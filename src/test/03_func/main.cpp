@@ -1,4 +1,4 @@
-#include <USRefl.h>
+#include <USRefl/USRefl.h>
 
 #include <iostream>
 
@@ -6,6 +6,24 @@
 
 using namespace Ubpa::USRefl;
 using namespace std;
+
+template <typename... Args>
+struct Overload {
+	template <typename R, typename T>
+	constexpr auto operator()(R(T::* func_ptr)(Args...)) const {
+		return func_ptr;
+	}
+	template <typename R, typename T>
+	constexpr auto operator()(R(T::* func_ptr)(Args...) const) const {
+		return func_ptr;
+	}
+	template <typename R>
+	constexpr auto operator()(R(*func_ptr)(Args...)) const {
+		return func_ptr;
+	}
+};
+
+template <typename... Args> constexpr Overload<Args...> overload_v{};
 
 struct [[size(8)]] Point {
 	[[not_serialize]]
@@ -24,8 +42,7 @@ struct [[size(8)]] Point {
 };
 
 template<>
-struct TypeInfo<Point> {
-	static constexpr std::string_view name = "Point";
+struct TypeInfo<Point> : TypeInfoBase<Point> {
 	using type = Point;
 
 	static constexpr FieldList fields = {

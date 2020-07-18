@@ -1,4 +1,4 @@
-#include <USRefl.h>
+#include <USRefl/USRefl.h>
 
 #include <iostream>
 
@@ -14,8 +14,6 @@ struct D : B, C { float d; };
 
 template<>
 struct TypeInfo<A> : TypeInfoBase<A> {
-	static constexpr std::string_view name = "A";
-
 	static constexpr FieldList fields = FieldList{
 		Field{"a", &A::a }
 	};
@@ -25,8 +23,6 @@ struct TypeInfo<A> : TypeInfoBase<A> {
 
 template<>
 struct TypeInfo<B> : TypeInfoBase<B, Base<A, true>> {
-	static constexpr std::string_view name = "B";
-
 	static constexpr FieldList fields = FieldList{
 		Field{"b", &B::b }
 	};
@@ -36,8 +32,6 @@ struct TypeInfo<B> : TypeInfoBase<B, Base<A, true>> {
 
 template<>
 struct TypeInfo<C> : TypeInfoBase<C, Base<A, true>> {
-	static constexpr std::string_view name = "C";
-
 	static constexpr FieldList fields = FieldList{
 		Field{"c", &C::c }
 	};
@@ -47,8 +41,6 @@ struct TypeInfo<C> : TypeInfoBase<C, Base<A, true>> {
 
 template<>
 struct Ubpa::USRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
-	static constexpr std::string_view name = "D";
-
 	static constexpr FieldList fields = FieldList{
 		Field{"d", &D::d }
 	};
@@ -57,6 +49,9 @@ struct Ubpa::USRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
 };
 
 int main() {
+	cout << "// not fully support in MSVC++ 19.26 because of a bug (2020/07/17)" << endl;
+	cout << "// https://developercommunity.visualstudio.com/content/problem/1116835/member-pointer-of-a-class-with-a-virtual-base-1.html" << endl;
+
 	cout << "[Virtual Bases]" << endl;
 	constexpr auto vbs = TypeInfo<D>::VirtualBases();
 	vbs.ForEach([](auto info) {

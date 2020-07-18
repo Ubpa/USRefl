@@ -1,4 +1,4 @@
-#include <USRefl.h>
+#include <USRefl/USRefl.h>
 
 #include <iostream>
 
@@ -15,8 +15,6 @@ struct [[size(8)]] Point {
 
 template<typename T>
 struct TypeInfo<Point<T>> : TypeInfoBase<Point<T>> {
-	static constexpr std::string_view name = "Point"; // use nameof
-
 	static constexpr FieldList fields = {
 		Field{"x", &Point<T>::x, AttrList{ Attr{ "not_serialize", true } }},
 		Field{"y", &Point<T>::y, AttrList{ Attr{ "info", "hello" } }}
