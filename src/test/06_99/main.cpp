@@ -1,5 +1,7 @@
-#include "USRefl_99.h"
+#include <USRefl_99.h>
 #include <iostream>
+
+using namespace Ubpa::USRefl;
 using namespace std;
 
 // ==============

@@ -8,7 +8,11 @@ All you need to do is writing a declaration for the class which needs to be refl
 
 The declaration is simple enough that we don't need any marco to simplify it.
 
-The library is well-designed so it's very tiny (only 99 lines), so it's easy to get the whole idea of this library. [USRefl_99.h](../include/USRefl_99.h) is condensed from  [USRefl.h](../include/USRefl.h) which is much easy to read. Both of them has the same API (but in different name spaces).
+The library is well-designed so it's very tiny (only 99 lines), so it's easy to get the whole idea of this library. [USRefl_99.h](../include/USRefl_99.h) is condensed from  [USRefl.h](../include/USRefl/USRefl.h) which is much easy to read. Both of them has the same API.
+
+> the difference between USRefl_99.h and USRefl.h
+>
+> - `name` 
 
 ## 1. Design
 
@@ -56,7 +60,9 @@ Then we need to write a declaration for it.
 ```c++
 template<>
 struct TypeInfo<Point> : TypeInfoBase<Point> {
-  static constexpr std::string_view name = "Point";
+  // the name is declared by TypeInfoBase<Point>
+  // if you use USRefl_99.h, you should declare it here.
+  // static constexpr std::string_view name = "struct Point";
 
   static constexpr FieldList fields = {
     Field{"x", &Point::x, AttrList{ Attr{ "not_serialize" } }},

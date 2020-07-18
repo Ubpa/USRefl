@@ -57,7 +57,9 @@ struct [[size(8)]] Point {
 // declaration
 template<>
 struct TypeInfo<Point> : TypeInfoBase<Point> {
-  static constexpr std::string_view name = "Point";
+  // if you use <USRefl/USRefl.h>, the name is declared by TypeInfoBase<Point>
+  // if you use <USRefl_99.h>, you should declare it here.
+  // static constexpr std::string_view name = "struct Point";
 
   static constexpr FieldList fields = {
     Field{"x", &Point::x, AttrList{ Attr{ "not_serialize" } }},
