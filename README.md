@@ -39,6 +39,8 @@ Header-only, tiny (99 lines) and powerful C++17 static reflection library.
 
 ## Example
 
+run it online : [compiler explorer](https://godbolt.org/z/8r84q7) 
+
 ```c++
 #include <USRefl/USRefl.h>
 #include <iostream>
