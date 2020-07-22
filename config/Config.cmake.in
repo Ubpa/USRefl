@@ -5,6 +5,5 @@ message(STATUS "config @PROJECT_NAME@ @PROJECT_VERSION@ ...")
 @UBPA_PACKAGE_INIT@
 
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/UbpaAutoRefl.cmake")
 
 message(STATUS "config @PROJECT_NAME@ @PROJECT_VERSION@ done")
