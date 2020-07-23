@@ -40,10 +40,10 @@ namespace Ubpa::USRefl {
 		return bases.Accumulate(ElemList<>{}, [](auto acc, auto base) {
 			constexpr auto vbs = base.info.VirtualBases();
 			auto concated = vbs.Accumulate(acc, [](auto acc, auto vb) {
-				return acc.UniqueInsert(vb);
+				return acc.Insert(vb);
 			});
 			if constexpr (base.is_virtual)
-				return concated.UniqueInsert(base.info);
+				return concated.Insert(base.info);
 			else
 				return concated;
 		});

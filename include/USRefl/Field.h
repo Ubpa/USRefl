@@ -17,7 +17,6 @@ namespace Ubpa::USRefl {
 			: NamedValue<T>{ name, value }, attrs{ attrs }{}
 	};
 
-
 	template<typename T, typename AList>
 	Field(std::string_view, T, AList)->Field<T, AList>;
 	template<typename T>

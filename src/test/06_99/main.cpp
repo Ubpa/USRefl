@@ -1,5 +1,6 @@
 #include <USRefl_99.h>
 #include <iostream>
+#include <array>
 
 using namespace Ubpa::USRefl;
 using namespace std;
@@ -391,6 +392,43 @@ void test_virtual() {
 		static_assert(std::is_lvalue_reference_v<decltype(var)>);
 		cout << cnt << ": " << var << endl;
 		cnt++;
+	});
+}
+
+template<typename T, size_t... Ns>
+constexpr auto GetXID(std::index_sequence<Ns...>) {
+	// get fields with name "x" or "z"
+	constexpr auto masks = TypeInfo<T>::fields.Accumulate(
+		std::array<bool, std::tuple_size_v<decltype(TypeInfo<T>::fields.elems)>>{},
+		[&, idx = 0](auto acc, auto field) mutable {
+		acc[idx] = field.name == "x" || field.name == "id";
+		idx++;
+		return acc;
+	}
+	);
+	constexpr auto fields = TypeInfo<T>::fields.Accumulate<masks[Ns]...>(
+		ElemList<>{},
+		[&](auto acc, auto field) {
+			return acc.Push(field);
+		}
+	);
+	return fields;
+}
+template<typename T>
+constexpr auto GetXID() {
+	return GetXID<T>(std::make_index_sequence<std::tuple_size_v<decltype(TypeInfo<T>::fields.elems)>>{});
+}
+
+void test_mask() {
+	cout
+		<< "====================" << endl
+		<< " virtual" << endl
+		<< "====================" << endl;
+
+	// get fields with name "x" or "id"
+	constexpr auto fields = GetXID<Point>();
+	fields.ForEach([](auto field) {
+		cout << field.name << endl;
 	});
 }
 

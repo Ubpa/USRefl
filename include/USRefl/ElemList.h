@@ -13,10 +13,10 @@ namespace Ubpa::USRefl {
 
 		constexpr ElemList(Elems... elems) : elems{ elems... } {}
 
-		template<typename Func, typename Acc>
+		template<bool... masks, typename Acc, typename Func>
 		constexpr auto Accumulate(Acc&& acc, Func&& func) const;
 
-		template<typename Func>
+		template<bool... masks, typename Func>
 		constexpr void ForEach(Func&& func) const;
 
 		template<typename Func>
@@ -33,7 +33,10 @@ namespace Ubpa::USRefl {
 		constexpr auto Get() const;
 
 		template<typename Elem>
-		constexpr auto UniqueInsert(Elem e) const;
+		constexpr auto Push(Elem e) const;
+
+		template<typename Elem>
+		constexpr auto Insert(Elem e) const;
 
 // name must be constexpr std::string_view / const char[N]
 // C++20 support string literal as template arguments

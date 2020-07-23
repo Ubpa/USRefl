@@ -8,11 +8,11 @@ namespace Ubpa::USRefl::detail {
 	template<template<typename...>class U, typename... Ts>
 	struct IsInstance<U<Ts...>, U> : std::true_type {};
 
-	template<typename Indices> struct IndexSequenceTraits;
+	template<typename Ints> struct IntegerSequenceTraits;
 
-	template<size_t N0, size_t... Ns>
-	struct IndexSequenceTraits<std::index_sequence<N0, Ns...>> {
+	template<typename T, T N0, T... Ns>
+	struct IntegerSequenceTraits<std::integer_sequence<T, N0, Ns...>> {
 		static constexpr size_t head = N0;
-		static constexpr auto tail = std::index_sequence<Ns...>{};
+		static constexpr auto tail = std::integer_sequence<T, Ns...>{};
 	};
 }
