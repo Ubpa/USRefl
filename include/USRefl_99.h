@@ -25,8 +25,7 @@ namespace Ubpa::USRefl::detail {
 namespace Ubpa::USRefl {
   template<typename T> struct NamedValue { // named value
     std::string_view name; T value; static constexpr bool has_value = true;
-    template<typename U>constexpr bool operator==(U v)const
-    { if constexpr (std::is_same_v<T, U>)return value == v; else return false; }
+    template<typename U>constexpr bool operator==(U v)const{if constexpr(std::is_same_v<T,U>)return value==v;else return false;}
   };
   template<> struct NamedValue<void> {
     std::string_view name; /*T value;*/ static constexpr bool has_value = false;
@@ -34,9 +33,10 @@ namespace Ubpa::USRefl {
   };
   template<typename...Es> struct ElemList { // Es is a named value
     std::tuple<Es...> elems;
+    static constexpr size_t size = sizeof...(Es);
     constexpr ElemList(Es... elems) : elems{ elems... } {}
     template<bool... ms, typename Init, typename Func> constexpr auto Accumulate(Init&& init, Func&& func) const
-    { return detail::Acc<ms...>(*this, std::forward<Func>(func), std::forward<Init>(init), std::make_index_sequence<sizeof...(Es)>{}); }
+    { return detail::Acc<ms...>(*this, std::forward<Func>(func), std::forward<Init>(init), std::make_index_sequence<size>{}); }
     template<bool... ms, typename Func> constexpr void ForEach(Func&& func) const
     { Accumulate<ms...>(0, [&](auto, auto field) {std::forward<Func>(func)(field); return 0; }); }
     template<typename Func> constexpr size_t FindIf(Func&& func) const

@@ -399,7 +399,7 @@ template<typename T, size_t... Ns>
 constexpr auto GetXID(std::index_sequence<Ns...>) {
 	// get fields with name "x" or "z"
 	constexpr auto masks = TypeInfo<T>::fields.Accumulate(
-		std::array<bool, std::tuple_size_v<decltype(TypeInfo<T>::fields.elems)>>{},
+		std::array<bool, TypeInfo<T>::fields.size>{},
 		[&, idx = 0](auto acc, auto field) mutable {
 		acc[idx] = field.name == "x" || field.name == "id";
 		idx++;
@@ -416,7 +416,7 @@ constexpr auto GetXID(std::index_sequence<Ns...>) {
 }
 template<typename T>
 constexpr auto GetXID() {
-	return GetXID<T>(std::make_index_sequence<std::tuple_size_v<decltype(TypeInfo<T>::fields.elems)>>{});
+	return GetXID<T>(std::make_index_sequence<TypeInfo<T>::fields.size>{});
 }
 
 void test_mask() {
