@@ -395,9 +395,12 @@ void test_virtual() {
 	});
 }
 
+// ==============
+//  mask
+// ==============
 template<typename T, size_t... Ns>
 constexpr auto GetXID(std::index_sequence<Ns...>) {
-	// get fields with name "x" or "z"
+	// get fields with name "x" or "id"
 	constexpr auto masks = TypeInfo<T>::fields.Accumulate(
 		std::array<bool, TypeInfo<T>::fields.size>{},
 		[&, idx = 0](auto acc, auto field) mutable {
@@ -406,7 +409,7 @@ constexpr auto GetXID(std::index_sequence<Ns...>) {
 		return acc;
 	}
 	);
-	constexpr auto fields = TypeInfo<T>::fields.Accumulate<masks[Ns]...>(
+	constexpr auto fields = TypeInfo<T>::fields.template Accumulate<masks[Ns]...>(
 		ElemList<>{},
 		[&](auto acc, auto field) {
 			return acc.Push(field);
@@ -422,7 +425,7 @@ constexpr auto GetXID() {
 void test_mask() {
 	cout
 		<< "====================" << endl
-		<< " virtual" << endl
+		<< " mask" << endl
 		<< "====================" << endl;
 
 	// get fields with name "x" or "id"
@@ -439,6 +442,7 @@ int main() {
 	test_inheritance();
 	test_function();
 	test_virtual();
+	test_mask();
 
 	return 0;
 }
