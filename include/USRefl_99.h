@@ -15,11 +15,15 @@ namespace Ubpa::USRefl::detail {
   template<typename L, typename F, typename R, size_t N0, size_t... Ns>
   constexpr auto Acc(L l, F&& f, R&& r, std::index_sequence<N0, Ns...>)
   { return Acc(l, std::forward<F>(f), f(std::forward<R>(r), l.template Get<N0>()), std::index_sequence<Ns...>{}); }
-  template<typename TI, typename U, typename F> constexpr void NV_Var(TI info, U&& obj, F&& f) {
-    info.fields.ForEach([&](auto fld)
-    { if constexpr (!fld.is_static && !fld.is_func) std::forward<F>(f)(std::forward<U>(obj).*(fld.value)); });
-    info.bases.ForEach([&](auto b)
-    { if constexpr (!b.is_virtual) NV_Var(b.info, b.info.Forward(std::forward<U>(obj)), std::forward<F>(f)); });
+  template<typename TI, typename U, typename F> constexpr void NV_Var(TI info, U&& u, F&& f) {
+    info.fields.ForEach([&](auto k){if constexpr(!k.is_static&&!k.is_func)std::forward<F>(f)(std::forward<U>(u).*(k.value));});
+    info.bases.ForEach([&](auto b){if constexpr(!b.is_virtual)NV_Var(b.info,b.info.Forward(std::forward<U>(u)),std::forward<F>(f));});
+  }
+  template<size_t D, typename T, typename Acc, typename F> constexpr auto DFS_Acc(T t, F&& f, Acc&& acc) {
+    return t.bases.Accumulate(std::forward<Acc>(acc), [&](auto&& r, auto b) {
+      if constexpr (b.is_virtual) return DFS_Acc<D+1>(b.info, std::forward<F>(f), std::forward<decltype(r)>(r));
+      else return DFS_Acc<D+1>(b.info, std::forward<F>(f), std::forward<F>(f)(std::forward<decltype(r)>(r), b.info, D+1));
+    });
   }
 }
 namespace Ubpa::USRefl {
@@ -32,8 +36,7 @@ namespace Ubpa::USRefl {
     template<typename U> constexpr bool operator==(U) const { return false; }
   };
   template<typename...Es> struct ElemList { // Es is a named value
-    std::tuple<Es...> elems;
-    static constexpr size_t size = sizeof...(Es);
+    std::tuple<Es...> elems; static constexpr size_t size = sizeof...(Es);
     constexpr ElemList(Es... elems) : elems{ elems... } {}
     template<bool... ms, typename Init, typename Func> constexpr auto Accumulate(Init&& init, Func&& func) const
     { return detail::Acc<ms...>(*this, std::forward<Func>(func), std::forward<Init>(init), std::make_index_sequence<size>{}); }
@@ -57,10 +60,8 @@ namespace Ubpa::USRefl {
   template<typename T> struct FTraits : FTraitsB<true, false> {}; // default is enum
   template<typename U, typename T> struct FTraits<T U::*> : FTraitsB<false, std::is_function_v<T>> {};
   template<typename T> struct FTraits<T*> : FTraitsB<true, std::is_function_v<T>>{}; // static member
-  template<typename T, typename AList> struct Field : FTraits<T>, NamedValue<T> {
-    AList attrs;
-    constexpr Field(std::string_view n, T v, AList as = {}) : NamedValue<T>{ n,v }, attrs{ as } {}
-  };
+  template<typename T, typename AList> struct Field : FTraits<T>, NamedValue<T>
+  { AList attrs;  constexpr Field(std::string_view n, T v, AList as = {}) : NamedValue<T>{ n,v }, attrs{ as } {} };
   template<typename...Fs>struct FieldList :ElemList<Fs...> { constexpr FieldList(Fs...fs) :ElemList<Fs...>{ fs... } {} };
   template<typename T> struct TypeInfo; // TypeInfoBase, name, fields, attrs
   template<typename T, bool IsVirtual = false> struct Base
@@ -68,8 +69,7 @@ namespace Ubpa::USRefl {
   template<typename...Bs> struct BaseList : ElemList<Bs...> { constexpr BaseList(Bs... bs) : ElemList<Bs...>{ bs... } {} };
   template<typename...Ts> struct TypeInfoList : ElemList<Ts...> { constexpr TypeInfoList(Ts...ts) : ElemList<Ts...>{ ts... } {} };
   template<typename T, typename... Bases> struct TypeInfoBase {
-    using type = T;
-    static constexpr BaseList bases = { Bases{}... };
+    using type = T; static constexpr BaseList bases = { Bases{}... };
     template<typename U> static constexpr auto&& Forward(U&& derived) noexcept {
       if constexpr (std::is_same_v<std::decay_t<U>, U>) return static_cast<type&&>(derived); // right
       else if constexpr (std::is_same_v<std::decay_t<U>&, U>) return static_cast<type&>(derived); // left
@@ -81,11 +81,11 @@ namespace Ubpa::USRefl {
         if constexpr (!base.is_virtual) return concated; else return concated.Insert(base.info);
       });
     }
-    template<typename F, size_t Depth = 0> static constexpr void DFS(F&& f) {
-      f(TypeInfo<type>{}, Depth);
-      if constexpr (Depth == 0) VirtualBases().ForEach([&](auto vb) { std::forward<F>(f)(vb, 1); });
-      bases.ForEach([&](auto b) { if constexpr (!b.is_virtual) b.info.template DFS<F, Depth + 1>(std::forward<F>(f)); });
-    }
+    template<typename R, typename F> static constexpr auto DFS_Acc(R&& r, F&& f) {
+      return detail::DFS_Acc<0>(TypeInfo<type>{},std::forward<F>(f),VirtualBases().Accumulate(f(std::forward<R>(r),TypeInfo<type>{},0),
+        [&](auto&& acc, auto vb){ return std::forward<F>(f)(std::forward<decltype(acc)>(acc), vb, 1); }));
+	}
+    template<typename F>static constexpr void DFS_ForEach(F&&f){DFS_Acc(0,[&](auto,auto t,auto d){std::forward<F>(f)(t,d);return 0;});}
     template<typename U, typename Func> static constexpr void ForEachVarOf(U&& obj, Func&& func) {
       VirtualBases().ForEach([&](auto vb) { vb.fields.ForEach([&](auto fld)
       { if constexpr (!fld.is_static && !fld.is_func) std::forward<Func>(func)(std::forward<U>(obj).*(fld.value)); }); });

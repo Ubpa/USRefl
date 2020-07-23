@@ -59,14 +59,14 @@ int main() {
 	});
 
 	cout << "[Tree]" << endl;
-	TypeInfo<D>::DFS([](auto t, size_t depth) {
+	TypeInfo<D>::DFS_ForEach([](auto t, size_t depth) {
 		for (size_t i = 0; i < depth; i++)
 			cout << "  ";
 		cout << t.name << endl;
 	});
 
 	cout << "[field]" << endl;
-	TypeInfo<D>::DFS([](auto t, size_t) {
+	TypeInfo<D>::DFS_ForEach([](auto t, size_t) {
 		t.fields.ForEach([](auto field) {
 			cout << field.name << endl;
 			});

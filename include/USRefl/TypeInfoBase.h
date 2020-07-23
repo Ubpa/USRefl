@@ -15,8 +15,11 @@ namespace Ubpa::USRefl {
 
 		static constexpr auto VirtualBases();
 
-		template<typename Func, size_t Depth = 0>
-		static constexpr void DFS(Func&& func);
+		template<typename Init, typename Func>
+		static constexpr auto DFS_Acc(Init&& init, Func&& func);
+
+		template<typename Func>
+		static constexpr void DFS_ForEach(Func&& func);
 
 		template<typename U, typename Func>
 		static constexpr void ForEachVarOf(U&& obj, Func&& func);

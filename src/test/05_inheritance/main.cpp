@@ -57,7 +57,7 @@ struct TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
 };
 
 int main() {
-	TypeInfo<D>::DFS([](auto t, size_t depth) {
+	TypeInfo<D>::DFS_ForEach([](auto t, size_t depth) {
 		for (size_t i = 0; i < depth; i++)
 			cout << "  ";
 		cout << t.name << endl;
@@ -69,11 +69,16 @@ int main() {
 	});
 
 	cout << "[DFS]" << endl;
-	TypeInfo<D>::DFS([](auto t, size_t) {
+	TypeInfo<D>::DFS_ForEach([](auto t, size_t) {
 		t.fields.ForEach([](auto field) {
 			cout << field.name << endl;
 		});
 	});
+
+	constexpr size_t fieldNum = TypeInfo<D>::DFS_Acc(0, [](auto acc, auto, auto) {
+		return acc + 1;
+	});
+	cout << "field number : " << fieldNum << endl;
 
 	cout << "[var]" << endl;
 	D d;

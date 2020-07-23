@@ -159,7 +159,7 @@ void test_inheritance() {
 		<< " inheritance" << endl
 		<< "====================" << endl;
 
-	TypeInfo<D>::DFS([](auto t, size_t depth) {
+	TypeInfo<D>::DFS_ForEach([](auto t, size_t depth) {
 		for (size_t i = 0; i < depth; i++)
 			cout << "  ";
 		cout << t.name << endl;
@@ -171,7 +171,7 @@ void test_inheritance() {
 	});
 
 	cout << "[DFS]" << endl;
-	TypeInfo<D>::DFS([](auto t, size_t) {
+	TypeInfo<D>::DFS_ForEach([](auto t, size_t) {
 		t.fields.ForEach([](auto field) {
 			cout << field.name << endl;
 		});
@@ -363,14 +363,14 @@ void test_virtual() {
 	});
 
 	cout << "[Tree]" << endl;
-	TypeInfo<VD>::DFS([](auto t, size_t depth) {
+	TypeInfo<VD>::DFS_ForEach([](auto t, size_t depth) {
 		for (size_t i = 0; i < depth; i++)
 			cout << "  ";
 		cout << t.name << endl;
 	});
 
 	cout << "[field]" << endl;
-	TypeInfo<VD>::DFS([](auto t, size_t) {
+	TypeInfo<VD>::DFS_ForEach([](auto t, size_t) {
 		t.fields.ForEach([](auto field) {
 			cout << field.name << endl;
 			});

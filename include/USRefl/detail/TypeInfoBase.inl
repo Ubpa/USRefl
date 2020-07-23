@@ -49,18 +49,44 @@ namespace Ubpa::USRefl {
 		});
 	}
 
+	template<size_t Depth, typename T, typename Acc, typename Func>
+	constexpr auto detail_DFS_Acc(T type, Acc&& acc, Func&& func) {
+		return type.bases.Accumulate(std::forward<Acc>(acc), [&](auto&& acc, auto base) {
+			if constexpr (base.is_virtual) {
+				return detail_DFS_Acc<Depth + 1>(
+					base.info,
+					std::forward<decltype(acc)>(acc),
+					std::forward<Func>(func)
+				);
+			}
+			else {
+				return detail_DFS_Acc<Depth + 1>(
+					base.info,
+					std::forward<Func>(func)(std::forward<decltype(acc)>(acc), base.info, Depth + 1),
+					std::forward<Func>(func)
+				);
+			}
+		});
+	}
+
 	template<typename T, typename... Bases>
-	template<typename Func, size_t Depth>
-	constexpr void TypeInfoBase<T, Bases...>::DFS(Func&& func) {
-		func(TypeInfo<type>{}, Depth);
-		if constexpr (Depth == 0) {
-			VirtualBases().ForEach([&](auto vb) {
-				func(vb, 1);
-			});
-		}
-		bases.ForEach([&](auto base) {
-			if constexpr (!base.is_virtual)
-				base.info.template DFS<Func, Depth + 1>(std::forward<Func>(func));
+	template<typename Init, typename Func>
+	constexpr auto TypeInfoBase<T, Bases...>::DFS_Acc(Init&& init, Func&& func) {
+		return detail_DFS_Acc<0>(
+			TypeInfo<type>{},
+			VirtualBases().Accumulate(func(std::forward<Init>(init), TypeInfo<type>{}, 0), [&](auto&& acc, auto vb) {
+				return std::forward<Func>(func)(std::forward<decltype(acc)>(acc), vb, 1);
+			}),
+			std::forward<Func>(func)
+		);
+	}
+
+	template<typename T, typename... Bases>
+	template<typename Func>
+	static constexpr void TypeInfoBase<T, Bases...>::DFS_ForEach(Func&& func) {
+		DFS_Acc(0, [&](auto, auto t, size_t depth) {
+			std::forward<Func>(func)(t, depth);
+			return 0;
 		});
 	}
 
