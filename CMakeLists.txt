@@ -4,16 +4,17 @@ project(USRefl VERSION 0.5.0)
 message(STATUS "[Project] ${PROJECT_NAME}")
 
 include(cmake/InitUCMake.cmake)
+include(cmake/UbpaUSReflAutoRefl.cmake)
 Ubpa_InitUCMake()
 
 Ubpa_InitProject()
 
-option(Ubpa_USRefl_Build_Parser "build parser" OFF)
-if(Ubpa_USRefl_Build_Parser)
+option(Ubpa_USRefl_Build_AutoRefl "build AutoRefl" OFF)
+if(Ubpa_USRefl_Build_AutoRefl)
   Ubpa_AddDep(UANTLR 0.1.1)
 endif()
 
 Ubpa_AddSubDirsRec(include)
 Ubpa_AddSubDirsRec(src)
 
-Ubpa_Export(DIRECTORIES "include")
+Ubpa_Export(DIRECTORIES "include;cmake")

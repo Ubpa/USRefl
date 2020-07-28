@@ -1,4 +1,4 @@
-if(NOT Ubpa_USRefl_Build_Parser)
+if(NOT Ubpa_USRefl_Build_AutoRefl)
   return()
 endif()
 
