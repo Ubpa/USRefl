@@ -71,9 +71,17 @@ string AutoRefl::Parse(string_view code) {
 		else
 			ss << "template<>" << endl;
 
+		ss << "struct Ubpa::USRefl::TypeInfo<" << type << ">" << endl;
+		
+		// bases
+		ss << indent << ": Ubpa::USRefl::TypeInfoBase<" << type;
+		for (const auto& base : typeinfo.bases) {
+			if (base.access != AccessSpecifier::PUBLIC)
+				continue;
+			ss << ", Base<" << base.name << ">";
+		}
 		ss
-			<< "struct Ubpa::USRefl::TypeInfo<" << type << ">" << endl
-			<< indent << ": Ubpa::USRefl::TypeInfoBase<" << type << ">" << endl
+			<< ">" << endl
 			<< "{" << endl;
 
 		// type attrs
@@ -252,7 +260,7 @@ string AutoRefl::Parse(string_view code) {
 		}
 		ss << indent << "};" << endl; // end FieldList
 
-		ss << "};" << endl; // end TypeInfo
+		ss << "};" << endl << endl; // end TypeInfo
 	}
 
 	return ss.str();
@@ -381,6 +389,35 @@ antlrcpp::Any AutoRefl::visitClasskey(CPP14Parser::ClasskeyContext* ctx) {
 antlrcpp::Any AutoRefl::visitClassheadname(CPP14Parser::ClassheadnameContext* ctx) {
 	curTypeInfo->name = ctx->getText();
 	return visitChildren(ctx);
+}
+
+antlrcpp::Any AutoRefl::visitBasespecifier(CPP14Parser::BasespecifierContext* ctx) {
+	BaseInfo info;
+	if (ctx->accessspecifier()) {
+		auto text = ctx->accessspecifier()->getText();
+		if (text == "public")
+			info.access = AccessSpecifier::PUBLIC;
+		else if (text == "protected")
+			info.access = AccessSpecifier::PROTECTED;
+		else
+			info.access = AccessSpecifier::PRIVATE;
+	}
+	else
+	{
+		if(curTypeInfo->classkey == "struct")
+			info.access = AccessSpecifier::PUBLIC;
+		else
+			info.access = AccessSpecifier::PRIVATE;
+	}
+	info.name = ctx->basetypespecifier()->getText();
+	if (auto list = dynamic_cast<CPP14Parser::BasespecifierlistContext*>(ctx->parent);
+		list && list->Ellipsis())
+	{
+		info.name += "...";
+	}
+	info.isVirtual = ctx->Virtual() != nullptr;
+	curTypeInfo->bases.emplace_back(move(info));
+	return {};
 }
 
 antlrcpp::Any AutoRefl::visitAttribute(CPP14Parser::AttributeContext* ctx) {
@@ -532,7 +569,7 @@ antlrcpp::Any AutoRefl::visitDeclaratorid(CPP14Parser::DeclaratoridContext* ctx)
 		// template
 		auto rst = visitChildren(ctx);
 		curTemplateInfo.templateParamList += curParam->SpecifiersToType()
-			+ (ctx->Ellipsis() ? " ... " : " ") + curParam->name;
+			+ (ctx->Ellipsis() ? "... " : " ") + curParam->name;
 		if (ctx->Ellipsis())
 			curParam->name += "...";
 		return rst;

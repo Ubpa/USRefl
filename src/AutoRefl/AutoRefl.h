@@ -64,6 +64,11 @@ namespace Ubpa::USRefl {
 			std::vector<Param> params;
 			std::vector<std::string> qualifiers; // cv, ref, except
 		};
+		struct BaseInfo {
+			AccessSpecifier access;
+			bool isVirtual{ false };
+			std::string name;
+		};
 		struct TypeInfo {
 			std::vector<std::string> ns; // namespace
 			std::string classkey; // class / struct
@@ -74,6 +79,7 @@ namespace Ubpa::USRefl {
 			std::string templateParamList;
 			std::vector<Param> templateParams;
 			bool isEnum{ false };
+			std::vector<BaseInfo> bases;
 		};
 		struct TemplateInfo {
 			std::string templateParamList;
@@ -692,9 +698,7 @@ namespace Ubpa::USRefl {
 			return visitChildren(ctx);
 		}
 
-		virtual antlrcpp::Any visitBasespecifier(CPP14Parser::BasespecifierContext* ctx) override {
-			return visitChildren(ctx);
-		}
+		virtual antlrcpp::Any visitBasespecifier(CPP14Parser::BasespecifierContext* ctx) override;
 
 		virtual antlrcpp::Any visitClassordecltype(CPP14Parser::ClassordecltypeContext* ctx) override {
 			return visitChildren(ctx);

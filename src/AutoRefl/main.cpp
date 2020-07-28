@@ -9,7 +9,7 @@
 //     [x] - ignore template function
 // [x] - static
 // [x] - enum
-// [ ] - bases
+// [x] - bases
 // [ ] - main arguments parse
 
 #include "AutoRefl.h"

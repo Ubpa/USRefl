@@ -5,93 +5,46 @@
 #include <USRefl/USRefl.h>
 
 template<>
-struct Ubpa::USRefl::TypeInfo<Vec2>
-    : Ubpa::USRefl::TypeInfoBase<Vec2>
+struct Ubpa::USRefl::TypeInfo<A>
+    : Ubpa::USRefl::TypeInfoBase<A>
 {
-    static constexpr AttrList attrs = {
-        Attr{"size", 8},
-    };
+    static constexpr AttrList attrs = {};
 
     static constexpr FieldList fields = {
-        Field{"x", &Vec2::x,
-            AttrList{
-                Attr{"not_serialize"},
-            }
-        },
-        Field{"y", &Vec2::y,
-            AttrList{
-                Attr{"info", "hello"},
-            }
-        },
-        Fields{"__constructor", WrapConstructor<Vec2()>()},
-        Fields{"__constructor", WrapConstructor<Vec2(float, float)>(),
-            AttrList {
-                Attr{"__arg_0",
-                    AttrList{
-                        Attr{"__name", "x"},
-                    }
-                },
-                Attr{"__arg_1",
-                    AttrList{
-                        Attr{"__name", "y"},
-                    }
-                },
-            }
-        },
-        Fields{"__destructor", WrapDestructor<Vec2>()},
-        Fields{"Sum", static_cast<float(Vec2::*)()const>(&Vec2::Sum),
-            AttrList {
-                Attr{"attr", "great"},
-            }
-        },
-        Fields{"Sum", static_cast<float(Vec2::*)(float)const>(&Vec2::Sum),
-            AttrList {
-                Attr{"attr", "great too"},
-                Attr{"__arg_0",
-                    AttrList{
-                        Attr{"__name", "z"},
-                        Attr{"__default_value", 3.f},
-                        Attr{"range", std::pair{1.f,10.f}},
-                    }
-                },
-            }
-        },
-        Fields{"operator+", &Vec2::operator+,
-            AttrList {
-                Attr{"__arg_0",
-                    AttrList{
-                        Attr{"__name", "rhs"},
-                    }
-                },
-            }
-        },
-        Fields{"Dot", static_cast<float(const Vec2 &, const Vec2 &)>(&Vec2::Dot),
-            AttrList {
-                Attr{"__arg_0",
-                    AttrList{
-                        Attr{"__name", "lhs"},
-                    }
-                },
-                Attr{"__arg_1",
-                    AttrList{
-                        Attr{"__name", "rhs"},
-                    }
-                },
-            }
-        },
-        Fields{"Dot", static_cast<float(const Vec2 &, float)>(&Vec2::Dot),
-            AttrList {
-                Attr{"__arg_0",
-                    AttrList{
-                        Attr{"__name", "v"},
-                    }
-                },
-                Attr{"__arg_1",
-                    AttrList{
-                        Attr{"__name", "k"},
-                    }
-                },
-            }
-        },
+        Field{"a", &A::a},
     };
 };
+
+template<>
+struct Ubpa::USRefl::TypeInfo<B>
+    : Ubpa::USRefl::TypeInfoBase<B, Base<A>>
+{
+    static constexpr AttrList attrs = {};
+
+    static constexpr FieldList fields = {
+        Field{"b", &B::b},
+    };
+};
+
+template<>
+struct Ubpa::USRefl::TypeInfo<C>
+    : Ubpa::USRefl::TypeInfoBase<C, Base<A>>
+{
+    static constexpr AttrList attrs = {};
+
+    static constexpr FieldList fields = {
+        Field{"c", &C::c},
+    };
+};
+
+template<>
+struct Ubpa::USRefl::TypeInfo<D>
+    : Ubpa::USRefl::TypeInfoBase<D, Base<B>, Base<C>>
+{
+    static constexpr AttrList attrs = {};
+
+    static constexpr FieldList fields = {
+        Field{"d", &D::d},
+    };
+};
+
