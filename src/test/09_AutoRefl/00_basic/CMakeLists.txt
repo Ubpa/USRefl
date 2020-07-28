@@ -3,8 +3,8 @@ if(NOT Ubpa_USRefl_Build_AutoRefl)
 endif()
 
 Ubpa_USReflAutoRefl(
-  "${CMAKE_CURRENT_SOURCE_DIR}/Point.h"
-  "${CMAKE_CURRENT_SOURCE_DIR}/Point_AutoRefl.inl"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Vec.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/Vec_AutoRefl.inl"
 )
 
 set(c_options "")
@@ -16,7 +16,7 @@ Ubpa_AddTarget(
   TEST
   MODE EXE
   SOURCE
-    "${CMAKE_CURRENT_SOURCE_DIR}/Point_AutoRefl.inl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Vec_AutoRefl.inl"
   LIB
     Ubpa::USRefl_core
   C_OPTION
