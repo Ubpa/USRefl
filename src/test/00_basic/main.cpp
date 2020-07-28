@@ -13,14 +13,23 @@ struct [[size(8)]] Point {
 };
 
 template<>
-struct TypeInfo<Point> : TypeInfoBase<Point> {
-	static constexpr FieldList fields = {
-		Field{"x", &Point::x, AttrList{ Attr{ "not_serialize" } }},
-		Field{"y", &Point::y, AttrList{ Attr{ "info", "hello" } }}
-	};
-
+struct Ubpa::USRefl::TypeInfo<Point>
+	: Ubpa::USRefl::TypeInfoBase<Point>
+{
 	static constexpr AttrList attrs = {
-		Attr{ "size", 8 }
+		Attr {"size", 8 },
+	};
+	static constexpr FieldList fields = {
+		Field {"x", &Point::x,
+			AttrList {
+				Attr {"not_serialize" },
+			}
+		},
+		Field {"y", &Point::y,
+			AttrList {
+				Attr {"info", "hello" },
+			}
+		},
 	};
 };
 
