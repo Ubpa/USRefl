@@ -7,24 +7,6 @@
 using namespace Ubpa::USRefl;
 using namespace std;
 
-template <typename... Args>
-struct Overload {
-	template <typename R, typename T>
-	constexpr auto operator()(R(T::* func_ptr)(Args...)) const {
-		return func_ptr;
-	}
-	template <typename R, typename T>
-	constexpr auto operator()(R(T::* func_ptr)(Args...) const) const {
-		return func_ptr;
-	}
-	template <typename R>
-	constexpr auto operator()(R(*func_ptr)(Args...)) const {
-		return func_ptr;
-	}
-};
-
-template <typename... Args> constexpr Overload<Args...> overload_v{};
-
 struct [[size(8)]] Point {
 	[[not_serialize]]
 	float x;
@@ -42,18 +24,35 @@ struct [[size(8)]] Point {
 };
 
 template<>
-struct TypeInfo<Point> : TypeInfoBase<Point> {
-	using type = Point;
-
-	static constexpr FieldList fields = {
-		Field{"x", &Point::x, AttrList{ Attr{ "not_serialize", true } }},
-		Field{"y", &Point::y, AttrList{ Attr{ "info", "hello" } }},
-		Field{"Sum", overload_v<>(&Point::Sum)},
-		Field{"Sum", overload_v<float>(&Point::Sum)}
+struct Ubpa::USRefl::TypeInfo<Point>
+	: Ubpa::USRefl::TypeInfoBase<Point>
+{
+	static constexpr AttrList attrs = {
+		Attr{"size", 8},
 	};
 
-	static constexpr AttrList attrs = {
-		Attr{ "size", 8 }
+	static constexpr FieldList fields = {
+		Field{"x", &Point::x,
+			AttrList{
+				Attr{"not_serialize"},
+			}
+		},
+		Field{"y", &Point::y,
+			AttrList{
+				Attr{"info", "hello"},
+			}
+		},
+		Field{"id", &Point::id},
+		Field{"Sum", static_cast<float(Point::*)()const>(&Point::Sum)},
+		Field{"Sum", static_cast<float(Point::*)(float)const>(&Point::Sum),
+			AttrList {
+				Attr{"__arg_0",
+					AttrList{
+						Attr{"__name", "z"},
+					}
+				},
+			}
+		},
 	};
 };
 
@@ -64,9 +63,9 @@ int main() {
 		if constexpr (field.is_func) {
 			if (field.name != "Sum")
 				return;
-			if constexpr (field.ValueTypeIsSameWith(overload_v<>(&Point::Sum)))
+			if constexpr (field.ValueTypeIsSameWith(static_cast<float(Point::*)()const>(&Point::Sum)))
 				cout << (p.*(field.value))() << endl;
-			else if constexpr (field.ValueTypeIsSameWith(overload_v<float>(&Point::Sum)))
+			else if constexpr (field.ValueTypeIsSameWith(static_cast<float(Point::*)(float)const>(&Point::Sum)))
 				cout << (p.*(field.value))(1.f) << endl;
 			else
 				assert(false);

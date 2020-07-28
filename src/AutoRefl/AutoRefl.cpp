@@ -163,7 +163,7 @@ string AutoRefl::Parse(string_view code) {
 
 			ss
 				<< indent << indent
-				<< "Fields{"
+				<< "Field{"
 				<< "\"" << name << "\", ";
 
 			// value

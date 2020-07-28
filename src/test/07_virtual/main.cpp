@@ -13,39 +13,47 @@ struct C : virtual A { float c; };
 struct D : B, C { float d; };
 
 template<>
-struct TypeInfo<A> : TypeInfoBase<A> {
-	static constexpr FieldList fields = FieldList{
-		Field{"a", &A::a }
-	};
-
+struct Ubpa::USRefl::TypeInfo<A>
+	: Ubpa::USRefl::TypeInfoBase<A>
+{
 	static constexpr AttrList attrs = {};
+
+	static constexpr FieldList fields = {
+		Field{"a", &A::a},
+	};
 };
 
 template<>
-struct TypeInfo<B> : TypeInfoBase<B, Base<A, true>> {
-	static constexpr FieldList fields = FieldList{
-		Field{"b", &B::b }
-	};
-
+struct Ubpa::USRefl::TypeInfo<B>
+	: Ubpa::USRefl::TypeInfoBase<B, Base<A>>
+{
 	static constexpr AttrList attrs = {};
+
+	static constexpr FieldList fields = {
+		Field{"b", &B::b},
+	};
 };
 
 template<>
-struct TypeInfo<C> : TypeInfoBase<C, Base<A, true>> {
-	static constexpr FieldList fields = FieldList{
-		Field{"c", &C::c }
-	};
-
+struct Ubpa::USRefl::TypeInfo<C>
+	: Ubpa::USRefl::TypeInfoBase<C, Base<A>>
+{
 	static constexpr AttrList attrs = {};
+
+	static constexpr FieldList fields = {
+		Field{"c", &C::c},
+	};
 };
 
 template<>
-struct Ubpa::USRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
-	static constexpr FieldList fields = FieldList{
-		Field{"d", &D::d }
-	};
-
+struct Ubpa::USRefl::TypeInfo<D>
+	: Ubpa::USRefl::TypeInfoBase<D, Base<B>, Base<C>>
+{
 	static constexpr AttrList attrs = {};
+
+	static constexpr FieldList fields = {
+		Field{"d", &D::d},
+	};
 };
 
 int main() {
