@@ -5,29 +5,29 @@
 #include <USRefl/USRefl.h>
 
 template<>
-struct Ubpa::USRefl::TypeInfo<Point>
-    : Ubpa::USRefl::TypeInfoBase<Point>
+struct Ubpa::USRefl::TypeInfo<Vec2>
+    : Ubpa::USRefl::TypeInfoBase<Vec2>
 {
     static constexpr AttrList attrs = {
-        Attr {"size", 8 }, 
+        Attr{"size", 8},
     };
     static constexpr FieldList fields = {
-        Field {"x", &Point::x,
+        Field {"x", &Vec2::x,
             AttrList {
                 Attr {"not_serialize" },
             }
         },
-        Field {"y", &Point::y,
+        Field {"y", &Vec2::y,
             AttrList {
                 Attr {"info", "hello" },
             }
         },
-        Fields{"Sum", static_cast<float(Point::*)()const>(&Point::Sum),
+        Fields{"Sum", static_cast<float(Vec2::*)()const>(&Vec2::Sum),
             AttrList {
                 Attr{"attr", "great"},
             }
         },
-        Fields{"Sum", static_cast<float(Point::*)(float)const>(&Point::Sum),
+        Fields{"Sum", static_cast<float(Vec2::*)(float)const>(&Vec2::Sum),
             AttrList {
                 Attr{"attr", "great too"},
                 Attr{"__@0",
@@ -39,12 +39,39 @@ struct Ubpa::USRefl::TypeInfo<Point>
                 },
             }
         },
-        Fields{"operator+", &Point::operator+,
+        Fields{"operator+", &Vec2::operator+,
             AttrList {
                 Attr{"__@0",
                     AttrList{
                         Attr{"__name", "rhs"},
-                        Attr{"__default_value"},
+                    }
+                },
+            }
+        },
+        Fields{"Dot", static_cast<float(const Vec2, const Vec2)>(&Vec2::Dot),
+            AttrList {
+                Attr{"__@0",
+                    AttrList{
+                        Attr{"__name", "lhs"},
+                    }
+                },
+                Attr{"__@1",
+                    AttrList{
+                        Attr{"__name", "rhs"},
+                    }
+                },
+            }
+        },
+        Fields{"Dot", static_cast<float(const Vec2, float)>(&Vec2::Dot),
+            AttrList {
+                Attr{"__@0",
+                    AttrList{
+                        Attr{"__name", "v"},
+                    }
+                },
+                Attr{"__@1",
+                    AttrList{
+                        Attr{"__name", "k"},
                     }
                 },
             }

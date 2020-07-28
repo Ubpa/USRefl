@@ -30,6 +30,7 @@ namespace Ubpa::USRefl {
 			std::map<std::string, std::string> metas;
 			AccessSpecifier access;
 			bool isFunc{ false };
+			bool isStatic{ false };
 
 			// - storage class specifier: register, static, thread_local, extern, mutable
 			// - function specifier: inline, virtual, explicit
@@ -46,11 +47,13 @@ namespace Ubpa::USRefl {
 			std::string name;
 			std::map<std::string, std::string> metas;
 			AccessSpecifier access;
+			bool isStatic{ false };
 		};
 		struct FuncInfo {
 			std::string name;
 			std::map<std::string, std::string> metas;
 			AccessSpecifier access;
+			bool isStatic{ false };
 
 			std::string ret;
 			std::vector<Param> params;
