@@ -73,6 +73,7 @@ namespace Ubpa::USRefl {
 			std::vector<FuncInfo> funcInfos;
 			std::string templateParamList;
 			std::vector<Param> templateParams;
+			bool isEnum{ false };
 		};
 		struct TemplateInfo {
 			std::string templateParamList;
@@ -417,13 +418,9 @@ namespace Ubpa::USRefl {
 			return visitChildren(ctx);
 		}
 
-		virtual antlrcpp::Any visitEnumspecifier(CPP14Parser::EnumspecifierContext* ctx) override {
-			return visitChildren(ctx);
-		}
+		virtual antlrcpp::Any visitEnumspecifier(CPP14Parser::EnumspecifierContext* ctx) override;
 
-		virtual antlrcpp::Any visitEnumhead(CPP14Parser::EnumheadContext* ctx) override {
-			return visitChildren(ctx);
-		}
+		virtual antlrcpp::Any visitEnumhead(CPP14Parser::EnumheadContext* ctx) override;
 
 		virtual antlrcpp::Any visitOpaqueenumdeclaration(CPP14Parser::OpaqueenumdeclarationContext* ctx) override {
 			return visitChildren(ctx);
@@ -441,9 +438,7 @@ namespace Ubpa::USRefl {
 			return visitChildren(ctx);
 		}
 
-		virtual antlrcpp::Any visitEnumeratordefinition(CPP14Parser::EnumeratordefinitionContext* ctx) override {
-			return visitChildren(ctx);
-		}
+		virtual antlrcpp::Any visitEnumeratordefinition(CPP14Parser::EnumeratordefinitionContext* ctx) override;
 
 		virtual antlrcpp::Any visitEnumerator(CPP14Parser::EnumeratorContext* ctx) override {
 			return visitChildren(ctx);
