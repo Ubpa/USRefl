@@ -14,14 +14,24 @@ struct [[size(8)]] Point {
 };
 
 template<typename T>
-struct TypeInfo<Point<T>> : TypeInfoBase<Point<T>> {
-	static constexpr FieldList fields = {
-		Field{"x", &Point<T>::x, AttrList{ Attr{ "not_serialize", true } }},
-		Field{"y", &Point<T>::y, AttrList{ Attr{ "info", "hello" } }}
+struct Ubpa::USRefl::TypeInfo<Point<T>>
+	: Ubpa::USRefl::TypeInfoBase<Point<T>>
+{
+	static constexpr AttrList attrs = {
+		Attr{"size", 8},
 	};
 
-	static constexpr AttrList attrs = {
-		Attr{ "size", 8 }
+	static constexpr FieldList fields = {
+		Field{"x", &Point<T>::x,
+			AttrList {
+				Attr {"not_serialize" },
+			}
+		},
+		Field{"y", &Point<T>::y,
+			AttrList {
+				Attr {"info", "hello" },
+			}
+		},
 	};
 };
 
@@ -31,7 +41,7 @@ int main() {
 	TypeInfo<Point<float>>::fields.ForEach([](auto field) {
 		cout << field.name << endl;
 		field.attrs.ForEach([](auto attr) {
-			cout << "name   : " << attr.name << endl;
+			cout << "name  : " << attr.name << endl;
 			if constexpr (attr.has_value)
 				cout << "value : " << attr.value << endl;
 		});
@@ -44,7 +54,7 @@ int main() {
 	static_assert(TypeInfo<Point<float>>::fields.Contains("x"));
 
 	TypeInfo<Point<float>>::attrs.ForEach([](auto attr) {
-		cout << "name   : " << attr.name << endl;
+		cout << "name  : " << attr.name << endl;
 		if constexpr (attr.has_value)
 			cout << "value : " << attr.value << endl;
 	});

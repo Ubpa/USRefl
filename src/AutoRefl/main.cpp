@@ -1,12 +1,12 @@
 // TODO
 // [x] - var
-// [ ] - template
-// [ ] - function
+// [x] - template
+// [x] - function
 //     [x] - basic
 //     [x] - overload
 //     [x] - arguments (name, default value)
 //     [x] - constructor / destructor
-//     [ ] - ignore template function
+//     [x] - ignore template function
 // [x] - static
 // [ ] - enum
 // [ ] - bases

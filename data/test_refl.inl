@@ -13,12 +13,12 @@ struct Ubpa::USRefl::TypeInfo<Vec2>
     };
 
     static constexpr FieldList fields = {
-        Field {"x", &Vec2::x,
+        Field{"x", &Vec2::x,
             AttrList {
                 Attr {"not_serialize" },
             }
         },
-        Field {"y", &Vec2::y,
+        Field{"y", &Vec2::y,
             AttrList {
                 Attr {"info", "hello" },
             }

@@ -10,6 +10,16 @@ using namespace Ubpa::USRefl;
 using namespace std;
 using namespace antlr4;
 
+std::string AutoRefl::Param::SpecifiersToType() const {
+	string type;
+	for (size_t j = 0; j < specifiers.size(); j++) {
+		type += specifiers[j];
+		if (j < specifiers.size() - 1)
+			type += " ";
+	}
+	return type;
+}
+
 string AutoRefl::Parse(string_view code) {
 	// [ 1. clear ]
 	typeInfos.clear();
@@ -46,8 +56,22 @@ string AutoRefl::Parse(string_view code) {
 			ns += a_ns + "::";
 		string type = ns + typeinfo.name;
 
+		if (!typeinfo.templateParamList.empty()) {
+			type += "<";
+			for (size_t i = 0; i < typeinfo.templateParams.size(); i++) {
+				type += typeinfo.templateParams[i].name;
+				if (i < typeinfo.templateParams.size() - 1)
+					type += ", ";
+			}
+			type += ">";
+
+			ss
+				<< "template<" << typeinfo.templateParamList << ">" << endl;
+		}
+		else
+			ss << "template<>" << endl;
+
 		ss
-			<< "template<>" << endl
 			<< "struct Ubpa::USRefl::TypeInfo<" << type << ">" << endl
 			<< indent << ": Ubpa::USRefl::TypeInfoBase<" << type << ">" << endl
 			<< "{" << endl;
@@ -79,7 +103,7 @@ string AutoRefl::Parse(string_view code) {
 
 			ss
 				<< indent << indent
-				<< "Field {"
+				<< "Field{"
 				<< "\"" << varInfo.name << "\", "
 				<< "&" << type << "::" << varInfo.name;
 
@@ -95,9 +119,10 @@ string AutoRefl::Parse(string_view code) {
 						<< " }," << endl;
 				}
 				ss << indent << indent << indent << "}" << endl; // end AttrList
+				ss << indent << indent << "}," << endl;
 			}
-
-			ss << indent << indent << "}," << endl;
+			else
+				ss << "}," << endl;
 		}
 
 		// func
@@ -138,13 +163,7 @@ string AutoRefl::Parse(string_view code) {
 				if (name == "__constructor") {
 					ss << "WrapConstructor<" << type << "(";
 					for (size_t i = 0; i < funcInfo.params.size(); i++) {
-						string type;
-						for (size_t j = 0; j < funcInfo.params[i].specifiers.size(); j++) {
-							type += funcInfo.params[i].specifiers[j];
-							if (j < funcInfo.params[i].specifiers.size() - 1)
-								type += " ";
-						}
-						ss << type;
+						ss << funcInfo.params[i].SpecifiersToType();
 						if (i < funcInfo.params.size() - 1)
 							ss << ", ";
 					}
@@ -160,13 +179,7 @@ string AutoRefl::Parse(string_view code) {
 						ss << "(" << type << "::*)";
 					ss << "("; // arguments begin
 					for (size_t i = 0; i < funcInfo.params.size(); i++) {
-						string type;
-						for (size_t j = 0; j < funcInfo.params[i].specifiers.size(); j++) {
-							type += funcInfo.params[i].specifiers[j];
-							if (j < funcInfo.params[i].specifiers.size() - 1)
-								type += " ";
-						}
-						ss << type;
+						ss << funcInfo.params[i].SpecifiersToType();
 						if (i < funcInfo.params.size() - 1)
 							ss << ", ";
 					}
@@ -252,10 +265,56 @@ antlrcpp::Any AutoRefl::visitOriginalnamespacedefinition(CPP14Parser::Originalna
 	return result;
 }
 
+antlrcpp::Any AutoRefl::visitTemplatedeclaration(CPP14Parser::TemplatedeclarationContext* ctx) {
+	if (!curTypeInfo) {
+		curTemplateInfo.templateParamList.clear();
+		curTemplateInfo.templateParams.clear();
+		return visitChildren(ctx);
+	}
+	else
+		return {};
+}
+
+antlrcpp::Any AutoRefl::visitTemplateparameter(CPP14Parser::TemplateparameterContext* ctx) {
+	if (!curTypeInfo) {
+		curTemplateInfo.templateParams.emplace_back();
+
+		if (!curTemplateInfo.templateParamList.empty())
+			curTemplateInfo.templateParamList += ", ";
+
+		curParam = &curTemplateInfo.templateParams.back();
+		curMetas = &curParam->metas;
+		curParam->idx = curTemplateInfo.templateParams.size() - 1;
+		auto rst = visitChildren(ctx);
+		curParam = nullptr;
+		curMetas = nullptr;
+		return rst;
+	}
+	else
+		return {};
+}
+
+antlrcpp::Any AutoRefl::visitTypeparameter(CPP14Parser::TypeparameterContext* ctx) {
+	if (ctx->Identifier())
+		curParam->name = ctx->Identifier()->getText();
+	else
+		curParam->name = "__T" + to_string(curParam->idx);
+
+	curTemplateInfo.templateParamList += (ctx->Typename_() ? "typename " : "class ")
+		+ string(ctx->Ellipsis()?"... ":"") + curParam->name;
+
+	if (ctx->Ellipsis()) // ...
+		curParam->name += "...";
+
+	return {};
+}
+
 antlrcpp::Any AutoRefl::visitClassspecifier(CPP14Parser::ClassspecifierContext* ctx) {
 	typeInfos.emplace_back();
 	curTypeInfo = &typeInfos.back();
 	curTypeInfo->ns = curNamespace;
+	curTypeInfo->templateParamList = move(curTemplateInfo.templateParamList);
+	curTypeInfo->templateParams = move(curTemplateInfo.templateParams);
 	auto result = visitChildren(ctx);
 	curTypeInfo = nullptr;
 	return result;
@@ -278,7 +337,7 @@ antlrcpp::Any AutoRefl::visitClasskey(CPP14Parser::ClasskeyContext* ctx) {
 	return visitChildren(ctx);
 }
 
-antlrcpp::Any AutoRefl::visitClassname(CPP14Parser::ClassnameContext* ctx) {
+antlrcpp::Any AutoRefl::visitClassheadname(CPP14Parser::ClassheadnameContext* ctx) {
 	curTypeInfo->name = ctx->getText();
 	return visitChildren(ctx);
 }
@@ -351,8 +410,12 @@ antlrcpp::Any AutoRefl::visitMemberdeclaration(CPP14Parser::MemberdeclarationCon
 }
 
 antlrcpp::Any AutoRefl::visitNoptrdeclarator(CPP14Parser::NoptrdeclaratorContext* ctx) {
-	if (!inMember)
-		return {};
+	if (!inMember) {
+		if (curParam)
+			return visitChildren(ctx); // template
+		else
+			return {};
+	}
 
 	if(!curParam)
 		curFieldInfo.isFunc = curFieldInfo.isFunc || ctx->parametersandqualifiers() != nullptr;
@@ -376,11 +439,15 @@ antlrcpp::Any AutoRefl::visitParametersandqualifiers(CPP14Parser::Parametersandq
 }
 
 antlrcpp::Any AutoRefl::visitParameterdeclaration(CPP14Parser::ParameterdeclarationContext* ctx) {
-	curFieldInfo.params.emplace_back();
-	curParam = &curFieldInfo.params.back();
-	curMetas = &curParam->metas;
-	auto rst = visitChildren(ctx);
-	return rst;
+	if (curTypeInfo) {
+		curFieldInfo.params.emplace_back();
+		curParam = &curFieldInfo.params.back();
+		curMetas = &curParam->metas;
+		auto rst = visitChildren(ctx);
+		return rst;
+	}
+	else
+		return visitChildren(ctx); // template parameter
 }
 
 antlrcpp::Any AutoRefl::visitInitializerclause(CPP14Parser::InitializerclauseContext* ctx) {
@@ -390,7 +457,7 @@ antlrcpp::Any AutoRefl::visitInitializerclause(CPP14Parser::InitializerclauseCon
 }
 
 antlrcpp::Any AutoRefl::visitDeclspecifier(CPP14Parser::DeclspecifierContext* ctx) {
-	if (!inMember)
+	if (!inMember && !curParam)
 		return visitChildren(ctx);
 
 	if (!curParam) {
@@ -419,14 +486,26 @@ antlrcpp::Any AutoRefl::visitPtroperator(CPP14Parser::PtroperatorContext* ctx) {
 	return {};
 }
 
-antlrcpp::Any AutoRefl::visitUnqualifiedid(CPP14Parser::UnqualifiedidContext* ctx) {
-	if (!inMember)
-		return {};
-	if(curParam)
-		curParam->name = ctx->getText();
+antlrcpp::Any AutoRefl::visitDeclaratorid(CPP14Parser::DeclaratoridContext* ctx) {
+	if (!curTypeInfo && curParam) {
+		// template
+		auto rst = visitChildren(ctx);
+		curTemplateInfo.templateParamList += curParam->SpecifiersToType()
+			+ (ctx->Ellipsis() ? " ... " : " ") + curParam->name;
+		if (ctx->Ellipsis())
+			curParam->name += "...";
+		return rst;
+	}
 	else
+		return visitChildren(ctx);
+}
+
+antlrcpp::Any AutoRefl::visitUnqualifiedid(CPP14Parser::UnqualifiedidContext* ctx) {
+	if (curParam)
+		curParam->name = ctx->getText();
+	else if (inMember)
 		curFieldInfo.name = ctx->getText();
-	
+
 	return {};
 	//return visitChildren(ctx);
 }
