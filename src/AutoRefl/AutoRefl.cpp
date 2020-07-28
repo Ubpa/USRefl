@@ -16,7 +16,6 @@ string AutoRefl::Parse(string_view code) {
 	curNamespace.clear();
 	curMetas = nullptr;
 	curTypeInfo = nullptr;
-	curVarInfo = nullptr;
 	curAccessSpecifier = AccessSpecifier::PRIVATE;
 
 	// [2. parse]
@@ -98,7 +97,7 @@ string AutoRefl::Parse(string_view code) {
 						<< "Attr {" <<
 						"\"" << key << "\""
 						<< (value.empty() ? "" : (", " + value))
-						<< " }, " << endl;
+						<< " }," << endl;
 				}
 				ss
 					<< indent << indent << indent << "}" << endl; // end AttrList
@@ -107,32 +106,88 @@ string AutoRefl::Parse(string_view code) {
 			ss << indent << indent << "}," << endl;
 		}
 		// func
+		map<string, bool> overloadMap;
+		for (const auto& funcInfo : typeinfo.funcInfos) {
+			auto target = overloadMap.find(funcInfo.name);
+			if (target != overloadMap.end())
+				target->second = true;
+			else
+				overloadMap.emplace_hint(target, funcInfo.name, false);
+		}
+
 		for (const auto& funcInfo : typeinfo.funcInfos) {
 			if (funcInfo.access != AccessSpecifier::PUBLIC)
 				continue;
 
 			ss
 				<< indent << indent
-				<< "Field {"
-				<< "\"" << funcInfo.name << "\", "
-				<< "&" << type << "::" << funcInfo.name;
+				<< "Fields{"
+				<< "\"" << funcInfo.name << "\", ";
 
-			if (!funcInfo.metas.empty()) {
+			if (overloadMap.find(funcInfo.name)->second) {
+				ss << "static_cast<" << funcInfo.ret << "(" << type << "::*)(";
+				for (size_t i = 0; i < funcInfo.params.size(); i++) {
+					string type;
+					for (size_t j = 0; j < funcInfo.params[i].specifiers.size(); j++) {
+						type += funcInfo.params[i].specifiers[j];
+						if (j < funcInfo.params[i].specifiers.size() - 1)
+							type += " ";
+					}
+					ss << type;
+					if (i < funcInfo.params.size() - 1)
+						ss << ", ";
+				}
+				ss << ")";
+				for (size_t k = 0; k < funcInfo.qualifiers.size(); k++) {
+					ss << funcInfo.qualifiers[k];
+					if (k < funcInfo.qualifiers.size() - 1)
+						ss << " ";
+				}
+				ss << ">(&" << type << "::" << funcInfo.name << ")";
+			}
+			else
+				ss << "&" << type << "::" << funcInfo.name;
+
+			if (!funcInfo.metas.empty() || !funcInfo.params.empty()) {
 				ss
 					<< "," << endl
 					<< indent << indent << indent << "AttrList {" << endl;
 				for (const auto& [key, value] : funcInfo.metas) {
 					ss << indent << indent << indent << indent
-						<< "Attr {" <<
+						<< "Attr{" <<
 						"\"" << key << "\""
 						<< (value.empty() ? "" : (", " + value))
-						<< " }, " << endl;
+						<< "}," << endl;
 				}
-				ss
-					<< indent << indent << indent << "}" << endl; // end AttrList
+				for (size_t i = 0; i < funcInfo.params.size(); i++) {
+					ss << indent << indent << indent << indent
+						<< "Attr{" <<
+						"\"__@" << i << "\"";
+					ss
+						<< "," << endl
+						<< indent << indent << indent << indent << indent
+						<< "AttrList{" << endl
+						<< indent << indent << indent << indent << indent << indent
+						<< "Attr{\"__name\", \""
+						<< funcInfo.params[i].name << "\"}," << endl
+						<< indent << indent << indent << indent << indent << indent
+						<< "Attr{\"__default_value\""
+						<< (funcInfo.params[i].defaultValue.empty() ? "" : (", " + funcInfo.params[i].defaultValue)) << "}," << endl;
+					for (const auto& [key, value] : funcInfo.params[i].metas) {
+						ss << indent << indent << indent << indent << indent << indent
+							<< "Attr{" <<
+							"\"" << key << "\""
+							<< (value.empty() ? "" : (", " + value))
+							<< "}," << endl;
+					}
+					// end argument AttrList
+					ss << indent << indent << indent << indent << indent << "}" << endl;
+					ss << indent << indent << indent << indent << "}," << endl; // end argument Attr
+				}
+				ss << indent << indent << indent << "}" << endl; // function attr list
 			}
 
-			ss << indent << indent << "}," << endl;
+			ss << indent << indent << "}," << endl; // end Field
 		}
 		ss << indent << "};" << endl; // end FieldList
 
@@ -216,20 +271,29 @@ antlrcpp::Any AutoRefl::visitMemberdeclaration(CPP14Parser::MemberdeclarationCon
 	auto result = visitChildren(ctx);
 
 	if (curFieldInfo.isFunc) {
-		curFuncInfo->metas = move(curFieldInfo.metas);
-		curFuncInfo->name = move(curFieldInfo.name);
-		curFuncInfo->access = curFieldInfo.access;
+		FuncInfo info;
+		info.metas = move(curFieldInfo.metas);
+		info.name = move(curFieldInfo.name);
+		info.access = curFieldInfo.access;
+		for (const auto& t : curFieldInfo.type_specifiers)
+			info.ret += t;
+		info.params = move(curFieldInfo.params);
+		info.qualifiers = move(curFieldInfo.qualifiers);
+		curTypeInfo->funcInfos.emplace_back(move(info));
 	}
 	else {
-		curVarInfo->metas = move(curFieldInfo.metas);
-		curVarInfo->name = move(curFieldInfo.name);
-		curVarInfo->access = curFieldInfo.access;
+		VarInfo	info;
+		info.metas = move(curFieldInfo.metas);
+		info.name = move(curFieldInfo.name);
+		info.access = curFieldInfo.access;
+		curTypeInfo->varInfos.emplace_back(move(info));
 	}
 
-	curVarInfo = nullptr;
-	curFuncInfo = nullptr;
 	curFieldInfo.metas.clear();
 	curFieldInfo.name.clear();
+	curFieldInfo.type_specifiers.clear();
+	curFieldInfo.nontype_specifiers.clear();
+	curFieldInfo.isFunc = false;
 	inMember = false;
 	curMetas = nullptr;
 
@@ -240,37 +304,53 @@ antlrcpp::Any AutoRefl::visitNoptrdeclarator(CPP14Parser::NoptrdeclaratorContext
 	if (!inMember)
 		return {};
 
-	// not the first time to visit noptrdeclarator
-	if (curFuncInfo != nullptr || curVarInfo != nullptr)
-		return visitChildren(ctx);
-
-	curFieldInfo.isFunc = ctx->parametersandqualifiers() != nullptr;
-	
-	if (curFieldInfo.isFunc) {
-		curTypeInfo->funcInfos.emplace_back();
-		curFuncInfo = &curTypeInfo->funcInfos.back();
-	}else{
-		curTypeInfo->varInfos.emplace_back();
-		curVarInfo = &curTypeInfo->varInfos.back();
-	}
+	if(!curParam)
+		curFieldInfo.isFunc = curFieldInfo.isFunc || ctx->parametersandqualifiers() != nullptr;
 
 	return visitChildren(ctx);
 }
 
 antlrcpp::Any AutoRefl::visitParametersandqualifiers(CPP14Parser::ParametersandqualifiersContext* ctx) {
-	return {}; // jump
-	//return visitChildren(ctx);
+	for (auto cur = ctx->cvqualifierseq(); cur != nullptr; cur = cur->cvqualifierseq()) {
+		if (cur->cvqualifier())
+			curFieldInfo.qualifiers.push_back(cur->getText());
+	}
+	if (ctx->refqualifier())
+		curFieldInfo.qualifiers.push_back(ctx->refqualifier()->getText());
+	if (ctx->exceptionspecification())
+		curFieldInfo.qualifiers.push_back(ctx->exceptionspecification()->getText());
+	auto rst = visitChildren(ctx);
+	curMetas = &curFieldInfo.metas;
+	curParam = nullptr;
+	return rst;
+}
+
+antlrcpp::Any AutoRefl::visitParameterdeclaration(CPP14Parser::ParameterdeclarationContext* ctx) {
+	curFieldInfo.params.emplace_back();
+	curParam = &curFieldInfo.params.back();
+	curMetas = &curParam->metas;
+	auto rst = visitChildren(ctx);
+	return rst;
+}
+
+antlrcpp::Any AutoRefl::visitInitializerclause(CPP14Parser::InitializerclauseContext* ctx) {
+	if(curParam)
+		curParam->defaultValue = ctx->getText();
+	return {};
 }
 
 antlrcpp::Any AutoRefl::visitDeclspecifier(CPP14Parser::DeclspecifierContext* ctx) {
 	if (!inMember)
 		return visitChildren(ctx);
 
-	if (curFieldInfo.isFunc)
-		return {}; // TODO
-
-	if (!ctx->typespecifier())
-		curVarInfo->specifiers.push_back(ctx->getText());
+	if (!curParam) {
+		if (ctx->typespecifier())
+			curFieldInfo.type_specifiers.push_back(ctx->getText());
+		else
+			curFieldInfo.nontype_specifiers.push_back(ctx->getText());
+	}
+	else
+		curParam->specifiers.push_back(ctx->getText());
 
 	return visitChildren(ctx);
 }
@@ -278,7 +358,10 @@ antlrcpp::Any AutoRefl::visitDeclspecifier(CPP14Parser::DeclspecifierContext* ct
 antlrcpp::Any AutoRefl::visitUnqualifiedid(CPP14Parser::UnqualifiedidContext* ctx) {
 	if (!inMember)
 		return {};
-	curFieldInfo.name = ctx->getText();
+	if(curParam)
+		curParam->name = ctx->getText();
+	else
+		curFieldInfo.name = ctx->getText();
 	
 	return {};
 	//return visitChildren(ctx);

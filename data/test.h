@@ -1,12 +1,18 @@
 struct [[size(8)]] Point {
 	[[not_serialize]]
-	float x;
+	static const float x = 1.f;
 	[[info("hello")]]
-	float y;
+	float y{2.f};
 	[[attr("great")]]
-	float Sum0() const{
+	float Sum() const{
 		return x + y;
 	}
 	[[attr("great too")]]
-	float Sum1(float z) const;
+	float Sum([[range(std::pair{1.f, 10.f})]]float z = 3.f) const; // overload
+
+	Point& operator+(const Point& rhs) {
+		x += rhs.x;
+		y += rhs.y;
+		return *this;
+	}
 };

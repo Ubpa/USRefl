@@ -1,12 +1,14 @@
 // TODO
-// [x] 0. var
-// [ ] 1. template
-// [ ] 2. function
-//     [x] a. basic
-//     [ ] b. overload
-// [ ] 3. base
-// [ ] 4. enum
-// [ ] 5. main arguments parse
+// [x] - var
+// [ ] - template
+// [ ] - function
+//     [x] - basic
+//     [x] - overload
+//     [x] - arguments (name, default value)
+// [ ] - static
+// [ ] - enum
+// [ ] - base
+// [ ] - main arguments parse
 
 #include "AutoRefl.h"
 

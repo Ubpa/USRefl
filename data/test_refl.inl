@@ -14,22 +14,39 @@ struct Ubpa::USRefl::TypeInfo<Point>
     static constexpr FieldList fields = {
         Field {"x", &Point::x,
             AttrList {
-                Attr {"not_serialize" }, 
+                Attr {"not_serialize" },
             }
         },
         Field {"y", &Point::y,
             AttrList {
-                Attr {"info", "hello" }, 
+                Attr {"info", "hello" },
             }
         },
-        Field {"Sum0", &Point::Sum0,
+        Fields{"Sum", static_cast<float(Point::*)()const>(&Point::Sum),
             AttrList {
-                Attr {"attr", "great" }, 
+                Attr{"attr", "great"},
             }
         },
-        Field {"Sum1", &Point::Sum1,
+        Fields{"Sum", static_cast<float(Point::*)(float)const>(&Point::Sum),
             AttrList {
-                Attr {"attr", "great too" }, 
+                Attr{"attr", "great too"},
+                Attr{"__@0",
+                    AttrList{
+                        Attr{"__name", "z"},
+                        Attr{"__default_value", 3.f},
+                        Attr{"range", std::pair{1.f,10.f}},
+                    }
+                },
+            }
+        },
+        Fields{"operator+", &Point::operator+,
+            AttrList {
+                Attr{"__@0",
+                    AttrList{
+                        Attr{"__name", "rhs"},
+                        Attr{"__default_value"},
+                    }
+                },
             }
         },
     };

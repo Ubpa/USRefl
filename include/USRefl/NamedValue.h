@@ -46,4 +46,8 @@ namespace Ubpa::USRefl {
 		template<typename U>
 		constexpr bool operator==(U) const { return false; }
 	};
+
+	NamedValue(std::string_view)->NamedValue<void>;
+	template<typename T, typename U>
+	NamedValue(std::string_view, U)->NamedValue<U>;
 }
