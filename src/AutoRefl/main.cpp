@@ -5,10 +5,11 @@
 //     [x] - basic
 //     [x] - overload
 //     [x] - arguments (name, default value)
-//     [ ] - constructor
-// [ ] - static
+//     [x] - constructor / destructor
+//     [ ] - ignore template function
+// [x] - static
 // [ ] - enum
-// [ ] - base
+// [ ] - bases
 // [ ] - main arguments parse
 
 #include "AutoRefl.h"

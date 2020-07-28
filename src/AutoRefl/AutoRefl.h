@@ -37,6 +37,7 @@ namespace Ubpa::USRefl {
 			// - friend
 			// - typedef
 			// - constexpr
+			// + ptroperator (*/&/&&)
 			std::vector<std::string> nontype_specifiers;
 			std::vector<std::string> type_specifiers;
 
@@ -561,9 +562,7 @@ namespace Ubpa::USRefl {
 			return visitChildren(ctx);
 		}
 
-		virtual antlrcpp::Any visitPtroperator(CPP14Parser::PtroperatorContext* ctx) override {
-			return visitChildren(ctx);
-		}
+		virtual antlrcpp::Any visitPtroperator(CPP14Parser::PtroperatorContext* ctx) override;
 
 		virtual antlrcpp::Any visitCvqualifierseq(CPP14Parser::CvqualifierseqContext* ctx) override {
 			return visitChildren(ctx);

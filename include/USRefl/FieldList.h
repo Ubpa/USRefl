@@ -2,7 +2,7 @@
 
 #include "Field.h"
 #include "ElemList.h"
-#include "detail/Util.h"
+#include "Util.h"
 
 namespace Ubpa::USRefl {
 	// Field's (name, value_type) must be unique

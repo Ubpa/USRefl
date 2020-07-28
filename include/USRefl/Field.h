@@ -3,7 +3,7 @@
 #include "NamedValue.h"
 #include "AttrList.h"
 #include "detail/FieldTraits.h"
-#include "detail/Util.h"
+#include "Util.h"
 
 namespace Ubpa::USRefl {
 	template<typename T, typename AList>
