@@ -267,10 +267,31 @@ string AutoRefl::Parse(string_view code) {
 }
 
 antlrcpp::Any AutoRefl::visitOriginalnamespacedefinition(CPP14Parser::OriginalnamespacedefinitionContext* ctx) {
+	size_t popNum = 1;
+	if (auto nested = ctx->nestednamespacenamespecifier()) {
+		vector<string> rst = nested->accept(this);
+		popNum += rst.size();
+		for (auto&& str : rst)
+			curNamespace.push_back(move(str));
+	}
 	curNamespace.push_back(ctx->Identifier()->getText());
-	auto result = visitChildren(ctx);
-	curNamespace.pop_back();
-	return result;
+
+	auto rst = ctx->namespacebody()->accept(this);
+	
+	for (size_t i = 0; i < popNum; i++)
+		curNamespace.pop_back();
+
+	return rst;
+}
+
+antlrcpp::Any AutoRefl::visitNestednamespacenamespecifier(CPP14Parser::NestednamespacenamespecifierContext* ctx) {
+	if (ctx->nestednamespacenamespecifier()) {
+		vector<string> rst = visitChildren(ctx);
+		rst.push_back(ctx->namespacename()->getText());
+		return rst;
+	}
+	else
+		return vector<string>{ctx->namespacename()->getText()};
 }
 
 antlrcpp::Any AutoRefl::visitTemplatedeclaration(CPP14Parser::TemplatedeclarationContext* ctx) {

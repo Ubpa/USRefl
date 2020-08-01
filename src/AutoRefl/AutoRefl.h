@@ -118,6 +118,8 @@ namespace Ubpa::USRefl {
 			return visitChildren(ctx);
 		}
 
+		virtual antlrcpp::Any visitNestednamespacenamespecifier(CPP14Parser::NestednamespacenamespecifierContext* ctx);
+
 		virtual antlrcpp::Any visitLambdaexpression(CPP14Parser::LambdaexpressionContext* ctx) override {
 			return visitChildren(ctx);
 		}

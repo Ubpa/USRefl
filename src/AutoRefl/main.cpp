@@ -10,6 +10,7 @@
 // [x] - static
 // [x] - enum
 // [x] - bases
+// [x] - nested namespace name
 // [ ] - main arguments parse
 
 #include "AutoRefl.h"
