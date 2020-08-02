@@ -150,25 +150,28 @@ string AutoRefl::Parse(string_view code) {
 			// name
 			string name;
 			bool isSpecial = false;
+			bool isConstruct = true;
 			if (funcInfo.ret.empty()) {
 				isSpecial = true;
 				// constructor / destructor
-				if (funcInfo.name.find('~') != string::npos)
-					name = "__destructor";
+				if (funcInfo.name.find('~') != string::npos) {
+					name = "Name::destructor";
+					isConstruct = false;
+				}
 				else
-					name = "__constructor";
+					name = "Name::constructor";
 			}
 			else
-				name = funcInfo.name;
+				name = "\"" + funcInfo.name + "\"";
 
 			ss
 				<< indent << indent
 				<< "Field{"
-				<< "\"" << name << "\", ";
+				<< name << ", ";
 
 			// value
 			if (isSpecial) {
-				if (name == "__constructor") {
+				if (isConstruct) {
 					ss << "WrapConstructor<" << type << "(";
 					for (size_t i = 0; i < funcInfo.params.size(); i++) {
 						ss << funcInfo.params[i].SpecifiersToType();
@@ -217,7 +220,7 @@ string AutoRefl::Parse(string_view code) {
 				for (size_t i = 0; i < funcInfo.params.size(); i++) {
 					ss << indent << indent << indent << indent
 						<< "Attr{" <<
-						"\"__arg_" << i << "\"";
+						"UBPA_USREFL_NAME_ARG(" << i << ")";
 					if (!funcInfo.params[i].name.empty()
 						|| !funcInfo.params[i].defaultValue.empty()
 						|| !funcInfo.params[i].metas.empty())
@@ -229,13 +232,13 @@ string AutoRefl::Parse(string_view code) {
 							<< indent << indent << indent << indent << indent << indent;
 						if (!funcInfo.params[i].name.empty()) {
 							ss
-								<< "Attr{\"__name\", \""
+								<< "Attr{Name::name, \""
 								<< funcInfo.params[i].name << "\"}," << endl;
 						}
 						if (!funcInfo.params[i].defaultValue.empty()) {
 							ss
 								<< indent << indent << indent << indent << indent << indent
-								<< "Attr{\"__default_value\", " << funcInfo.params[i].defaultValue << "}," << endl;
+								<< "Attr{\"Name::default_value\", " << funcInfo.params[i].defaultValue << "}," << endl;
 						}
 						for (const auto& [key, value] : funcInfo.params[i].metas) {
 							ss << indent << indent << indent << indent << indent << indent
