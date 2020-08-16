@@ -10,7 +10,7 @@
 
 ```
 
-[![repo-size](https://img.shields.io/github/languages/code-size/Ubpa/USRefl?style=flat)](https://github.com/Ubpa/USRefl/archive/master.zip) [![tag](https://img.shields.io/github/v/tag/Ubpa/USRefl)](https://github.com/Ubpa/USRefl/tags) [![license](https://img.shields.io/github/license/Ubpa/USRefl)](LICENSE) [![compiler explorer](https://img.shields.io/badge/compiler_explorer-online-blue)](https://godbolt.org/z/8r84q7)
+[![repo-size](https://img.shields.io/github/languages/code-size/Ubpa/USRefl?style=flat)](https://github.com/Ubpa/USRefl/archive/master.zip) [![tag](https://img.shields.io/github/v/tag/Ubpa/USRefl)](https://github.com/Ubpa/USRefl/tags) [![license](https://img.shields.io/github/license/Ubpa/USRefl)](LICENSE) [![compiler explorer](https://img.shields.io/badge/compiler_explorer-online-blue)](https://godbolt.org/z/5333TY)
 
 ⭐ Star us on GitHub — it helps!
 
@@ -40,7 +40,7 @@ Header-only, tiny (99 lines) and powerful C++17 static reflection library.
 
 ## Example
 
-run it online : [**compiler explorer**](https://godbolt.org/z/8r84q7) 
+run it online : [**compiler explorer**](https://godbolt.org/z/Y8e6rE) 
 
 ```c++
 #include <USRefl/USRefl.h>
@@ -94,15 +94,15 @@ int main() {
     cout << endl;
   });
   
-  TypeInfo<Point>::ForEachVarOf(Point{ 1,2 }, [](auto&& var) {
-    cout << var << endl;
+  TypeInfo<Point>::ForEachVarOf(Point{ 1,2 }, [](auto field, auto&& var) {
+    cout << field.name << " : " << var << endl;
   });
 }
 ```
 
 **other example** 
 
-- 99 line: [USRefl_99.h](include/USRefl_99.h)，[test](src/test/06_99/main.cpp), [**online**](https://godbolt.org/z/hndzze) (test all examples below)
+- 99 line: [USRefl_99.h](include/USRefl_99.h), [test](src/test/06_99/main.cpp), [**online**](https://godbolt.org/z/5333TY) (test all examples below)
 - [template](src/test/01_template/main.cpp) 
 - [static](src/test/02_static/main.cpp) 
 - [func](src/test/03_func/main.cpp) 

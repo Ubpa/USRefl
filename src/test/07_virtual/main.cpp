@@ -92,7 +92,7 @@ int main() {
 		cout << var << endl;
 	});
 	cout << "[var : right]" << endl;
-	TypeInfo<D>::ForEachVarOf(d, [](auto field, auto&& var) mutable {
+	TypeInfo<D>::ForEachVarOf(d, [](auto field, auto&& var) {
 		static_assert(std::is_lvalue_reference_v<decltype(var)>);
 		cout << field.name << " : " << var << endl;
 	});
