@@ -26,20 +26,11 @@ struct Ubpa::USRefl::TypeInfo<Ubpa::Nested::Vec<T>>
         },
         Field{"num", &Ubpa::Nested::Vec<T>::num},
         Field{Name::constructor, WrapConstructor<Ubpa::Nested::Vec<T>()>()},
-        Field{Name::constructor, WrapConstructor<Ubpa::Nested::Vec<T>(T, T)>(),
-            AttrList {
-            }
-        },
+        Field{Name::constructor, WrapConstructor<Ubpa::Nested::Vec<T>(T, T)>()},
         Field{Name::destructor, WrapDestructor<Ubpa::Nested::Vec<T>>()},
         Field{"Sum", static_cast<float(Ubpa::Nested::Vec<T>::*)()const>(&Ubpa::Nested::Vec<T>::Sum)},
-        Field{"Sum", static_cast<float(Ubpa::Nested::Vec<T>::*)(float)const>(&Ubpa::Nested::Vec<T>::Sum),
-            AttrList {
-            }
-        },
-        Field{"Dot", &Ubpa::Nested::Vec<T>::Dot,
-            AttrList {
-            }
-        },
+        Field{"Sum", static_cast<float(Ubpa::Nested::Vec<T>::*)(float)const>(&Ubpa::Nested::Vec<T>::Sum)},
+        Field{"Dot", &Ubpa::Nested::Vec<T>::Dot},
     };
 };
 
