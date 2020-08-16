@@ -208,7 +208,7 @@ string AutoRefl::Parse(string_view code) {
 					ss << "&" << type << "::" << funcInfo.name;
 			}
 
-			if (!funcInfo.metas.empty() || !funcInfo.params.empty()) {
+			if (!funcInfo.metas.empty() /*|| !funcInfo.params.empty()*/) {
 				ss
 					<< "," << endl
 					<< indent << indent << indent << "AttrList {" << endl;
