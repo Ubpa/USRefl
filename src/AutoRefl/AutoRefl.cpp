@@ -219,44 +219,44 @@ string AutoRefl::Parse(string_view code) {
 						<< (value.empty() ? "" : (", " + value))
 						<< "}," << endl;
 				}
-				for (size_t i = 0; i < funcInfo.params.size(); i++) {
-					ss << indent << indent << indent << indent
-						<< "Attr{" <<
-						"UBPA_USREFL_NAME_ARG(" << i << ")";
-					if (!funcInfo.params[i].name.empty()
-						|| !funcInfo.params[i].defaultValue.empty()
-						|| !funcInfo.params[i].metas.empty())
-					{
-						ss
-							<< "," << endl
-							<< indent << indent << indent << indent << indent
-							<< "AttrList{" << endl
-							<< indent << indent << indent << indent << indent << indent;
-						if (!funcInfo.params[i].name.empty()) {
-							ss
-								<< "Attr{Name::name, \""
-								<< funcInfo.params[i].name << "\"}," << endl;
-						}
-						if (!funcInfo.params[i].defaultValue.empty()) {
-							ss
-								<< indent << indent << indent << indent << indent << indent
-								<< "Attr{\"Name::default_value\", " << funcInfo.params[i].defaultValue << "}," << endl;
-						}
-						for (const auto& [key, value] : funcInfo.params[i].metas) {
-							ss << indent << indent << indent << indent << indent << indent
-								<< "Attr{" <<
-								"\"" << key << "\""
-								<< (value.empty() ? "" : (", " + value))
-								<< "}," << endl;
-						}
-						// end argument AttrList
-						ss << indent << indent << indent << indent << indent << "}" << endl;
-						ss << indent << indent << indent << indent << "}," << endl; // end argument Attr
-					}
-					else
-						ss << "}," << endl; // end argument Attr
-				}
-				ss << indent << indent << indent << "}" << endl; // function attr list
+				//for (size_t i = 0; i < funcInfo.params.size(); i++) {
+				//	ss << indent << indent << indent << indent
+				//		<< "Attr{" <<
+				//		"UBPA_USREFL_NAME_ARG(" << i << ")";
+				//	if (!funcInfo.params[i].name.empty()
+				//		|| !funcInfo.params[i].defaultValue.empty()
+				//		|| !funcInfo.params[i].metas.empty())
+				//	{
+				//		ss
+				//			<< "," << endl
+				//			<< indent << indent << indent << indent << indent
+				//			<< "AttrList{" << endl
+				//			<< indent << indent << indent << indent << indent << indent;
+				//		if (!funcInfo.params[i].name.empty()) {
+				//			ss
+				//				<< "Attr{Name::name, \""
+				//				<< funcInfo.params[i].name << "\"}," << endl;
+				//		}
+				//		if (!funcInfo.params[i].defaultValue.empty()) {
+				//			ss
+				//				<< indent << indent << indent << indent << indent << indent
+				//				<< "Attr{\"Name::default_value\", " << funcInfo.params[i].defaultValue << "}," << endl;
+				//		}
+				//		for (const auto& [key, value] : funcInfo.params[i].metas) {
+				//			ss << indent << indent << indent << indent << indent << indent
+				//				<< "Attr{" <<
+				//				"\"" << key << "\""
+				//				<< (value.empty() ? "" : (", " + value))
+				//				<< "}," << endl;
+				//		}
+				//		// end argument AttrList
+				//		ss << indent << indent << indent << indent << indent << "}" << endl;
+				//		ss << indent << indent << indent << indent << "}," << endl; // end argument Attr
+				//	}
+				//	else
+				//		ss << "}," << endl; // end argument Attr
+				//}
+				ss << indent << indent << indent << "}" << endl; // end function attr list
 				ss << indent << indent << "}," << endl; // end Field
 			}
 			else
