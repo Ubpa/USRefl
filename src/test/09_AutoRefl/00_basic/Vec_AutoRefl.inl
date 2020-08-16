@@ -28,42 +28,16 @@ struct Ubpa::USRefl::TypeInfo<Ubpa::Nested::Vec<T>>
         Field{Name::constructor, WrapConstructor<Ubpa::Nested::Vec<T>()>()},
         Field{Name::constructor, WrapConstructor<Ubpa::Nested::Vec<T>(T, T)>(),
             AttrList {
-                Attr{UBPA_USREFL_NAME_ARG(0),
-                    AttrList{
-                        Attr{Name::name, "x"},
-                    }
-                },
-                Attr{UBPA_USREFL_NAME_ARG(1),
-                    AttrList{
-                        Attr{Name::name, "y"},
-                    }
-                },
             }
         },
         Field{Name::destructor, WrapDestructor<Ubpa::Nested::Vec<T>>()},
         Field{"Sum", static_cast<float(Ubpa::Nested::Vec<T>::*)()const>(&Ubpa::Nested::Vec<T>::Sum)},
         Field{"Sum", static_cast<float(Ubpa::Nested::Vec<T>::*)(float)const>(&Ubpa::Nested::Vec<T>::Sum),
             AttrList {
-                Attr{UBPA_USREFL_NAME_ARG(0),
-                    AttrList{
-                        Attr{Name::name, "z"},
-                        Attr{"Name::default_value", 1.f},
-                    }
-                },
             }
         },
         Field{"Dot", &Ubpa::Nested::Vec<T>::Dot,
             AttrList {
-                Attr{UBPA_USREFL_NAME_ARG(0),
-                    AttrList{
-                        Attr{Name::name, "lhs"},
-                    }
-                },
-                Attr{UBPA_USREFL_NAME_ARG(1),
-                    AttrList{
-                        Attr{Name::name, "rhs"},
-                    }
-                },
             }
         },
     };
