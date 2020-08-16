@@ -48,8 +48,8 @@ run it online : [**compiler explorer**](https://godbolt.org/z/Y8e6rE)
 using namespace Ubpa::USRefl;
 using namespace std;
 
-// [[...]] act as (structured) command
-// they are useless in code
+// [[...]] act as (structured) comments
+// they are useless in the code
 struct [[size(8)]] Point {
   [[not_serialize]]
   float x;
@@ -98,6 +98,18 @@ int main() {
     cout << field.name << " : " << var << endl;
   });
 }
+```
+
+result is
+
+```
+x
+not_serialize
+y
+info: hello
+size
+x : 1
+y : 2
 ```
 
 **other example** 
