@@ -30,7 +30,7 @@ int main() {
 			cout << "value : " << attr.value << endl;
 	});
 
-	TypeInfo<Vec<float>>::ForEachVarOf(Vec<float>{ 1,2 }, [](auto&& var) {
-		cout << var << endl;
+	TypeInfo<Vec<float>>::ForEachVarOf(Vec<float>{ 1,2 }, [](auto field, auto&& var) {
+		cout << field.name << " : " << var << endl;
 	});
 }

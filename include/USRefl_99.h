@@ -15,15 +15,15 @@ namespace Ubpa::USRefl::detail {
   template<typename L, typename F, typename R, size_t N0, size_t... Ns>
   constexpr auto Acc(L l, F&& f, R&& r, std::index_sequence<N0, Ns...>)
   { return Acc(l, std::forward<F>(f), f(std::forward<R>(r), l.template Get<N0>()), std::index_sequence<Ns...>{}); }
-  template<typename TI, typename U, typename F> constexpr void NV_Var(TI info, U&& u, F&& f) {
-    info.fields.ForEach([&](auto k){if constexpr(!k.is_static&&!k.is_func)std::forward<F>(f)(std::forward<U>(u).*(k.value));});
-    info.bases.ForEach([&](auto b){if constexpr(!b.is_virtual)NV_Var(b.info,b.info.Forward(std::forward<U>(u)),std::forward<F>(f));});
-  }
   template<size_t D, typename T, typename Acc, typename F> constexpr auto DFS_Acc(T t, F&& f, Acc&& acc) {
     return t.bases.Accumulate(std::forward<Acc>(acc), [&](auto&& r, auto b) {
       if constexpr (b.is_virtual) return DFS_Acc<D+1>(b.info, std::forward<F>(f), std::forward<decltype(r)>(r));
       else return DFS_Acc<D+1>(b.info, std::forward<F>(f), std::forward<F>(f)(std::forward<decltype(r)>(r), b.info, D+1));
     });
+  }
+  template<typename TI, typename U, typename F> constexpr void NV_Var(TI info, U&& u, F&& f) {
+    info.fields.ForEach([&](auto k){if constexpr(!k.is_static&&!k.is_func)std::forward<F>(f)(k,std::forward<U>(u).*(k.value));});
+    info.bases.ForEach([&](auto b){if constexpr(!b.is_virtual)NV_Var(b.info,b.info.Forward(std::forward<U>(u)),std::forward<F>(f));});
   }
 }
 namespace Ubpa::USRefl {
@@ -88,7 +88,7 @@ namespace Ubpa::USRefl {
     template<typename F>static constexpr void DFS_ForEach(F&&f){DFS_Acc(0,[&](auto,auto t,auto d){std::forward<F>(f)(t,d);return 0;});}
     template<typename U, typename Func> static constexpr void ForEachVarOf(U&& obj, Func&& func) {
       VirtualBases().ForEach([&](auto vb) { vb.fields.ForEach([&](auto fld)
-      { if constexpr (!fld.is_static && !fld.is_func) std::forward<Func>(func)(std::forward<U>(obj).*(fld.value)); }); });
+      { if constexpr (!fld.is_static && !fld.is_func) std::forward<Func>(func)(fld, std::forward<U>(obj).*(fld.value)); }); });
       detail::NV_Var(TypeInfo<type>{}, std::forward<U>(obj), std::forward<Func>(func));
     }
   };

@@ -96,15 +96,13 @@ int main() {
 	d.c = 4;
 	d.d = 5;
 	cout << "[left]" << endl;
-	TypeInfo<D>::ForEachVarOf(std::move(d), [cnt = 0](auto&& var) mutable {
+	TypeInfo<D>::ForEachVarOf(std::move(d), [](auto field, auto&& var) mutable {
 		static_assert(std::is_rvalue_reference_v<decltype(var)>);
-		cout << cnt << ": " << var << endl;
-		cnt++;
+		cout << field.name << " : " << var << endl;
 	});
 	cout << "[right]" << endl;
-	TypeInfo<D>::ForEachVarOf(d, [cnt = 0](auto&& var) mutable {
+	TypeInfo<D>::ForEachVarOf(d, [](auto field, auto&& var) mutable {
 		static_assert(std::is_lvalue_reference_v<decltype(var)>);
-		cout << cnt << ": " << var << endl;
-		cnt++;
+		cout << field.name << " : " << var << endl;
 	});
 }

@@ -16,10 +16,10 @@ template<>
 struct Ubpa::USRefl::TypeInfo<Point>
 	: Ubpa::USRefl::TypeInfoBase<Point>
 {
-	static constexpr AttrList attrs = {
+	inline static AttrList attrs = {
 		Attr {"size", 8 },
 	};
-	static constexpr FieldList fields = {
+	inline static FieldList fields = {
 		Field {"x", &Point::x,
 			AttrList {
 				Attr {"not_serialize" },
@@ -44,21 +44,5 @@ int main() {
 				cout << " : " << attr.value;
 			cout << endl;
 		});
-	});
-
-	constexpr auto y_idx = TypeInfo<Point>::fields.Find("y");
-	constexpr auto y_field = TypeInfo<Point>::fields.Get<y_idx>();
-	static_assert(y_field.name == "y");
-
-	static_assert(TypeInfo<Point>::fields.Contains("x"));
-
-	TypeInfo<Point>::attrs.ForEach([](auto attr) {
-		cout << "name  : " << attr.name << endl;
-		if constexpr (!attr.has_value)
-			cout << "value : " << attr.value << endl;
-	});
-
-	TypeInfo<Point>::ForEachVarOf(Point{ 1,2 }, [](auto&& var) {
-		cout << var << endl;
 	});
 }

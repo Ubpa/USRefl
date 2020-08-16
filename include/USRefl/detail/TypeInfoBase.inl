@@ -5,7 +5,7 @@ namespace Ubpa::USRefl::detail {
 	constexpr void ForEachNonVirtualVarOf(TI info, U&& obj, Func&& func) {
 		info.fields.ForEach([&](auto field) {
 			if constexpr (!field.is_static && !field.is_func)
-				std::forward<Func>(func)(std::forward<U>(obj).*(field.value));
+				std::forward<Func>(func)(field, std::forward<U>(obj).*(field.value));
 		});
 		info.bases.ForEach([&](auto base) {
 			if constexpr (!base.is_virtual) {
@@ -97,7 +97,7 @@ namespace Ubpa::USRefl {
 		VirtualBases().ForEach([&](auto vb) {
 			vb.fields.ForEach([&](auto field) {
 				if constexpr (!field.is_static && !field.is_func)
-					std::forward<Func>(func)(std::forward<U>(obj).*(field.value));
+					std::forward<Func>(func)(field, std::forward<U>(obj).*(field.value));
 			});
 		});
 		detail::ForEachNonVirtualVarOf(TypeInfo<type>{}, std::forward<U>(obj), std::forward<Func>(func));

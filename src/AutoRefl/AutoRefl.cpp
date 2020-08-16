@@ -188,6 +188,8 @@ string AutoRefl::Parse(string_view code) {
 					ss << "static_cast<" << funcInfo.ret;
 					if (!funcInfo.isStatic)
 						ss << "(" << type << "::*)";
+					else
+						ss << "(*)";
 					ss << "("; // arguments begin
 					for (size_t i = 0; i < funcInfo.params.size(); i++) {
 						ss << funcInfo.params[i].SpecifiersToType();

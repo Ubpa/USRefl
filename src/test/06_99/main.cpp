@@ -56,8 +56,8 @@ void test_basic() {
 
 	static_assert(TypeInfo<Point>::fields.Contains("x"));
 
-	TypeInfo<Point>::ForEachVarOf(p, [](auto&& var) {
-		cout << var << endl;
+	TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
+		cout << field.name << " : " << var << endl;
 	});
 
 	TypeInfo<Point>::fields.ForEach([](auto field) {
@@ -184,15 +184,13 @@ void test_inheritance() {
 	d.b = 3;
 	d.c = 4;
 	d.d = 5;
-	TypeInfo<D>::ForEachVarOf(std::move(d), [cnt = 0](auto&& var) mutable {
+	TypeInfo<D>::ForEachVarOf(std::move(d), [](auto field, auto&& var) mutable {
 		static_assert(std::is_rvalue_reference_v<decltype(var)>);
-		cout << cnt << ": " << var << endl;
-		cnt++;
+		cout << field.name << " : " << var << endl;
 	});
-	TypeInfo<D>::ForEachVarOf(d, [cnt = 0](auto&& var) mutable {
+	TypeInfo<D>::ForEachVarOf(d, [](auto field, auto&& var) mutable {
 		static_assert(std::is_lvalue_reference_v<decltype(var)>);
-		cout << cnt << ": " << var << endl;
-		cnt++;
+		cout << field.name << " : " << var << endl;
 	});
 }
 
@@ -383,15 +381,14 @@ void test_virtual() {
 	d.c = 3;
 	d.d = 4;
 	cout << "[var : left]" << endl;
-	TypeInfo<VD>::ForEachVarOf(std::move(d), [](auto&& var) {
+	TypeInfo<VD>::ForEachVarOf(std::move(d), [](auto field, auto&& var) {
 		static_assert(std::is_rvalue_reference_v<decltype(var)>);
-		cout << var << endl;
+		cout << field.name << " : " << var << endl;
 	});
 	cout << "[var : right]" << endl;
-	TypeInfo<VD>::ForEachVarOf(d, [cnt = 0](auto&& var) mutable {
+	TypeInfo<VD>::ForEachVarOf(d, [](auto field, auto&& var) mutable {
 		static_assert(std::is_lvalue_reference_v<decltype(var)>);
-		cout << cnt << ": " << var << endl;
-		cnt++;
+		cout << field.name << " : " << var << endl;
 	});
 }
 

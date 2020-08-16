@@ -59,7 +59,7 @@ int main() {
 			cout << "value : " << attr.value << endl;
 	});
 
-	TypeInfo<Point<float>>::ForEachVarOf(p, [](auto&& var) {
-		cout << var << endl;
+	TypeInfo<Point<float>>::ForEachVarOf(p, [](auto field, auto&& var) {
+		cout << field.name << " : " << var << endl;
 	});
 }

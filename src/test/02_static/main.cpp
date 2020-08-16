@@ -61,8 +61,8 @@ int main() {
 			cout << "value : " << attr.value << endl;
 	});
 
-	TypeInfo<Point>::ForEachVarOf(p, [](auto&& var) {
-		cout << var << endl;
+	TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
+		cout << field.name << " : " << var << endl;
 	});
 
 	TypeInfo<Point>::fields.ForEach([](auto field) {
