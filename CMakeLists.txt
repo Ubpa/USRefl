@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
-project(USRefl VERSION 0.5.3)
+project(USRefl VERSION 0.5.4)
 message(STATUS "[Project] ${PROJECT_NAME}")
 
 include(cmake/InitUCMake.cmake)
@@ -11,7 +11,7 @@ Ubpa_InitProject()
 
 option(Ubpa_USRefl_Build_AutoRefl "build AutoRefl, need Java" OFF)
 if(Ubpa_USRefl_Build_AutoRefl)
-  Ubpa_AddDep(UANTLR 0.1.2)
+  Ubpa_AddDep(UANTLR 0.1.3)
 endif()
 
 Ubpa_AddSubDirsRec(include)
