@@ -1,17 +1,5 @@
 // TODO
-// [x] - var
-// [x] - template
-// [x] - function
-//     [x] - basic
-//     [x] - overload
-//     [x] - arguments (name, default value)
-//     [x] - constructor / destructor
-//     [x] - ignore template function
-// [x] - static
-// [x] - enum
-// [x] - bases
-// [x] - nested namespace name
-// [ ] - main arguments parse
+// [ ] main arguments parse
 
 #include "MetaGenerator.h"
 #include "TypeInfoGenerator.h"

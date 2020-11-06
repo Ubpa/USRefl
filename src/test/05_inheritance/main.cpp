@@ -7,72 +7,64 @@
 using namespace Ubpa::USRefl;
 using namespace std;
 
-struct A {
-	float a;
-};
-struct B : A {
-	float b;
-};
-struct C : A {
-	float c;
-};
-struct D : B, C {
-	float d;
+struct A { float a; };
+struct B : A { float b; };
+struct C : A { float c; };
+struct D : B, C { float d; };
+
+template<>
+struct Ubpa::USRefl::TypeInfo<A> :
+    TypeInfoBase<A>
+{
+#ifdef UBPA_USREFL_NOT_USE_NAMEOF
+    static constexpr char name[2] = "A";
+#endif
+    static constexpr AttrList attrs = {};
+    static constexpr FieldList fields = {
+        Field {"a", &Type::a},
+    };
 };
 
 template<>
-struct Ubpa::USRefl::TypeInfo<A>
-	: TypeInfoBase<A>
+struct Ubpa::USRefl::TypeInfo<B> :
+    TypeInfoBase<B, Base<A>>
 {
 #ifdef UBPA_USREFL_NOT_USE_NAMEOF
-	static constexpr char name[2] = "A";
+    static constexpr char name[2] = "B";
 #endif
-	static constexpr AttrList attrs = {};
-	static constexpr FieldList fields = {
-		Field {"a", &Type::a},
-	};
+    static constexpr AttrList attrs = {};
+    static constexpr FieldList fields = {
+        Field {"b", &Type::b},
+    };
 };
 
 template<>
-struct Ubpa::USRefl::TypeInfo<B>
-	: TypeInfoBase<B, Base<A>>
+struct Ubpa::USRefl::TypeInfo<C> :
+    TypeInfoBase<C, Base<A>>
 {
 #ifdef UBPA_USREFL_NOT_USE_NAMEOF
-	static constexpr char name[2] = "B";
+    static constexpr char name[2] = "C";
 #endif
-	static constexpr AttrList attrs = {};
-	static constexpr FieldList fields = {
-		Field {"b", &Type::b},
-	};
+    static constexpr AttrList attrs = {};
+    static constexpr FieldList fields = {
+        Field {"c", &Type::c},
+    };
 };
 
 template<>
-struct Ubpa::USRefl::TypeInfo<C>
-	: TypeInfoBase<C, Base<A>>
+struct Ubpa::USRefl::TypeInfo<D> :
+    TypeInfoBase<D,
+        Base<B>,
+        Base<C>
+    >
 {
 #ifdef UBPA_USREFL_NOT_USE_NAMEOF
-	static constexpr char name[2] = "C";
+    static constexpr char name[2] = "D";
 #endif
-	static constexpr AttrList attrs = {};
-	static constexpr FieldList fields = {
-		Field {"c", &Type::c},
-	};
-};
-
-template<>
-struct Ubpa::USRefl::TypeInfo<D>
-	: TypeInfoBase<D,
-	Base<B>,
-	Base<C>
-	>
-{
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-	static constexpr char name[2] = "D";
-#endif
-	static constexpr AttrList attrs = {};
-	static constexpr FieldList fields = {
-		Field {"d", &Type::d},
-	};
+    static constexpr AttrList attrs = {};
+    static constexpr FieldList fields = {
+        Field {"d", &Type::d},
+    };
 };
 
 int main() {

@@ -14,8 +14,8 @@ struct [[size(8)]] Point {
 };
 
 template<>
-struct Ubpa::USRefl::TypeInfo<Point>
-	: TypeInfoBase<Point>
+struct Ubpa::USRefl::TypeInfo<Point> :
+	TypeInfoBase<Point>
 {
 #ifdef UBPA_USREFL_NOT_USE_NAMEOF
 	static constexpr char name[6] = "Point";
@@ -24,16 +24,12 @@ struct Ubpa::USRefl::TypeInfo<Point>
 		Attr {"size", 8},
 	};
 	static constexpr FieldList fields = {
-		Field {"x", &Type::x,
-			AttrList {
-				Attr {"not_serialize"},
-			}
-		},
-		Field {"y", &Type::y,
-			AttrList {
-				Attr {"info", "hello"},
-			}
-		},
+		Field {"x", &Type::x, AttrList {
+			Attr {"not_serialize"},
+		}},
+		Field {"y", &Type::y, AttrList {
+			Attr {"info", "hello"},
+		}},
 		Field {"dim", Type::dim},
 	};
 };

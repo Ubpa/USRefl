@@ -22,8 +22,8 @@ namespace Ubpa::Nested {
 			return x + y;
 		}
 		// overload function, default value
-		float Sum(float z = 1.f) const {
-			return x + y + z;
+		float Sum(float z, float o = 1.f) const {
+			return x + y + z + o;
 		}
 
 		// static member function

@@ -20,13 +20,13 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 
 	for (const auto& typeMeta : typeMetas) {
 		const auto fullname = typeMeta.GenerateFullName();
+		const std::string nsname = typeMeta.GenerateNsName();
 		const std::string tname = typeMeta.IsTemplateType() ? fullname : "Type";
 		ss
 			<< "template<" << typeMeta.GenerateTemplateList() << ">" << endl
-			<< "struct Ubpa::USRefl::TypeInfo<" << fullname << ">" << endl
-			;
+			<< "struct Ubpa::USRefl::TypeInfo<" << fullname << "> :" << endl;
 		
-		ss << indent << ": TypeInfoBase<" << fullname;
+		ss << indent << "TypeInfoBase<" << fullname;
 		auto publicBaseIndice = typeMeta.GetPublicBaseIndices();
 		if(!publicBaseIndice.empty()) {
 			if (publicBaseIndice.size() > 1) {
@@ -46,29 +46,28 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 		
 		ss
 			<< ">" << endl
-			<< "{" << endl
-			;
+			<< "{" << endl;
 
 		// name
 		ss << "#ifdef UBPA_USREFL_NOT_USE_NAMEOF" << endl;
 
 		if (typeMeta.IsTemplateType())
 			ss << indent << "// [!] all instance types have the same name" << endl;
+
 		
 		ss
-			<< indent << "static constexpr char name[" << (typeMeta.name.size() + 1) << "] = \"" << typeMeta.name << "\";" << endl
-			<< "#endif" << endl
-			;
+			<< indent << "static constexpr char name[" << (nsname.size() + 1) << "] = \"" << nsname << "\";" << endl
+			<< "#endif" << endl;
 		
 		// attributes
 		switch (config.attrListConstMode) {
-		case Config::ConstMode::Constepxr:
+		case ConstMode::Constepxr:
 			ss << indent << "static constexpr AttrList attrs = {";
 			break;
-		case Config::ConstMode::Const:
+		case ConstMode::Const:
 			ss << indent << "inline static const AttrList attrs = {";
 			break;
-		case Config::ConstMode::NonConst:
+		case ConstMode::NonConst:
 			ss << indent << "inline static AttrList attrs = {";
 			break;
 		}
@@ -91,40 +90,54 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 		
 		// fields
 		switch (config.attrListConstMode) {
-		case Config::ConstMode::Constepxr:
+		case ConstMode::Constepxr:
 			ss << indent << "static constexpr FieldList fields = {";
 			break;
-		case Config::ConstMode::Const:
+		case ConstMode::Const:
 			ss << indent << "inline static const FieldList fields = {";
 			break;
-		case Config::ConstMode::NonConst:
+		case ConstMode::NonConst:
 			ss << indent << "inline static FieldList fields = {";
 			break;
 		}
-		if(!typeMeta.fields.empty()) {
+		if(typeMeta.HaveAnyPublicField()) {
 			ss << endl;
 			for (const auto& field : typeMeta.fields) {
-				if (field.isTemplate)
+				if (field.isTemplate || field.accessSpecifier != AccessSpecifier::PUBLIC)
 					continue;
 				
 				ss << indent << indent << "Field {\"";
-				// name
-				ss << field.name << "\", ";
-				// value
+				
+				// [name]
+				if (field.name == typeMeta.name) {
+					// constructor
+					ss << config.name_constructor;
+				}
+				else if (field.name == ("~" + typeMeta.name)) {
+					// destructor
+					ss << config.name_destructor;
+				}
+				else
+					ss << field.name;
+				ss << "\", ";
+				
+				// [value]
 				switch (field.mode) {
 				case Field::Mode::Variable: {
 					ss << "&" << tname << "::" << field.name;
 					break;
 				}
 				case Field::Mode::Function: {
-					// TODO
-					// - overload
-					// - default value function overload
-					// - constructor
-					// - destructor
-					// - operator
-					if(typeMeta.IsOverloaded(field.name))
-						ss << "static_cast<" << field.GenerateFunctionType("Type") << ">(&Type::" << field.name << ")";
+					if (field.name == typeMeta.name) {
+						// constructor
+						ss << "WrapConstructor<" << tname << "(" << field.GenerateParamTypeList() << ")>()";
+					}
+					else if(field.name == ("~" + typeMeta.name)) {
+						// destructor
+						ss << "WrapDestructor<" << tname << ">()";
+					}
+					else if (typeMeta.IsOverloaded(field.name))
+						ss << "static_cast<" << field.GenerateFunctionType(tname) << ">(&" << tname << "::" << field.name << ")";
 					else
 						ss << "&" << tname << "::" << field.name;
 					break;
@@ -135,14 +148,18 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 				}
 				}
 				// attributes
-				if (!field.attrs.empty() || field.mode != Field::Mode::Value && config.isInitializerAsAttr && !field.initializer.empty()) {
+				const bool hasInitializerAttr = config.isInitializerAsAttr
+					&& field.mode != Field::Mode::Value && !field.initializer.empty();
+				const bool hasDefaultFunctionsAttr = config.generateDefaultFunctions
+					&& field.mode == Field::Mode::Function && field.GetDefaultParameterNum() > 0;
+				if (!field.attrs.empty() || hasInitializerAttr || hasDefaultFunctionsAttr) {
 					ss
-						<< "," << endl
-						<< indent << indent << indent << "AttrList {" << endl;
-					if (config.isInitializerAsAttr && !field.initializer.empty()) {
+						<< ", AttrList {" << endl;
+					// [initializer]
+					if (hasInitializerAttr) {
 						Attr attr;
-						attr.name = config.name_initializer;
 						attr.ns = config.ns_initializer;
+						attr.name = config.name_initializer;
 						attr.value = field.initializer;
 						auto name = attr.GenerateName(
 							attr.ns.empty() ?
@@ -150,24 +167,67 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 							: !config.namespaceAttrNameWithQuotation
 						);
 						ss
-							<< indent << indent << indent << indent
+							<< indent << indent << indent
 							<< "Attr {" << name << ", "
 							<< attr.GenerateValue(field.GenerateSimpleFieldType(), config.isInitializerToFunction) << "}," << endl;
 					}
+					// [default functions]
+					if (hasDefaultFunctionsAttr) {
+						Attr attr;
+						attr.ns = config.ns_default_functions;
+						attr.name = config.name_default_functions;
+						auto name = attr.GenerateName(
+							attr.ns.empty() ?
+							config.nonNamespaceAttrNameWithoutQuotation
+							: !config.namespaceAttrNameWithQuotation
+						);
+						ss
+							<< indent << indent << indent
+							<< "Attr {" << name << ", std::tuple {" << endl;
+						const size_t defaultParameterNum = field.GetDefaultParameterNum();
+						const bool isConstructor = field.name == typeMeta.name;
+						for (size_t i = 1; i <= defaultParameterNum; i++) {
+							size_t num = field.parameters.size() - i;
+							if(isConstructor) {
+								ss
+									<< indent << indent << indent << indent
+									<< "WrapConstructor<" << tname << "(" << field.GenerateParamTypeList(num) << ")>()";
+							}
+							else {
+								auto qualifiers = field.GenerateQualifiers();
+								bool isPointer = qualifiers.find('&') == std::string::npos;
+								if (isPointer)
+									qualifiers += "*";
+
+								auto ftname = tname + " " + qualifiers;
+								ss
+									<< indent << indent << indent << indent
+									<< "[](" << ftname << " __this" << (num > 0 ? ", " : "")
+									<< field.GenerateNamedParameterList(num) << "){ return "
+									<< (isPointer? "__this->" : ("std::forward<" + ftname + ">(__this)."))
+									<< field.name << "(" << field.GenerateForwardArgumentList(num) << "); }";
+							}
+							if (i != defaultParameterNum)
+								ss << ",";
+							ss << endl;
+						}
+						ss << indent << indent << indent << "}}," << endl; // attr
+					}
+					// [normal attrs]
 					for (const auto& attr : field.attrs) {
 						auto name = attr.GenerateName(
 							attr.ns.empty() ?
 							config.nonNamespaceAttrNameWithoutQuotation
 							: !config.namespaceAttrNameWithQuotation
 						);
-						ss << indent << indent << indent << indent << "Attr {" << name;
+						ss << indent << indent << indent
+							<< "Attr {" << name;
 						if (!attr.value.empty())
 							ss << ", " << attr.GenerateValue(config.isAttrValueToFunction);
 						ss << "}," << endl;
 					}
 					ss
-						<< indent << indent << indent << "}" << endl
-						<< indent << indent;
+						<< indent << indent << "}";
 				}
 				ss << "}," << endl;
 			}

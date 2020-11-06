@@ -5,33 +5,37 @@
 #include <USRefl/USRefl.h>
 
 template<typename T>
-struct Ubpa::USRefl::TypeInfo<Ubpa::Nested::Vec<T>>
-    : TypeInfoBase<Ubpa::Nested::Vec<T>>
+struct Ubpa::USRefl::TypeInfo<Ubpa::Nested::Vec<T>> :
+    TypeInfoBase<Ubpa::Nested::Vec<T>>
 {
 #ifdef UBPA_USREFL_NOT_USE_NAMEOF
     // [!] all instance types have the same name
-    static constexpr char name[4] = "Vec";
+    static constexpr char name[18] = "Ubpa::Nested::Vec";
 #endif
     static constexpr AttrList attrs = {
         Attr {"size", sizeof(T)},
     };
     static constexpr FieldList fields = {
-        Field {"x", &Ubpa::Nested::Vec<T>::x,
-            AttrList {
-                Attr {"not_serialize"},
-            }
-        },
-        Field {"y", &Ubpa::Nested::Vec<T>::y,
-            AttrList {
-                Attr {"info", "hello"},
-                Attr {"maximum", 10.f},
-            }
-        },
-        Field {"num", &Ubpa::Nested::Vec<T>::num,
-            AttrList {
-                Attr {"__initializer", []{ return size_t{ 0 }; }},
-            }
-        },
+        Field {"__constructor", WrapConstructor<Ubpa::Nested::Vec<T>()>()},
+        Field {"__constructor", WrapConstructor<Ubpa::Nested::Vec<T>(T, T)>()},
+        Field {"__destructor", WrapDestructor<Ubpa::Nested::Vec<T>>()},
+        Field {"x", &Ubpa::Nested::Vec<T>::x, AttrList {
+            Attr {"not_serialize"},
+        }},
+        Field {"y", &Ubpa::Nested::Vec<T>::y, AttrList {
+            Attr {"info", "hello"},
+            Attr {"maximum", 10.f},
+        }},
+        Field {"num", &Ubpa::Nested::Vec<T>::num, AttrList {
+            Attr {"__initializer", []{ return size_t{ 0 }; }},
+        }},
+        Field {"Sum", static_cast<float(Ubpa::Nested::Vec<T>::*)()const>(&Ubpa::Nested::Vec<T>::Sum)},
+        Field {"Sum", static_cast<float(Ubpa::Nested::Vec<T>::*)(float, float)const>(&Ubpa::Nested::Vec<T>::Sum), AttrList {
+            Attr {"__default_functions", std::tuple {
+                [](Ubpa::Nested::Vec<T> const* __this, float z){ return __this->Sum(std::forward<float>(z)); }
+            }},
+        }},
+        Field {"Dot", &Ubpa::Nested::Vec<T>::Dot},
     };
 };
 

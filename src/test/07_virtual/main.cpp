@@ -13,8 +13,8 @@ struct C : virtual A { float c; };
 struct D : B, C { float d; };
 
 template<>
-struct Ubpa::USRefl::TypeInfo<A>
-    : TypeInfoBase<A>
+struct Ubpa::USRefl::TypeInfo<A> :
+    TypeInfoBase<A>
 {
 #ifdef UBPA_USREFL_NOT_USE_NAMEOF
     static constexpr char name[2] = "A";
@@ -26,8 +26,8 @@ struct Ubpa::USRefl::TypeInfo<A>
 };
 
 template<>
-struct Ubpa::USRefl::TypeInfo<B>
-    : TypeInfoBase<B, Base<A, true>>
+struct Ubpa::USRefl::TypeInfo<B> :
+    TypeInfoBase<B, Base<A, true>>
 {
 #ifdef UBPA_USREFL_NOT_USE_NAMEOF
     static constexpr char name[2] = "B";
@@ -39,8 +39,8 @@ struct Ubpa::USRefl::TypeInfo<B>
 };
 
 template<>
-struct Ubpa::USRefl::TypeInfo<C>
-    : TypeInfoBase<C, Base<A, true>>
+struct Ubpa::USRefl::TypeInfo<C> :
+    TypeInfoBase<C, Base<A, true>>
 {
 #ifdef UBPA_USREFL_NOT_USE_NAMEOF
     static constexpr char name[2] = "C";
@@ -52,8 +52,8 @@ struct Ubpa::USRefl::TypeInfo<C>
 };
 
 template<>
-struct Ubpa::USRefl::TypeInfo<D>
-    : TypeInfoBase<D,
+struct Ubpa::USRefl::TypeInfo<D> :
+    TypeInfoBase<D,
         Base<B>,
         Base<C>
     >
