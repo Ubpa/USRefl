@@ -6,31 +6,32 @@
 
 template<typename T>
 struct Ubpa::USRefl::TypeInfo<Ubpa::Nested::Vec<T>>
-    : Ubpa::USRefl::TypeInfoBase<Ubpa::Nested::Vec<T>>
+    : TypeInfoBase<Ubpa::Nested::Vec<T>>
 {
+#ifdef UBPA_USREFL_NOT_USE_NAMEOF
+    // [!] all instance types have the same name
+    static constexpr char name[4] = "Vec";
+#endif
     static constexpr AttrList attrs = {
-        Attr{"size", sizeof(T)},
+        Attr {"size", sizeof(T)},
     };
-
     static constexpr FieldList fields = {
-        Field{"x", &Ubpa::Nested::Vec<T>::x,
-            AttrList{
-                Attr{"not_serialize"},
+        Field {"x", &Ubpa::Nested::Vec<T>::x,
+            AttrList {
+                Attr {"not_serialize"},
             }
         },
-        Field{"y", &Ubpa::Nested::Vec<T>::y,
-            AttrList{
-                Attr{"info", "hello"},
-                Attr{"maximum", 10.f},
+        Field {"y", &Ubpa::Nested::Vec<T>::y,
+            AttrList {
+                Attr {"info", "hello"},
+                Attr {"maximum", 10.f},
             }
         },
-        Field{"num", &Ubpa::Nested::Vec<T>::num},
-        Field{Name::constructor, WrapConstructor<Ubpa::Nested::Vec<T>()>()},
-        Field{Name::constructor, WrapConstructor<Ubpa::Nested::Vec<T>(T, T)>()},
-        Field{Name::destructor, WrapDestructor<Ubpa::Nested::Vec<T>>()},
-        Field{"Sum", static_cast<float(Ubpa::Nested::Vec<T>::*)()const>(&Ubpa::Nested::Vec<T>::Sum)},
-        Field{"Sum", static_cast<float(Ubpa::Nested::Vec<T>::*)(float)const>(&Ubpa::Nested::Vec<T>::Sum)},
-        Field{"Dot", &Ubpa::Nested::Vec<T>::Dot},
+        Field {"num", &Ubpa::Nested::Vec<T>::num,
+            AttrList {
+                Attr {"__initializer", []{ return size_t{ 0 }; }},
+            }
+        },
     };
 };
 

@@ -22,45 +22,56 @@ struct D : B, C {
 
 template<>
 struct Ubpa::USRefl::TypeInfo<A>
-	: Ubpa::USRefl::TypeInfoBase<A>
+	: TypeInfoBase<A>
 {
+#ifdef UBPA_USREFL_NOT_USE_NAMEOF
+	static constexpr char name[2] = "A";
+#endif
 	static constexpr AttrList attrs = {};
-
 	static constexpr FieldList fields = {
-		Field{"a", &A::a},
+		Field {"a", &Type::a},
 	};
 };
 
 template<>
 struct Ubpa::USRefl::TypeInfo<B>
-	: Ubpa::USRefl::TypeInfoBase<B, Base<A>>
+	: TypeInfoBase<B, Base<A>>
 {
+#ifdef UBPA_USREFL_NOT_USE_NAMEOF
+	static constexpr char name[2] = "B";
+#endif
 	static constexpr AttrList attrs = {};
-
 	static constexpr FieldList fields = {
-		Field{"b", &B::b},
+		Field {"b", &Type::b},
 	};
 };
 
 template<>
 struct Ubpa::USRefl::TypeInfo<C>
-	: Ubpa::USRefl::TypeInfoBase<C, Base<A>>
+	: TypeInfoBase<C, Base<A>>
 {
+#ifdef UBPA_USREFL_NOT_USE_NAMEOF
+	static constexpr char name[2] = "C";
+#endif
 	static constexpr AttrList attrs = {};
-
 	static constexpr FieldList fields = {
-		Field{"c", &C::c},
+		Field {"c", &Type::c},
 	};
 };
 
 template<>
 struct Ubpa::USRefl::TypeInfo<D>
-	: Ubpa::USRefl::TypeInfoBase<D, Base<B>, Base<C>>
+	: TypeInfoBase<D,
+	Base<B>,
+	Base<C>
+	>
 {
+#ifdef UBPA_USREFL_NOT_USE_NAMEOF
+	static constexpr char name[2] = "D";
+#endif
 	static constexpr AttrList attrs = {};
-
 	static constexpr FieldList fields = {
-		Field{"d", &D::d},
+		Field {"d", &Type::d},
 	};
 };
 

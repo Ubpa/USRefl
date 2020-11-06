@@ -18,30 +18,32 @@ enum class [[enum_attr("enum_attr_value")]] Color {
 
 template<>
 struct Ubpa::USRefl::TypeInfo<Color>
-	: Ubpa::USRefl::TypeInfoBase<Color>
+    : Ubpa::USRefl::TypeInfoBase<Color>
 {
-	static constexpr AttrList attrs = {
-		Attr{"enum_attr", "enum_attr_value"},
-	};
-
-	static constexpr FieldList fields = {
-		Field{"RED", Color::RED,
-			AttrList{
-				Attr{"enumerator_attr", "enumerator_attr_value"},
-				Attr{"func", &Func<1>},
-			}
-		},
-		Field{"GREEN", Color::GREEN,
-			AttrList{
-				Attr{"func", &Func<2>},
-			}
-		},
-		Field{"BLUE", Color::BLUE,
-			AttrList{
-				Attr{"func", &Func<3>},
-			}
-		},
-	};
+#ifdef UBPA_USREFL_NOT_USE_NAMEOF
+    static constexpr char name[6] = "Color";
+#endif
+    static constexpr AttrList attrs = {
+        Attr {"enum_attr", "enum_attr_value"},
+    };
+    static constexpr FieldList fields = {
+        Field {"RED", Type::RED,
+            AttrList {
+                Attr {"enumerator_attr", "enumerator_attr_value"},
+                Attr {"func", &Func<1>},
+            }
+        },
+        Field {"GREEN", Type::GREEN,
+            AttrList {
+                Attr {"func", &Func<2>},
+            }
+        },
+        Field {"BLUE", Type::BLUE,
+            AttrList {
+                Attr {"func", &Func<3>},
+            }
+        },
+    };
 };
 
 int main() {

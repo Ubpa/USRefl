@@ -6,31 +6,26 @@ namespace Ubpa::USRefl::detail {
 	template<typename T>
 	struct FieldTraits;
 
+	template<typename Obj, typename Value, bool isStatic>
+	struct FieldTraitsBase {
+		using object_type = Obj;
+		using value_type = Value;
+		static constexpr bool is_static = isStatic;
+		static constexpr bool is_func = std::is_function_v<Value>;
+	};
+
 	// non-static member pointer
 	template<typename Object, typename T>
-	struct FieldTraits<T Object::*> {
-		using object_type = Object;
-		using value_type = T;
-		static constexpr bool is_static = false;
-		static constexpr bool is_func = std::is_function_v<T>;
-	};
+	struct FieldTraits<T Object::*>
+		: FieldTraitsBase<Object, T, false> {};
 
 	// static member pointer
 	template<typename T>
-	struct FieldTraits<T*> {
-		using object_type = void;
-		using value_type = T;
-		static constexpr bool is_static = true;
-		static constexpr bool is_func = std::is_function_v<T>;
-	};
+	struct FieldTraits<T*>
+		: FieldTraitsBase<void, T, true> {};
 
-	// enum pointer
+	// enum / static constexpr
 	template<typename T>
-	struct FieldTraits {
-		static_assert(std::is_enum_v<T>);
-		using object_type = void;
-		using value_type = T;
-		static constexpr bool is_static = true;
-		static constexpr bool is_func = false;
-	};
+	struct FieldTraits
+		: FieldTraitsBase<void, T, true> {};
 }
