@@ -5,8 +5,9 @@ endif()
 
 set(libs "")
 set(defines "")
-if(NOT Ubpa_USRefl_NotUseNameof)
+if(Ubpa_USRefl_UseNameof)
   list(APPEND libs nameof::nameof)
+else()
   list(APPEND defines UBPA_USREFL_NOT_USE_NAMEOF)
 endif()
 

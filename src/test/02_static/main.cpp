@@ -65,6 +65,6 @@ int main() {
 
 	TypeInfo<Point>::fields.ForEach([](auto field) {
 		if constexpr (field.is_static)
-			cout << field.name << ": " << *field.value << endl;
+			cout << field.name << ": " << field.value << endl;
 	});
 }

@@ -15,8 +15,11 @@ if(Ubpa_USRefl_Build_AutoRefl)
   Ubpa_AddDep(UANTLR 0.2.0)
 endif()
 
-option(Ubpa_USRefl_NotUseNameof "not use nameof" ON)
-if(NOT Ubpa_USRefl_NotUseNameof)
+set(OptionCPM "")
+
+option(Ubpa_USRefl_UseNameof "use nameof" OFF)
+if(Ubpa_USRefl_UseNameof)
+  set(OptionCPM "CPM")
   CPMAddPackage(
     NAME nameof
     GITHUB_REPOSITORY Neargye/nameof
@@ -40,7 +43,7 @@ install(
 
 Ubpa_Export(
   TARGET
-  CPM
+  ${OptionCPM}
   DIRECTORIES
     "include"
     "cmake"

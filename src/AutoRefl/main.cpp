@@ -1,6 +1,3 @@
-// TODO
-// [ ] main arguments parse
-
 #include "MetaGenerator.h"
 #include "TypeInfoGenerator.h"
 
