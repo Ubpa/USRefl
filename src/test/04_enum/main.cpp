@@ -24,18 +24,18 @@ struct Ubpa::USRefl::TypeInfo<Color> :
     static constexpr char name[6] = "Color";
 #endif
     static constexpr AttrList attrs = {
-        Attr {"enum_attr", "enum_attr_value"},
+        Attr {USTR("enum_attr"), "enum_attr_value"},
     };
     static constexpr FieldList fields = {
-        Field {"RED", Type::RED, AttrList {
-            Attr {"enumerator_attr", "enumerator_attr_value"},
-            Attr {"func", &Func<1>},
+        Field {USTR("RED"), Type::RED, AttrList {
+            Attr {USTR("enumerator_attr"), "enumerator_attr_value"},
+            Attr {USTR("func"), &Func<1>},
         }},
-        Field {"GREEN", Type::GREEN, AttrList {
-            Attr {"func", &Func<2>},
+        Field {USTR("GREEN"), Type::GREEN, AttrList {
+            Attr {USTR("func"), &Func<2>},
         }},
-        Field {"BLUE", Type::BLUE, AttrList {
-            Attr {"func", &Func<3>},
+        Field {USTR("BLUE"), Type::BLUE, AttrList {
+            Attr {USTR("func"), &Func<3>},
         }},
     };
 };
@@ -47,10 +47,59 @@ int main() {
 		cout << field.name << endl;
 	});
 
-	static_assert(USRefl_ElemList_GetByName(TypeInfo<Color>::fields, "RED").value == Color::RED);
-	static_assert(USRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::RED).name == "RED");
+    Color red = Color::RED;
+    std::string_view nameof_red = "RED";
 
-	constexpr Color c = Color::GREEN;
-	constexpr auto c_attr = USRefl_ElemList_GetByValue(TypeInfo<Color>::fields, c).attrs;
-	static_assert(USRefl_ElemList_GetByName(c_attr, "func").value() == 2);
+    // name -> value
+    {
+        // compile-time
+        static_assert(TypeInfo<Color>::fields.ValueOfName<Color>("GREEN") == Color::GREEN);
+
+        // runtime
+        assert(TypeInfo<Color>::fields.ValueOfName<Color>(nameof_red) == red);
+    }
+
+    // value -> name
+    {
+        // compile-time
+        static_assert(TypeInfo<Color>::fields.NameOfValue(Color::GREEN) == "GREEN");
+
+        // runtime
+        assert(TypeInfo<Color>::fields.NameOfValue(red) == nameof_red);
+    }
+
+    // name -> attr
+    {
+        // compile-time
+        static_assert(TypeInfo<Color>::fields.Find(USTR("GREEN")).attrs.Find(USTR("func")).value() == 2);
+        // runtime
+        size_t rst = static_cast<size_t>(-1);
+        TypeInfo<Color>::fields.FindIf([nameof_red, &rst](auto field) {
+            if (field.name == nameof_red) {
+                rst = field.attrs.Find(USTR("func")).value();
+                return true;
+            }
+            else
+                return false;
+        });
+        assert(rst == 1);
+    }
+
+    // value -> attr
+    {
+        static_assert(USRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::GREEN).attrs.Find(USTR("func")).value() == 2);
+
+        // runtime
+        size_t rst = static_cast<size_t>(-1);
+        TypeInfo<Color>::fields.FindIf([red, &rst](auto field) {
+            if (field.value == red) {
+                rst = field.attrs.Find(USTR("func")).value();
+                return true;
+            }
+            else
+                return false;
+        });
+        assert(rst == 1);
+    }
+
 }

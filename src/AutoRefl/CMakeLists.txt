@@ -7,4 +7,6 @@ Ubpa_AddTarget(
   OUTPUT_NAME AutoRefl
   LIB
     Ubpa::UANTLR_ParserCpp14
+  INC
+    "${PROJECT_SOURCE_DIR}/include"
 )

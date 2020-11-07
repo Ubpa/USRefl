@@ -58,8 +58,8 @@ struct Ubpa::USRefl::TypeInfo<Point> : TypeInfoBase<Point> {
 #endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-    Field {"x", &Type::x},
-    Field {"y", &Type::y},
+    Field {USTR("x"), &Type::x},
+    Field {USTR("y"), &Type::y},
   };
 };
 

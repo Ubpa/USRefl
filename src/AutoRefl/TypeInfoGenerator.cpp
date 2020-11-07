@@ -76,8 +76,8 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 			for (const auto& attr : typeMeta.attrs) {
 				auto name = attr.GenerateName(
 					attr.ns.empty() ?
-					config.nonNamespaceAttrNameWithoutQuotation
-					: !config.namespaceAttrNameWithQuotation
+					config.nonNamespaceNameWithoutQuotation
+					: !config.namespaceNameWithQuotation
 				);
 				ss << indent << indent << "Attr {" << name;
 				if (!attr.value.empty())
@@ -106,20 +106,28 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 				if (field.isTemplate || field.accessSpecifier != AccessSpecifier::PUBLIC)
 					continue;
 				
-				ss << indent << indent << "Field {\"";
+				ss << indent << indent << "Field {";
 				
 				// [name]
+				Attr attr;
 				if (field.name == typeMeta.name) {
 					// constructor
-					ss << config.name_constructor;
+					attr.ns = config.nameof_namespace;
+					attr.name = config.nameof_constructor;
 				}
 				else if (field.name == ("~" + typeMeta.name)) {
 					// destructor
-					ss << config.name_destructor;
+					attr.ns = config.nameof_namespace;
+					attr.name = config.nameof_destructor;
 				}
 				else
-					ss << field.name;
-				ss << "\", ";
+					attr.name = field.name;
+				ss
+					<< attr.GenerateName(
+						attr.ns.empty() ?
+						config.nonNamespaceNameWithoutQuotation
+						: !config.namespaceNameWithQuotation
+					) << ", ";
 				
 				// [value]
 				switch (field.mode) {
@@ -158,13 +166,13 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 					// [initializer]
 					if (hasInitializerAttr) {
 						Attr attr;
-						attr.ns = config.ns_initializer;
-						attr.name = config.name_initializer;
+						attr.ns = config.nameof_namespace;
+						attr.name = config.nameof_initializer;
 						attr.value = field.initializer;
 						auto name = attr.GenerateName(
 							attr.ns.empty() ?
-							config.nonNamespaceAttrNameWithoutQuotation
-							: !config.namespaceAttrNameWithQuotation
+							config.nonNamespaceNameWithoutQuotation
+							: !config.namespaceNameWithQuotation
 						);
 						ss
 							<< indent << indent << indent
@@ -174,12 +182,12 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 					// [default functions]
 					if (hasDefaultFunctionsAttr) {
 						Attr attr;
-						attr.ns = config.ns_default_functions;
-						attr.name = config.name_default_functions;
+						attr.ns = config.nameof_namespace;
+						attr.name = config.nameof_default_functions;
 						auto name = attr.GenerateName(
 							attr.ns.empty() ?
-							config.nonNamespaceAttrNameWithoutQuotation
-							: !config.namespaceAttrNameWithQuotation
+							config.nonNamespaceNameWithoutQuotation
+							: !config.namespaceNameWithQuotation
 						);
 						ss
 							<< indent << indent << indent
@@ -217,8 +225,8 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 					for (const auto& attr : field.attrs) {
 						auto name = attr.GenerateName(
 							attr.ns.empty() ?
-							config.nonNamespaceAttrNameWithoutQuotation
-							: !config.namespaceAttrNameWithQuotation
+							config.nonNamespaceNameWithoutQuotation
+							: !config.namespaceNameWithQuotation
 						);
 						ss << indent << indent << indent
 							<< "Attr {" << name;

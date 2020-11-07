@@ -6,10 +6,10 @@ using namespace Ubpa::USRefl;
 
 std::string Attr::GenerateName(bool withoutQuatation) const {
 	auto rst = ns.empty() ? name : ns + "::" + name;
-	if (withoutQuatation)
-		return rst;
+	if (!withoutQuatation)
+		rst = "\"" + rst + "\"";
 	
-	return "\"" + rst + "\"";
+	return "USTR(" + rst + ")";
 }
 
 std::string Attr::GenerateValue(bool toFunction) const {

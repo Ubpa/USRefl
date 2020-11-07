@@ -7,7 +7,7 @@
 namespace Ubpa::USRefl {
 	template<typename... Attrs>
 	struct AttrList : ElemList<Attrs...> {
-		static_assert((detail::IsInstance<Attrs, Attr>::value&&...));
+		//static_assert((detail::IsInstance<Attrs, Attr>::value&&...));
 
 		constexpr AttrList(Attrs... attrs)
 			: ElemList<Attrs...>{ attrs... } {}

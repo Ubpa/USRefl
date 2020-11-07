@@ -1,5 +1,7 @@
 #pragma once
 
+#include "config.h"
+
 #include "Attr.h"
 #include "AttrList.h"
 #include "Base.h"

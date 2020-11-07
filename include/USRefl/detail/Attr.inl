@@ -1,15 +1,14 @@
 #pragma once
 
 namespace Ubpa::USRefl {
-	template<typename T>
-	struct Attr : NamedValue<T> {
-		constexpr Attr(std::string_view name, T value)
-			: NamedValue<T>{ name,value } {}
+	template<typename T, typename Char, Char... chars>
+	struct Attr : NamedValue<T, Char, chars...> {
+		constexpr Attr(std::integer_sequence<Char, chars...> name, T value)
+			: NamedValue<T, Char, chars...>{ name, value } {}
 	};
 
-	template<>
-	struct Attr<void> : NamedValue<void> {
-		constexpr Attr(std::string_view name)
-			: NamedValue<void>{ name } {}
+	template<typename Char, Char... chars>
+	struct Attr<void, Char, chars...> : NamedValue<void, Char, chars...> {
+		constexpr Attr(std::integer_sequence<Char, chars...> name) : NamedValue<void, Char, chars...>{ name } {}
 	};
 }

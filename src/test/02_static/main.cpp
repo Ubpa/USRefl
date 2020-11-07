@@ -22,16 +22,16 @@ struct Ubpa::USRefl::TypeInfo<Point> :
 	static constexpr char name[6] = "Point";
 #endif
 	static constexpr AttrList attrs = {
-		Attr {"size", 8},
+		Attr {USTR("size"), 8},
 	};
 	static constexpr FieldList fields = {
-		Field {"x", &Type::x, AttrList {
-			Attr {"not_serialize"},
+		Field {USTR("x"), &Type::x, AttrList {
+			Attr {USTR("not_serialize")},
 		}},
-		Field {"y", &Type::y, AttrList {
-			Attr {"info", "hello"},
+		Field {USTR("y"), &Type::y, AttrList {
+			Attr {USTR("info"), "hello"},
 		}},
-		Field {"id", Type::id},
+		Field {USTR("id"), Type::id},
 	};
 };
 
@@ -47,11 +47,10 @@ int main() {
 		});
 	});
 
-	constexpr auto y_idx = TypeInfo<Point>::fields.Find("y");
-	constexpr auto y_field = TypeInfo<Point>::fields.Get<y_idx>();
+	constexpr auto y_field = TypeInfo<Point>::fields.Find(USTR("y"));
 	static_assert(y_field.name == "y");
 
-	static_assert(TypeInfo<Point>::fields.Contains("x"));
+	static_assert(TypeInfo<Point>::fields.Contains(USTR("x")));
 
 	TypeInfo<Point>::attrs.ForEach([](auto attr) {
 		cout << "name   : " << attr.name << endl;

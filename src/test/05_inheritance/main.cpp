@@ -14,57 +14,57 @@ struct D : B, C { float d; };
 
 template<>
 struct Ubpa::USRefl::TypeInfo<A> :
-    TypeInfoBase<A>
+	TypeInfoBase<A>
 {
 #ifdef UBPA_USREFL_NOT_USE_NAMEOF
-    static constexpr char name[2] = "A";
+	static constexpr char name[2] = "A";
 #endif
-    static constexpr AttrList attrs = {};
-    static constexpr FieldList fields = {
-        Field {"a", &Type::a},
-    };
+	static constexpr AttrList attrs = {};
+	static constexpr FieldList fields = {
+		Field {USTR("a"), &Type::a},
+	};
 };
 
 template<>
 struct Ubpa::USRefl::TypeInfo<B> :
-    TypeInfoBase<B, Base<A>>
+	TypeInfoBase<B, Base<A>>
 {
 #ifdef UBPA_USREFL_NOT_USE_NAMEOF
-    static constexpr char name[2] = "B";
+	static constexpr char name[2] = "B";
 #endif
-    static constexpr AttrList attrs = {};
-    static constexpr FieldList fields = {
-        Field {"b", &Type::b},
-    };
+	static constexpr AttrList attrs = {};
+	static constexpr FieldList fields = {
+		Field {USTR("b"), &Type::b},
+	};
 };
 
 template<>
 struct Ubpa::USRefl::TypeInfo<C> :
-    TypeInfoBase<C, Base<A>>
+	TypeInfoBase<C, Base<A>>
 {
 #ifdef UBPA_USREFL_NOT_USE_NAMEOF
-    static constexpr char name[2] = "C";
+	static constexpr char name[2] = "C";
 #endif
-    static constexpr AttrList attrs = {};
-    static constexpr FieldList fields = {
-        Field {"c", &Type::c},
-    };
+	static constexpr AttrList attrs = {};
+	static constexpr FieldList fields = {
+		Field {USTR("c"), &Type::c},
+	};
 };
 
 template<>
 struct Ubpa::USRefl::TypeInfo<D> :
-    TypeInfoBase<D,
-        Base<B>,
-        Base<C>
-    >
+	TypeInfoBase<D,
+	Base<B>,
+	Base<C>
+	>
 {
 #ifdef UBPA_USREFL_NOT_USE_NAMEOF
-    static constexpr char name[2] = "D";
+	static constexpr char name[2] = "D";
 #endif
-    static constexpr AttrList attrs = {};
-    static constexpr FieldList fields = {
-        Field {"d", &Type::d},
-    };
+	static constexpr AttrList attrs = {};
+	static constexpr FieldList fields = {
+		Field {USTR("d"), &Type::d},
+	};
 };
 
 int main() {

@@ -22,12 +22,24 @@ namespace Ubpa::USRefl {
 		template<typename Func>
 		constexpr size_t FindIf(Func&& func) const;
 
-		constexpr size_t Find(std::string_view name) const;
+		template<typename Char, Char... chars>
+		constexpr auto Find(std::integer_sequence<Char, chars...> name) const;
 
 		template<typename T>
 		constexpr size_t FindValue(T value) const;
 
-		constexpr bool Contains(std::string_view name) const;
+		template<typename T, typename Char>
+		constexpr T ValueOfName(std::basic_string_view<Char> name) const;
+
+		template<typename T>
+		constexpr T ValueOfName(std::string_view name) const { return ValueOfName<T, char>(name); }
+
+		template<typename T, typename Char = char>
+		constexpr std::basic_string_view<Char> NameOfValue(T value) const;
+		
+
+		template<typename Char, Char... chars>
+		constexpr bool Contains(std::integer_sequence<Char, chars...> name) const;
 
 		template<size_t N>
 		constexpr auto Get() const;
@@ -37,10 +49,6 @@ namespace Ubpa::USRefl {
 
 		template<typename Elem>
 		constexpr auto Insert(Elem e) const;
-
-// name must be constexpr std::string_view / const char[N]
-// C++20 support string literal as template arguments
-#define USRefl_ElemList_GetByName(list, name) list.Get<list.Find(name)>()
 
 // value must be constexpr
 // C++20 support string literal as template arguments

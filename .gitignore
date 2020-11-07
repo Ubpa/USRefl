@@ -4,8 +4,6 @@ lib/
 .vs/
 _deps/
 
-*Config.h
-
 *.obj
 *.uscene
 

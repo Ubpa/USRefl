@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Util.h"
+#include "../Util.h"
 
 namespace Ubpa::USRefl::detail {
 	template<typename List, typename Func, typename Acc, size_t... Ns, bool... masks>
@@ -70,7 +70,6 @@ namespace Ubpa::USRefl {
 	template<typename... Elems>
 	template<bool... masks, typename Func>
 	constexpr void ElemList<Elems...>::ForEach(Func&& func) const {
-		// std::apply([&](auto... elems) { (std::forward<Func>(func)(elems), ...); }, elems);
 		Accumulate<masks...>(0, [&](auto, auto field) {
 			std::forward<Func>(func)(field);
 			return 0;
@@ -84,8 +83,22 @@ namespace Ubpa::USRefl {
 	}
 
 	template<typename... Elems>
-	constexpr size_t ElemList<Elems...>::Find(std::string_view name) const {
-		return FindIf([name](auto elem) { return elem.name == name; });
+	template<typename Char, Char... chars>
+	constexpr auto ElemList<Elems...>::Find(std::integer_sequence<Char, chars...>) const {
+		return detail::Accumulate(
+			*this,
+			[](auto acc, auto ele) {
+				if constexpr (!std::is_same_v<std::decay_t<decltype(acc)>, nullptr_t>)
+					return acc;
+				else if constexpr (std::is_same_v<typename decltype(ele)::NameTag, std::integer_sequence<Char, chars...>>)
+					return ele;
+				else
+					return acc;
+			},
+			nullptr,
+			std::make_index_sequence<size>{},
+			std::integer_sequence<bool>{}
+		);
 	}
 
 	template<typename... Elems>
@@ -95,8 +108,52 @@ namespace Ubpa::USRefl {
 	}
 
 	template<typename... Elems>
-	constexpr bool ElemList<Elems...>::Contains(std::string_view name) const {
-		return Find(name) != static_cast<size_t>(-1);
+	template<typename T, typename Char>
+	constexpr T ElemList<Elems...>::ValueOfName(std::basic_string_view<Char> name) const {
+		T value{};
+		FindIf([name, &value](auto ele) {
+			if constexpr (std::is_same_v<std::decay_t<decltype(ele.name)>, std::basic_string_view<Char>> && ele.ValueTypeIs<T>()) {
+				if (ele.name == name) {
+					value = ele.value;
+					return true;
+				}
+				else
+					return false;
+			}
+			else
+				return false;
+		});
+		return value;
+	}
+
+	template<typename... Elems>
+	template<typename T, typename Char>
+	constexpr std::basic_string_view<Char> ElemList<Elems...>::NameOfValue(T value) const {
+		std::basic_string_view<Char> name;
+		FindIf([value, &name](auto ele) {
+			if constexpr (ele.ValueTypeIs<T>()) {
+				if (ele.value == value) {
+					name = ele.name;
+					return true;
+				}
+				else
+					return false;
+			}
+			else
+				return false;
+		});
+		return name;
+	}
+
+	template<typename... Elems>
+	template<typename Char, Char... chars>
+	constexpr bool ElemList<Elems...>::Contains(std::integer_sequence<Char, chars...> name) const {
+		return static_cast<size_t>(-1) != FindIf([](auto ele) {
+			if constexpr (std::is_same_v<typename decltype(ele)::NameTag, std::integer_sequence<Char, chars...>>)
+				return true;
+			else
+				return false;
+		});
 	}
 
 	template<typename... Elems>

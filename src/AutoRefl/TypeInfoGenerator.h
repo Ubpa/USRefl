@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Meta.h"
+#include <USRefl/config.h>
 
 namespace Ubpa::USRefl {
 	class TypeInfoGenerator {
@@ -12,21 +13,22 @@ namespace Ubpa::USRefl {
 		};
 		
 		struct Config {
-			bool nonNamespaceAttrNameWithoutQuotation{ false };
-			bool namespaceAttrNameWithQuotation{ false };
+			bool nonNamespaceNameWithoutQuotation{ false };
+			bool namespaceNameWithQuotation{ false };
 			bool isAttrValueToFunction{ false };
-			
+
+			std::string_view nameof_namespace = _USRefl::nameof_namespace;
+
 			bool isInitializerAsAttr{ true };
-			std::string_view ns_initializer = "";
-			std::string_view name_initializer = "__initializer";
+
+			std::string_view nameof_initializer = _USRefl::nameof_initializer;
 			bool isInitializerToFunction{ true };
-			
-			std::string_view name_constructor = "__constructor";
-			std::string_view name_destructor = "__destructor";
+
+			std::string_view nameof_constructor = _USRefl::nameof_constructor;
+			std::string_view nameof_destructor = _USRefl::nameof_destructor;
 			
 			bool generateDefaultFunctions{ true };
-			std::string_view ns_default_functions = "";
-			std::string_view name_default_functions = "__default_functions";
+			std::string_view nameof_default_functions = _USRefl::nameof_default_functions;
 			ConstMode attrListConstMode{ ConstMode::Constepxr };
 			ConstMode fieldListConstMode{ ConstMode::Constepxr };
 		};
