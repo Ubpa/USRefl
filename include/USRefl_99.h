@@ -1,7 +1,7 @@
 #pragma once                           // Ubpa Static Reflection -- 99 lines
 #include <string_view>                 // Repository: https://github.com/Ubpa/USRefl
 #include <tuple>                       // License: https://github.com/Ubpa/USRefl/blob/master/LICENSE
-#define USTR(s) Ubpa::USRefl::detail::USTRImpl1([] { struct tmp { static constexpr decltype(auto) get() { return s; } }; return tmp{}; }())
+#define USTR(s) Ubpa::USRefl::detail::USTRImpl1([] { struct tmp { static constexpr decltype(auto) get() { return (s); } }; return tmp{}; }())
 namespace Ubpa::USRefl::detail {
   template<class Char, Char... chars> struct Str { using Tag = Str; template<class T> static constexpr bool NameIs() {return std::is_same_v<T,Tag>;}
     static constexpr char name_data[]{chars...,Char(0)}; static constexpr std::string_view name{name_data}; };

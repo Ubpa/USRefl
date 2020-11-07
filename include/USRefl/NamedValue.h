@@ -8,10 +8,10 @@
 // std::integer_sequence<Char, chars...>
 // in C++20, we can easily put a string into template parameter list
 // but in C++17, we just can use this disgusting trick
-#define USTR(s)                                                         \
-(Ubpa::USRefl::detail::USTRHelper([] {                                  \
-    struct tmp { static constexpr decltype(auto) get() { return s; } }; \
-    return tmp{};                                                       \
+#define USTR(s)                                                           \
+(Ubpa::USRefl::detail::USTRHelper([] {                                    \
+    struct tmp { static constexpr decltype(auto) get() { return (s); } }; \
+    return tmp{};                                                         \
 }()))
 
 namespace Ubpa::USRefl {

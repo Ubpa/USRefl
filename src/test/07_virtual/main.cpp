@@ -67,22 +67,6 @@ struct Ubpa::USRefl::TypeInfo<D> :
     };
 };
 
-template<>
-struct Ubpa::USRefl::TypeInfo<D> :
-    TypeInfoBase<D,
-        Base<B>,
-        Base<C>
-    >
-{
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-    static constexpr char name[2] = "D";
-#endif
-    static constexpr AttrList attrs = {};
-    static constexpr FieldList fields = {
-        Field {"d", &Type::d},
-    };
-};
-
 int main() {
 	cout << "// not fully support in MSVC++ 19.26 because of a bug (2020/07/17)" << endl;
 	cout << "// https://developercommunity.visualstudio.com/content/problem/1116835/member-pointer-of-a-class-with-a-virtual-base-1.html" << endl;

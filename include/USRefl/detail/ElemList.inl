@@ -125,9 +125,10 @@ namespace Ubpa::USRefl {
 	constexpr std::basic_string_view<Char> ElemList<Elems...>::NameOfValue(T value) const {
 		std::basic_string_view<Char> name;
 		FindIf([value, &name](auto ele) {
-			if constexpr (ele.template ValueTypeIs<T>()) {
+			using Elem = std::decay_t<decltype(ele)>;
+			if constexpr (Elem::template ValueTypeIs<T>()) {
 				if (ele.value == value) {
-					name = ele.name;
+					name = Elem::name;
 					return true;
 				}
 				else
