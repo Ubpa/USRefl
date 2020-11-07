@@ -36,7 +36,6 @@ namespace Ubpa::USRefl {
 
 		template<typename T, typename Char = char>
 		constexpr std::basic_string_view<Char> NameOfValue(T value) const;
-		
 
 		template<typename Char, Char... chars>
 		constexpr bool Contains(std::integer_sequence<Char, chars...> name) const;

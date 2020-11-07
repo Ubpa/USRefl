@@ -1,6 +1,7 @@
 #pragma once
 
 #include "detail/NamedValue.inl"
+
 #include <string_view>
 
 // [USRefl static C-style string]
@@ -8,7 +9,7 @@
 // in C++20, we can easily put a string into template parameter list
 // but in C++17, we just can use this disgusting trick
 #define USTR(s)                                                         \
-(Ubpa::USRefl::detail::prepare([] {                                     \
+(Ubpa::USRefl::detail::USTRHelper([] {                                  \
     struct tmp { static constexpr decltype(auto) get() { return s; } }; \
     return tmp{};                                                       \
 }()))

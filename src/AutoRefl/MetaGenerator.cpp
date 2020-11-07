@@ -327,7 +327,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 				base.isPacked = true;
 			base.name = {
 				code.begin() + ctxBaseSpecifierX->baseSpecifier()->baseTypeSpecifier()->getStart()->getStartIndex(),
-				code.begin() + ctxBaseSpecifierX->baseSpecifier()->baseTypeSpecifier()->getStop()->getStartIndex() + 1
+				code.begin() + ctxBaseSpecifierX->baseSpecifier()->baseTypeSpecifier()->getStop()->getStopIndex() + 1
 			};
 			if (ctxBaseSpecifierX->baseSpecifier()->Virtual())
 				base.isVirtual = true;

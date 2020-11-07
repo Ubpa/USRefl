@@ -85,20 +85,14 @@ namespace Ubpa::USRefl {
 	template<typename... Elems>
 	template<typename Char, Char... chars>
 	constexpr auto ElemList<Elems...>::Find(std::integer_sequence<Char, chars...>) const {
-		return detail::Accumulate(
-			*this,
-			[](auto acc, auto ele) {
-				if constexpr (!std::is_same_v<std::decay_t<decltype(acc)>, nullptr_t>)
-					return acc;
-				else if constexpr (std::is_same_v<typename decltype(ele)::NameTag, std::integer_sequence<Char, chars...>>)
-					return ele;
-				else
-					return acc;
-			},
-			nullptr,
-			std::make_index_sequence<size>{},
-			std::integer_sequence<bool>{}
-		);
+		return Accumulate(nullptr, [](auto acc, auto ele) {
+			if constexpr (!std::is_same_v<std::decay_t<decltype(acc)>, nullptr_t>)
+				return acc;
+			else if constexpr (std::is_same_v<typename decltype(ele)::NameTag, std::integer_sequence<Char, chars...>>)
+				return ele;
+			else
+				return acc;
+		});
 	}
 
 	template<typename... Elems>
@@ -112,7 +106,7 @@ namespace Ubpa::USRefl {
 	constexpr T ElemList<Elems...>::ValueOfName(std::basic_string_view<Char> name) const {
 		T value{};
 		FindIf([name, &value](auto ele) {
-			if constexpr (std::is_same_v<std::decay_t<decltype(ele.name)>, std::basic_string_view<Char>> && ele.ValueTypeIs<T>()) {
+			if constexpr (std::is_same_v<std::decay_t<decltype(ele.name)>, std::basic_string_view<Char>> && ele.template ValueTypeIs<T>()) {
 				if (ele.name == name) {
 					value = ele.value;
 					return true;
@@ -131,7 +125,7 @@ namespace Ubpa::USRefl {
 	constexpr std::basic_string_view<Char> ElemList<Elems...>::NameOfValue(T value) const {
 		std::basic_string_view<Char> name;
 		FindIf([value, &name](auto ele) {
-			if constexpr (ele.ValueTypeIs<T>()) {
+			if constexpr (ele.template ValueTypeIs<T>()) {
 				if (ele.value == value) {
 					name = ele.name;
 					return true;
