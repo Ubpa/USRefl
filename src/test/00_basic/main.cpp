@@ -10,7 +10,7 @@ struct Point {
 };
 
 template<>
-struct TypeInfo<Point> : TypeInfoBase<Point> {
+struct Ubpa::USRefl::TypeInfo<Point> : TypeInfoBase<Point> {
 #ifdef UBPA_USREFL_NOT_USE_NAMEOF
     static constexpr char name[6] = "Point";
 #endif
@@ -23,7 +23,7 @@ struct TypeInfo<Point> : TypeInfoBase<Point> {
 
 int main() {
     Point p{ 1.f, 2.f };
-    Ubpa::USRefl::TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
+    TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
         cout << field.name << ": " << var << endl;
     });
 }
