@@ -40,62 +40,36 @@ Header-only, tiny (99 lines) and powerful C++17 static reflection library.
 
 ## Example
 
-run it online : [**compiler explorer**](https://godbolt.org/z/Y8e6rE) 
+run it online : [**compiler explorer**](https://godbolt.org/z/691fhj) 
 
 ```c++
 #include <USRefl/USRefl.h>
 #include <iostream>
+
 using namespace Ubpa::USRefl;
 using namespace std;
 
-// [[...]] act as (structured) comments
-// they are useless in the code
-struct [[size(8)]] Point {
-  [[not_serialize]]
+struct Point {
   float x;
-  [[info("hello")]]
   float y;
 };
 
-// declaration
 template<>
 struct TypeInfo<Point> : TypeInfoBase<Point> {
-  // if you use <USRefl/USRefl.h>, the name is declared by TypeInfoBase<Point>
-  // if you use <USRefl_99.h>, you should declare it here.
-  // static constexpr std::string_view name = "struct Point";
-
+#ifdef UBPA_USREFL_NOT_USE_NAMEOF
+  static constexpr char name[6] = "Point";
+#endif
+  static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-    Field{"x", &Point::x, AttrList{ Attr{ "not_serialize" } }},
-    Field{"y", &Point::y, AttrList{ Attr{ "info", "hello" } }}
-  };
-
-  static constexpr AttrList attrs = {
-    Attr{ "size", 8 }
+    Field {"x", &Type::x},
+    Field {"y", &Type::y},
   };
 };
 
 int main() {
-  TypeInfo<Point>::fields.ForEach([](auto field) {
-    cout << field.name << endl;
-    field.attrs.ForEach([](auto attr) {
-      cout << attr.name;
-      if constexpr (attr.has_value)
-        cout << ": " << attr.value;
-      cout << endl;
-    });
-  });
-
-  static_assert(TypeInfo<Point>::fields.Contains("x"));
-
-  TypeInfo<Point>::attrs.ForEach([](auto attr) {
-    cout << attr.name;
-    if constexpr (!attr.has_value)
-      cout << ": " << attr.value;
-    cout << endl;
-  });
-  
-  TypeInfo<Point>::ForEachVarOf(Point{ 1,2 }, [](auto field, auto&& var) {
-    cout << field.name << " : " << var << endl;
+  Point p{ 1.f, 2.f };
+  Ubpa::USRefl::TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
+    cout << field.name << ": " << var << endl;
   });
 }
 ```
@@ -103,11 +77,6 @@ int main() {
 result is
 
 ```
-x
-not_serialize
-y
-info: hello
-size
 x : 1
 y : 2
 ```
