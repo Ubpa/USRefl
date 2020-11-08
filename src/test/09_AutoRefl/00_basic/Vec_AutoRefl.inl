@@ -13,29 +13,29 @@ struct Ubpa::USRefl::TypeInfo<Ubpa::Nested::Vec<T>> :
     static constexpr char name[18] = "Ubpa::Nested::Vec";
 #endif
     static constexpr AttrList attrs = {
-        Attr {USTR("size"), sizeof(T)},
+        Attr {TSTR("size"), sizeof(T)},
     };
     static constexpr FieldList fields = {
-        Field {USTR(UMeta::constructor), WrapConstructor<Ubpa::Nested::Vec<T>()>()},
-        Field {USTR(UMeta::constructor), WrapConstructor<Ubpa::Nested::Vec<T>(T, T)>()},
-        Field {USTR(UMeta::destructor), WrapDestructor<Ubpa::Nested::Vec<T>>()},
-        Field {USTR("x"), &Ubpa::Nested::Vec<T>::x, AttrList {
-            Attr {USTR("not_serialize")},
+        Field {TSTR(UMeta::constructor), WrapConstructor<Ubpa::Nested::Vec<T>()>()},
+        Field {TSTR(UMeta::constructor), WrapConstructor<Ubpa::Nested::Vec<T>(T, T)>()},
+        Field {TSTR(UMeta::destructor), WrapDestructor<Ubpa::Nested::Vec<T>>()},
+        Field {TSTR("x"), &Ubpa::Nested::Vec<T>::x, AttrList {
+            Attr {TSTR("not_serialize")},
         }},
-        Field {USTR("y"), &Ubpa::Nested::Vec<T>::y, AttrList {
-            Attr {USTR("info"), "hello"},
-            Attr {USTR("maximum"), 10.f},
+        Field {TSTR("y"), &Ubpa::Nested::Vec<T>::y, AttrList {
+            Attr {TSTR("info"), "hello"},
+            Attr {TSTR("maximum"), 10.f},
         }},
-        Field {USTR("num"), &Ubpa::Nested::Vec<T>::num, AttrList {
-            Attr {USTR(UMeta::initializer), []{ return size_t{ 0 }; }},
+        Field {TSTR("num"), &Ubpa::Nested::Vec<T>::num, AttrList {
+            Attr {TSTR(UMeta::initializer), []{ return size_t{ 0 }; }},
         }},
-        Field {USTR("Sum"), static_cast<float(Ubpa::Nested::Vec<T>::*)()const>(&Ubpa::Nested::Vec<T>::Sum)},
-        Field {USTR("Sum"), static_cast<float(Ubpa::Nested::Vec<T>::*)(float, float)const>(&Ubpa::Nested::Vec<T>::Sum), AttrList {
-            Attr {USTR(UMeta::default_functions), std::tuple {
+        Field {TSTR("Sum"), static_cast<float(Ubpa::Nested::Vec<T>::*)()const>(&Ubpa::Nested::Vec<T>::Sum)},
+        Field {TSTR("Sum"), static_cast<float(Ubpa::Nested::Vec<T>::*)(float, float)const>(&Ubpa::Nested::Vec<T>::Sum), AttrList {
+            Attr {TSTR(UMeta::default_functions), std::tuple {
                 [](Ubpa::Nested::Vec<T> const* __this, float z){ return __this->Sum(std::forward<float>(z)); }
             }},
         }},
-        Field {USTR("Dot"), &Ubpa::Nested::Vec<T>::Dot},
+        Field {TSTR("Dot"), &Ubpa::Nested::Vec<T>::Dot},
     };
 };
 

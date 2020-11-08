@@ -18,10 +18,10 @@ int main() {
 		cout << field.name << endl;
 	});
 
-	constexpr auto y_field = TypeInfo<Vec<float>>::fields.Find(USTR("y"));
+	constexpr auto y_field = TypeInfo<Vec<float>>::fields.Find(TSTR("y"));
 	static_assert(y_field.name == "y");
 
-	static_assert(TypeInfo<Vec<float>>::fields.Contains(USTR("x")));
+	static_assert(TypeInfo<Vec<float>>::fields.Contains(TSTR("x")));
 
 	TypeInfo<Vec<float>>::attrs.ForEach([](auto attr) {
 		cout << "name  : " << attr.name << endl;

@@ -22,16 +22,16 @@ struct Ubpa::USRefl::TypeInfo<Point> :
 	static constexpr char name[6] = "Point";
 #endif
 	static constexpr AttrList attrs = {
-		Attr {USTR("size"), 8},
+		Attr {TSTR("size"), 8},
 	};
 	static constexpr FieldList fields = {
-		Field {USTR("x"), &Type::x, AttrList {
-			Attr {USTR("not_serialize")},
+		Field {TSTR("x"), &Type::x, AttrList {
+			Attr {TSTR("not_serialize")},
 		}},
-		Field {USTR("y"), &Type::y, AttrList {
-			Attr {USTR("info"), "hello"},
+		Field {TSTR("y"), &Type::y, AttrList {
+			Attr {TSTR("info"), "hello"},
 		}},
-		Field {USTR("z"), &Type::z},
+		Field {TSTR("z"), &Type::z},
 	};
 };
 

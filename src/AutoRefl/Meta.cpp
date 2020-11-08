@@ -9,7 +9,7 @@ std::string Attr::GenerateName(bool withoutQuatation) const {
 	if (!withoutQuatation)
 		rst = "\"" + rst + "\"";
 	
-	return "USTR(" + rst + ")";
+	return "TSTR(" + rst + ")";
 }
 
 std::string Attr::GenerateValue(bool toFunction) const {

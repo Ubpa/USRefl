@@ -24,17 +24,17 @@ struct Ubpa::USRefl::TypeInfo<Point> :
 {
 	static constexpr char name[6] = "Point";
 	static constexpr AttrList attrs = {
-		Attr {USTR("size"), 8},
+		Attr {TSTR("size"), 8},
 	};
 	static constexpr FieldList fields = {
-		Field {USTR("x"), &Type::x, AttrList {
-			Attr {USTR("not_serialize")},
+		Field {TSTR("x"), &Type::x, AttrList {
+			Attr {TSTR("not_serialize")},
 		}},
-		Field {USTR("y"), &Type::y, AttrList {
-			Attr {USTR("info"), "hello"},
+		Field {TSTR("y"), &Type::y, AttrList {
+			Attr {TSTR("info"), "hello"},
 		}},
-		Field {USTR("id"), Type::id},
-		Field {USTR("Sum"), &Type::Sum},
+		Field {TSTR("id"), Type::id},
+		Field {TSTR("Sum"), &Type::Sum},
 	};
 };
 
@@ -56,10 +56,10 @@ void test_basic() {
 		});
 	});
 
-	constexpr auto y_field = TypeInfo<Point>::fields.Find(USTR("y"));
+	constexpr auto y_field = TypeInfo<Point>::fields.Find(TSTR("y"));
 	static_assert(y_field.name == "y");
 
-	static_assert(TypeInfo<Point>::fields.Contains(USTR("x")));
+	static_assert(TypeInfo<Point>::fields.Contains(TSTR("x")));
 
 	TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
 		cout << field.name << " : " << var << endl;
@@ -98,8 +98,8 @@ struct Ubpa::USRefl::TypeInfo<Data<T>> :
 	static constexpr char name[5] = "Data";
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
-		Field {USTR("value"), &Data<T>::value, AttrList {
-			Attr {USTR("range"), std::pair<T,T>{static_cast<T>(0),static_cast<T>(100)}},
+		Field {TSTR("value"), &Data<T>::value, AttrList {
+			Attr {TSTR("range"), std::pair<T,T>{static_cast<T>(0),static_cast<T>(100)}},
 		}},
 	};
 };
@@ -111,8 +111,8 @@ void test_template() {
 		<< "====================" << endl;
 
 	cout << TypeInfo<Data<float>>::name << endl;
-	constexpr auto valueAttrs = TypeInfo<Data<float>>::fields.Find(USTR("value")).attrs;
-	constexpr auto range = valueAttrs.Find(USTR("range")).value;
+	constexpr auto valueAttrs = TypeInfo<Data<float>>::fields.Find(TSTR("value")).attrs;
+	constexpr auto range = valueAttrs.Find(TSTR("range")).value;
 	constexpr float range_min = range.first;
 	constexpr float range_max = range.second;
 	cout << "range min :" << range_min << endl;
@@ -134,7 +134,7 @@ struct Ubpa::USRefl::TypeInfo<A> :
 	static constexpr char name[2] = "A";
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
-		Field {USTR("a"), &Type::a},
+		Field {TSTR("a"), &Type::a},
 	};
 };
 
@@ -145,7 +145,7 @@ struct Ubpa::USRefl::TypeInfo<B> :
 	static constexpr char name[2] = "B";
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
-		Field {USTR("b"), &Type::b},
+		Field {TSTR("b"), &Type::b},
 	};
 };
 
@@ -156,7 +156,7 @@ struct Ubpa::USRefl::TypeInfo<C> :
 	static constexpr char name[2] = "C";
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
-		Field {USTR("c"), &Type::c},
+		Field {TSTR("c"), &Type::c},
 	};
 };
 
@@ -170,7 +170,7 @@ struct Ubpa::USRefl::TypeInfo<D> :
 	static constexpr char name[2] = "D";
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
-		Field {USTR("d"), &Type::d},
+		Field {TSTR("d"), &Type::d},
 	};
 };
 
@@ -233,18 +233,18 @@ struct Ubpa::USRefl::TypeInfo<Color> :
 {
 	static constexpr char name[6] = "Color";
 	static constexpr AttrList attrs = {
-		Attr {USTR("enum_attr"), "enum_attr_value"},
+		Attr {TSTR("enum_attr"), "enum_attr_value"},
 	};
 	static constexpr FieldList fields = {
-		Field {USTR("RED"), Type::RED, AttrList {
-			Attr {USTR("enumerator_attr"), "enumerator_attr_value"},
-			Attr {USTR("func"), &Func<1>},
+		Field {TSTR("RED"), Type::RED, AttrList {
+			Attr {TSTR("enumerator_attr"), "enumerator_attr_value"},
+			Attr {TSTR("func"), &Func<1>},
 		}},
-		Field {USTR("GREEN"), Type::GREEN, AttrList {
-			Attr {USTR("func"), &Func<2>},
+		Field {TSTR("GREEN"), Type::GREEN, AttrList {
+			Attr {TSTR("func"), &Func<2>},
 		}},
-		Field {USTR("BLUE"), Type::BLUE, AttrList {
-			Attr {USTR("func"), &Func<3>},
+		Field {TSTR("BLUE"), Type::BLUE, AttrList {
+			Attr {TSTR("func"), &Func<3>},
 		}},
 	};
 };
@@ -284,12 +284,12 @@ void test_enum() {
 	// name -> attr
 	{
 		// compile-time
-		static_assert(TypeInfo<Color>::fields.Find(USTR("GREEN")).attrs.Find(USTR("func")).value() == 2);
+		static_assert(TypeInfo<Color>::fields.Find(TSTR("GREEN")).attrs.Find(TSTR("func")).value() == 2);
 		// runtime
 		size_t rst = static_cast<size_t>(-1);
 		TypeInfo<Color>::fields.FindIf([nameof_red, &rst](auto field) {
 			if (field.name == nameof_red) {
-				rst = field.attrs.Find(USTR("func")).value();
+				rst = field.attrs.Find(TSTR("func")).value();
 				return true;
 			}
 			else
@@ -300,13 +300,13 @@ void test_enum() {
 
 	// value -> attr
 	{
-		static_assert(USRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::GREEN).attrs.Find(USTR("func")).value() == 2);
+		static_assert(USRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::GREEN).attrs.Find(TSTR("func")).value() == 2);
 
 		// runtime
 		size_t rst = static_cast<size_t>(-1);
 		TypeInfo<Color>::fields.FindIf([red, &rst](auto field) {
 			if (field.value == red) {
-				rst = field.attrs.Find(USTR("func")).value();
+				rst = field.attrs.Find(TSTR("func")).value();
 				return true;
 			}
 			else
@@ -331,9 +331,9 @@ struct Ubpa::USRefl::TypeInfo<FuncList> :
 	static constexpr char name[9] = "FuncList";
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
-		Field {USTR("Func0"), &Type::Func0},
-		Field {USTR("Func1"), &Type::Func1, AttrList {
-			Attr {USTR("default_functions"), std::tuple {
+		Field {TSTR("Func0"), &Type::Func0},
+		Field {TSTR("Func1"), &Type::Func1, AttrList {
+			Attr {TSTR("default_functions"), std::tuple {
 				[](Type* __this) { return __this->Func1(); }
 			}},
 		}},
@@ -366,7 +366,7 @@ struct Ubpa::USRefl::TypeInfo<VA> :
     static constexpr char name[3] = "VA";
     static constexpr AttrList attrs = {};
     static constexpr FieldList fields = {
-        Field {USTR("a"), &Type::a},
+        Field {TSTR("a"), &Type::a},
     };
 };
 
@@ -377,7 +377,7 @@ struct Ubpa::USRefl::TypeInfo<VB> :
     static constexpr char name[3] = "VB";
     static constexpr AttrList attrs = {};
     static constexpr FieldList fields = {
-        Field {USTR("b"), &Type::b},
+        Field {TSTR("b"), &Type::b},
     };
 };
 
@@ -388,7 +388,7 @@ struct Ubpa::USRefl::TypeInfo<VC> :
     static constexpr char name[3] = "VC";
     static constexpr AttrList attrs = {};
     static constexpr FieldList fields = {
-        Field {USTR("c"), &Type::c},
+        Field {TSTR("c"), &Type::c},
     };
 };
 
@@ -402,7 +402,7 @@ struct Ubpa::USRefl::TypeInfo<VD> :
     static constexpr char name[3] = "VD";
     static constexpr AttrList attrs = {};
     static constexpr FieldList fields = {
-        Field {USTR("d"), &Type::d},
+        Field {TSTR("d"), &Type::d},
     };
 };
 

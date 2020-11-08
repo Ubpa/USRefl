@@ -21,7 +21,7 @@ struct Ubpa::USRefl::TypeInfo<A> :
 #endif
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
-		Field {USTR("a"), &Type::a},
+		Field {TSTR("a"), &Type::a},
 	};
 };
 
@@ -34,7 +34,7 @@ struct Ubpa::USRefl::TypeInfo<B> :
 #endif
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
-		Field {USTR("b"), &Type::b},
+		Field {TSTR("b"), &Type::b},
 	};
 };
 
@@ -47,7 +47,7 @@ struct Ubpa::USRefl::TypeInfo<C> :
 #endif
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
-		Field {USTR("c"), &Type::c},
+		Field {TSTR("c"), &Type::c},
 	};
 };
 
@@ -63,7 +63,7 @@ struct Ubpa::USRefl::TypeInfo<D> :
 #endif
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
-		Field {USTR("d"), &Type::d},
+		Field {TSTR("d"), &Type::d},
 	};
 };
 

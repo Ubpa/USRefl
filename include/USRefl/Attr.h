@@ -7,16 +7,15 @@ namespace Ubpa::USRefl {
 	// [summary]
 	// attribute for field, class, enum
 	// [member]
-	// std::string_view name
 	// T value (T == void -> no value)
-	template<typename T, typename Char, Char... chars>
+	template<typename Name, typename T>
 	struct Attr;
 
-	template<size_t N, typename Char, Char... chars>
-	Attr(std::integer_sequence<Char, chars...>, const char(&)[N])->Attr<std::string_view, Char, chars...>;
+	template<typename Name, typename Char, size_t N>
+	Attr(Name, const Char(&)[N])->Attr<Name, std::basic_string_view<Char>>;
 
-	template<typename Char, Char... chars>
-	Attr(std::integer_sequence<Char, chars...>)->Attr<void, Char, chars...>;
+	template<typename Name>
+	Attr(Name)->Attr<Name, void>;
 }
 
 #include "detail/Attr.inl"

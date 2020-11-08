@@ -1,13 +1,13 @@
 #pragma once                           // Ubpa Static Reflection -- 99 lines
 #include <string_view>                 // Repository: https://github.com/Ubpa/USRefl
 #include <tuple>                       // License: https://github.com/Ubpa/USRefl/blob/master/LICENSE
-#define USTR(s) Ubpa::USRefl::detail::USTRImpl1([] { struct tmp { static constexpr decltype(auto) get() { return (s); } }; return tmp{}; }())
+#define TSTR(s) Ubpa::USRefl::detail::TNameImpl1([] { struct tmp { static constexpr decltype(auto) get() { return (s); } }; return tmp{}; }())
 namespace Ubpa::USRefl::detail {
-  template<class Char, Char... chars> struct Str { using Tag = Str; template<class T> static constexpr bool NameIs() {return std::is_same_v<T,Tag>;}
-    static constexpr char name_data[]{chars...,Char(0)}; static constexpr std::string_view name{name_data}; };
-  template<class Char,class T,size_t...N>constexpr auto USTRImpl2(std::index_sequence<N...>) { return Str<Char, T::get()[N]...>(); }
-  template <typename T> constexpr auto USTRImpl1(T) { using Char = std::decay_t<decltype(T::get()[0])>;
-    return USTRImpl2<Char, T>(std::make_index_sequence<sizeof(T::get()) / sizeof(Char) - 1>()); }
+  template<class C, C... cs>struct TStr{using Tag=TStr; template<class T>static constexpr bool NameIs(){return std::is_same_v<T,Tag>;}
+    using Char=C; static constexpr char name_data[]{cs...,C(0)}; static constexpr std::string_view name{name_data}; };
+  template<class Char,class T,size_t...N>constexpr auto TNameImpl2(std::index_sequence<N...>) { return TStr<Char, T::get()[N]...>(); }
+  template <typename T> constexpr auto TNameImpl1(T) { using Char = std::decay_t<decltype(T::get()[0])>;
+    return TNameImpl2<Char, T>(std::make_index_sequence<sizeof(T::get()) / sizeof(Char) - 1>()); }
   template<class L, class F> constexpr size_t FindIf(L, F&&, std::index_sequence<>) { return -1; }
   template<class L, class F, size_t N0, size_t... Ns> constexpr size_t FindIf(L l, F&& f, std::index_sequence<N0, Ns...>)
   { return f(l.template Get<N0>()) ? N0 : FindIf(l, std::forward<F>(f), std::index_sequence<Ns...>{}); }
@@ -31,9 +31,9 @@ namespace Ubpa::USRefl::detail {
   }
 }
 namespace Ubpa::USRefl {
-  template<class T, class STR> struct NamedValue : STR { T value; static constexpr bool has_value = true; constexpr NamedValue(T v):value{v}{}
+  template<class Name,class T>struct NamedValue:Name{T value;static constexpr bool has_value=true;constexpr NamedValue(T v):value{v}{}
     template<class U>constexpr bool operator==(U v)const{if constexpr(std::is_same_v<T,U>)return value==v;else return false;} };
-  template<class STR> struct NamedValue<void, STR> : STR { /*T value;*/ static constexpr bool has_value = false;
+  template<class Name> struct NamedValue<Name, void> : Name { /*T value;*/ static constexpr bool has_value = false;
     template<class U> constexpr bool operator==(U) const { return false; } };
   template<typename...Es> struct ElemList {
     std::tuple<Es...> elems; static constexpr size_t size = sizeof...(Es);
@@ -55,15 +55,15 @@ namespace Ubpa::USRefl {
     template<size_t N> constexpr auto Get() const { return std::get<N>(elems); }
     #define USRefl_ElemList_GetByValue(list, value) list.Get<list.FindValue(value)>()
   };
-  template<class T, class STR>struct Attr : NamedValue<T, STR> { constexpr Attr(STR, T v) : NamedValue<T, STR>{ v } {} };
-  template<class STR> struct Attr<void, STR> : NamedValue<void, STR> { constexpr Attr(STR) {} };
+  template<class Name, class T>struct Attr : NamedValue<Name, T> { constexpr Attr(Name, T v) : NamedValue<Name,T>{ v } {} };
+  template<class Name> struct Attr<Name, void> : NamedValue<Name, void> { constexpr Attr(Name) {} };
   template<typename...As>struct AttrList : ElemList<As...> { constexpr AttrList(As...as) : ElemList<As...>{ as... } {} };
   template<bool s, bool f> struct FTraitsB { static constexpr bool is_static = s, is_func = f; };
   template<class T> struct FTraits : FTraitsB<true, false> {}; // default is enum
   template<class U, class T> struct FTraits<T U::*> : FTraitsB<false, std::is_function_v<T>> {};
   template<class T> struct FTraits<T*> : FTraitsB<true, std::is_function_v<T>>{}; // static member
-  template<class T, class AList, class STR> struct Field : FTraits<T>, NamedValue<T, STR>
-  { AList attrs; constexpr Field(STR, T v, AList as = {}) : NamedValue<T, STR>{ v }, attrs{ as } {} };
+  template<class Name, class T, class AList> struct Field : FTraits<T>, NamedValue<Name, T>
+  { AList attrs; constexpr Field(Name, T v, AList as = {}) : NamedValue<Name, T>{ v }, attrs{ as } {} };
   template<typename...Fs>struct FieldList :ElemList<Fs...> { constexpr FieldList(Fs...fs) :ElemList<Fs...>{ fs... } {} };
   template<class T> struct TypeInfo; // TypeInfoBase, name, fields, attrs
   template<class T, bool IsVirtual = false> struct Base
@@ -92,8 +92,8 @@ namespace Ubpa::USRefl {
       { if constexpr (!fld.is_static && !fld.is_func) std::forward<Func>(func)(fld, std::forward<U>(obj).*(fld.value)); }); });
       detail::NV_Var(TypeInfo<Type>{}, std::forward<U>(obj), std::forward<Func>(func)); }
   };
-  template<size_t N, class STR> Attr(STR, const char(&)[N])->Attr<std::string_view, STR>;
-  template<class STR> Attr(STR)->Attr<void, STR>;
-  template<class T, class AList, class STR> Field(STR, T, AList)->Field<T, AList, STR>;
-  template<class T, class STR> Field(STR, T)->Field<T, AttrList<>, STR>;
+  template<class Name, class Char, size_t N> Attr(Name, const Char(&)[N])->Attr<Name, std::basic_string_view<Char>>;
+  template<class Name> Attr(Name)->Attr<Name, void>;
+  template<class Name, class T, class AList> Field(Name, T, AList)->Field<Name, T, AList>;
+  template<class Name, class T> Field(Name, T)->Field<Name, T, AttrList<>>;
 }
