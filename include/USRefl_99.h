@@ -3,7 +3,7 @@
 #include <tuple>                       // License: https://github.com/Ubpa/USRefl/blob/master/LICENSE
 #define TSTR(s) Ubpa::USRefl::detail::TNameImpl1([] { struct tmp { static constexpr decltype(auto) get() { return (s); } }; return tmp{}; }())
 namespace Ubpa::USRefl::detail {
-  template<class C, C... cs>struct TStr{using Tag=TStr; template<class T>static constexpr bool NameIs(){return std::is_same_v<T,Tag>;}
+  template<class C, C... cs>struct TStr{using Tag=TStr; template<class T>static constexpr bool NameIs(T={}){return std::is_same_v<T,Tag>;}
     using Char=C; static constexpr char name_data[]{cs...,C(0)}; static constexpr std::string_view name{name_data}; };
   template<class Char,class T,size_t...N>constexpr auto TNameImpl2(std::index_sequence<N...>) { return TStr<Char, T::get()[N]...>(); }
   template <typename T> constexpr auto TNameImpl1(T) { using Char = std::decay_t<decltype(T::get()[0])>;
@@ -44,9 +44,10 @@ namespace Ubpa::USRefl {
     { Accumulate<ms...>(0, [&](auto, auto field) {std::forward<Func>(func)(field); return 0; }); }
     template<class Func> constexpr size_t FindIf(Func&& func) const
     { return detail::FindIf(*this, std::forward<Func>(func), std::make_index_sequence<sizeof...(Es)>{}); }
-    template<class S>constexpr auto Find(S)const{return Accumulate(0,[](auto r,auto e){if constexpr(decltype(e)::template NameIs<S>())return e;else return r;});}
+    template<class S> constexpr auto Find(S = {}) const
+    { return Accumulate(0, [](auto r, auto e) {if constexpr (decltype(e)::template NameIs<S>())return e; else return r; }); }
     template<class T> constexpr size_t FindValue(T v) const { return FindIf([v](auto e) { return e == v; }); }
-    template<class S>constexpr bool Contains(S) const { return !std::is_same_v<int, decltype(Find(S{}))>; }
+    template<class S>static constexpr bool Contains(S={}) { return (Es::template NameIs<S>() || ...); }
   	template<typename T, typename S>constexpr T ValueOfName(S n) const
   	{return Accumulate(T{},[n](auto r,auto e){if constexpr(std::is_same_v<decltype(e.value), T>)return e.name==n?e.value:r;else return r;});}
     template<class T, class C=char>constexpr auto NameOfValue(T v)const{return Accumulate(std::basic_string_view<C>{},[v](auto r,auto e){return e==v?e.name:r;});}
@@ -80,8 +81,7 @@ namespace Ubpa::USRefl {
     static constexpr auto VirtualBases() {
       return bases.Accumulate(ElemList<>{}, [](auto acc, auto base) {
         auto concated = base.info.VirtualBases().Accumulate(acc, [](auto acc, auto b) { return acc.Insert(b); });
-        if constexpr (!base.is_virtual) return concated; else return concated.Insert(base.info);
-      });
+        if constexpr (!base.is_virtual) return concated; else return concated.Insert(base.info); });
     }
     template<class R, class F> static constexpr auto DFS_Acc(R&& r, F&& f) {
       return detail::DFS_Acc<0>(TypeInfo<Type>{},std::forward<F>(f),VirtualBases().Accumulate(f(std::forward<R>(r),TypeInfo<Type>{},0),

@@ -144,14 +144,8 @@ namespace Ubpa::USRefl {
 
 	template<typename... Elems>
 	template<typename Name>
-	constexpr bool ElemList<Elems...>::Contains(Name) const {
-		return static_cast<size_t>(-1) != FindIf([](auto ele) {
-			using Elem = std::decay_t<decltype(ele)>;
-			if constexpr (Elem::template NameIs<Name>())
-				return true;
-			else
-				return false;
-		});
+	constexpr bool ElemList<Elems...>::Contains(Name) {
+		return (Elems::template NameIs<Name>() || ...);
 	}
 
 	template<typename... Elems>
