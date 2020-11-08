@@ -88,7 +88,7 @@ namespace Ubpa::USRefl {
 		return Accumulate(nullptr, [](auto acc, auto ele) {
 			if constexpr (!std::is_same_v<std::decay_t<decltype(acc)>, nullptr_t>)
 				return acc;
-			else if constexpr (std::is_same_v<typename decltype(ele)::NameTag, std::integer_sequence<Char, chars...>>)
+			else if constexpr (std::is_same_v<typename decltype(ele)::Tag, std::integer_sequence<Char, chars...>>)
 				return ele;
 			else
 				return acc;
@@ -106,7 +106,8 @@ namespace Ubpa::USRefl {
 	constexpr T ElemList<Elems...>::ValueOfName(std::basic_string_view<Char> name) const {
 		T value{};
 		FindIf([name, &value](auto ele) {
-			if constexpr (std::is_same_v<std::decay_t<decltype(ele.name)>, std::basic_string_view<Char>> && ele.template ValueTypeIs<T>()) {
+			using Elem = std::decay_t<decltype(ele)>;
+			if constexpr (std::is_same_v<typename Elem::Tag::value_type, Char> && Elem::template ValueTypeIs<T>()) {
 				if (ele.name == name) {
 					value = ele.value;
 					return true;
@@ -144,7 +145,7 @@ namespace Ubpa::USRefl {
 	template<typename Char, Char... chars>
 	constexpr bool ElemList<Elems...>::Contains(std::integer_sequence<Char, chars...> name) const {
 		return static_cast<size_t>(-1) != FindIf([](auto ele) {
-			if constexpr (std::is_same_v<typename decltype(ele)::NameTag, std::integer_sequence<Char, chars...>>)
+			if constexpr (std::is_same_v<typename decltype(ele)::Tag, std::integer_sequence<Char, chars...>>)
 				return true;
 			else
 				return false;

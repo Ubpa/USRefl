@@ -17,18 +17,18 @@ namespace Ubpa::USRefl {
 			bool namespaceNameWithQuotation{ false };
 			bool isAttrValueToFunction{ false };
 
-			std::string_view nameof_namespace = _USRefl::nameof_namespace;
+			std::string_view nameof_namespace = UMeta::nameof_namespace;
 
 			bool isInitializerAsAttr{ true };
 
-			std::string_view nameof_initializer = _USRefl::nameof_initializer;
+			std::string_view nameof_initializer = UMeta::nameof_initializer;
 			bool isInitializerToFunction{ true };
 
-			std::string_view nameof_constructor = _USRefl::nameof_constructor;
-			std::string_view nameof_destructor = _USRefl::nameof_destructor;
+			std::string_view nameof_constructor = UMeta::nameof_constructor;
+			std::string_view nameof_destructor = UMeta::nameof_destructor;
 			
 			bool generateDefaultFunctions{ true };
-			std::string_view nameof_default_functions = _USRefl::nameof_default_functions;
+			std::string_view nameof_default_functions = UMeta::nameof_default_functions;
 			ConstMode attrListConstMode{ ConstMode::Constepxr };
 			ConstMode fieldListConstMode{ ConstMode::Constepxr };
 		};

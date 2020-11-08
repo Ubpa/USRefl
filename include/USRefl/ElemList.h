@@ -34,6 +34,9 @@ namespace Ubpa::USRefl {
 		template<typename T>
 		constexpr T ValueOfName(std::string_view name) const { return ValueOfName<T, char>(name); }
 
+		template<typename T>
+		constexpr T ValueOfName(std::wstring_view name) const { return ValueOfName<T, wchar_t>(name); }
+
 		template<typename T, typename Char = char>
 		constexpr std::basic_string_view<Char> NameOfValue(T value) const;
 

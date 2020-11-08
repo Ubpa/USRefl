@@ -16,9 +16,9 @@ struct Ubpa::USRefl::TypeInfo<Ubpa::Nested::Vec<T>> :
         Attr {USTR("size"), sizeof(T)},
     };
     static constexpr FieldList fields = {
-        Field {USTR(_USRefl::constructor), WrapConstructor<Ubpa::Nested::Vec<T>()>()},
-        Field {USTR(_USRefl::constructor), WrapConstructor<Ubpa::Nested::Vec<T>(T, T)>()},
-        Field {USTR(_USRefl::destructor), WrapDestructor<Ubpa::Nested::Vec<T>>()},
+        Field {USTR(UMeta::constructor), WrapConstructor<Ubpa::Nested::Vec<T>()>()},
+        Field {USTR(UMeta::constructor), WrapConstructor<Ubpa::Nested::Vec<T>(T, T)>()},
+        Field {USTR(UMeta::destructor), WrapDestructor<Ubpa::Nested::Vec<T>>()},
         Field {USTR("x"), &Ubpa::Nested::Vec<T>::x, AttrList {
             Attr {USTR("not_serialize")},
         }},
@@ -27,11 +27,11 @@ struct Ubpa::USRefl::TypeInfo<Ubpa::Nested::Vec<T>> :
             Attr {USTR("maximum"), 10.f},
         }},
         Field {USTR("num"), &Ubpa::Nested::Vec<T>::num, AttrList {
-            Attr {USTR(_USRefl::initializer), []{ return size_t{ 0 }; }},
+            Attr {USTR(UMeta::initializer), []{ return size_t{ 0 }; }},
         }},
         Field {USTR("Sum"), static_cast<float(Ubpa::Nested::Vec<T>::*)()const>(&Ubpa::Nested::Vec<T>::Sum)},
         Field {USTR("Sum"), static_cast<float(Ubpa::Nested::Vec<T>::*)(float, float)const>(&Ubpa::Nested::Vec<T>::Sum), AttrList {
-            Attr {USTR(_USRefl::default_functions), std::tuple {
+            Attr {USTR(UMeta::default_functions), std::tuple {
                 [](Ubpa::Nested::Vec<T> const* __this, float z){ return __this->Sum(std::forward<float>(z)); }
             }},
         }},

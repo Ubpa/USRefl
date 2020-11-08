@@ -5,13 +5,13 @@
 #endif
 
 // AutoRefl will use these names
-namespace _USRefl {
-	static constexpr char nameof_namespace[] = "_USRefl";
+namespace UMeta {
+	static constexpr char nameof_namespace[] = "UMeta";
 
-	static constexpr char initializer[] = "_USRefl_initializer";
-	static constexpr char default_functions[] = "_USRefl_default_functions";
-	static constexpr char constructor[] = "_USRefl_constructor";
-	static constexpr char destructor[] = "_USRefl_destructor";
+	static constexpr char initializer[] = "UMeta_initializer";
+	static constexpr char default_functions[] = "UMeta_default_functions";
+	static constexpr char constructor[] = "UMeta_constructor";
+	static constexpr char destructor[] = "UMeta_destructor";
 
 	static constexpr char nameof_initializer[] = "initializer";
 	static constexpr char nameof_default_functions[] = "default_functions";
