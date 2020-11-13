@@ -22,7 +22,6 @@ namespace Ubpa::USRefl {
 			bool isInitializerAsAttr{ true };
 
 			std::string_view nameof_initializer = UMeta::nameof_initializer;
-			bool isInitializerToFunction{ true };
 
 			std::string_view nameof_constructor = UMeta::nameof_constructor;
 			std::string_view nameof_destructor = UMeta::nameof_destructor;

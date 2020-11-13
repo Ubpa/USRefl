@@ -14,7 +14,7 @@ namespace Ubpa::USRefl {
 		// name
 		std::string GenerateName(bool withoutQuatation) const;
 		std::string GenerateValue(bool toFunction) const;
-		std::string GenerateValue(const std::string& type, bool toFunction) const;
+		std::string GenerateValue(const std::string& type) const;
 	};
 
 	enum class AccessSpecifier {
@@ -31,7 +31,7 @@ namespace Ubpa::USRefl {
 		bool isPacked{ false };
 		std::string type; // typename, class, ...
 		std::string name;
-		std::string initializer; // {expression}
+		std::string initializer; // expression or {expression}
 		
 		// type[...]
 		std::string GenerateTypeName() const;
@@ -53,7 +53,7 @@ namespace Ubpa::USRefl {
 		std::vector<DeclSpecifier> declSpecifiers;
 		std::vector<std::string> pointerOperators; // *, &, &&
 		std::string name;
-		std::string initializer; // {expression}
+		std::string initializer; // expression or {expression}
 		std::vector<Parameter> parameters;
 		std::vector<std::string> qualifiers; // const, volatile, &, &&
 		bool isTemplate{ false };

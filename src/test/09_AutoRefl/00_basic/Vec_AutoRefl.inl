@@ -27,7 +27,7 @@ struct Ubpa::USRefl::TypeInfo<Ubpa::Nested::Vec<T>> :
             Attr {TSTR("maximum"), 10.f},
         }},
         Field {TSTR("num"), &Ubpa::Nested::Vec<T>::num, AttrList {
-            Attr {TSTR(UMeta::initializer), []{ return size_t{ 0 }; }},
+            Attr {TSTR(UMeta::initializer), []()->size_t{ return { 0 }; }},
         }},
         Field {TSTR("Sum"), static_cast<float(Ubpa::Nested::Vec<T>::*)()const>(&Ubpa::Nested::Vec<T>::Sum)},
         Field {TSTR("Sum"), static_cast<float(Ubpa::Nested::Vec<T>::*)(float, float)const>(&Ubpa::Nested::Vec<T>::Sum), AttrList {

@@ -156,10 +156,10 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 		Parameter parameter;
 		size_t start = ctx->proDeclSpecifierSeq()->preDeclSpecifierSeq() ?
 			ctx->proDeclSpecifierSeq()->preDeclSpecifierSeq()->getStart()->getStartIndex()
-			: ctx->proDeclSpecifierSeq()->simpleTypeSpecifier()->getStart()->getStartIndex();
+			: ctx->proDeclSpecifierSeq()->proSimpleTypeSpecifier()->getStart()->getStartIndex();
 		size_t stop = ctx->proDeclSpecifierSeq()->postDeclSpecifierSeq() ?
 			ctx->proDeclSpecifierSeq()->postDeclSpecifierSeq()->getStop()->getStopIndex()
-			: ctx->proDeclSpecifierSeq()->simpleTypeSpecifier()->getStop()->getStopIndex();
+			: ctx->proDeclSpecifierSeq()->proSimpleTypeSpecifier()->getStop()->getStopIndex();
 		parameter.type = { code.begin() + start, code.begin() + stop + 1 };
 		
 		if (ctx->declarator()) {
@@ -203,6 +203,8 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 			return {};
 
 		TypeMeta typeMeta;
+
+		typeMeta.namespaces = namespaces;
 
 		if (ctx->enumHead()->nestedNameSpecifier()) {
 			typeMeta.name = {
@@ -279,6 +281,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 		
 		typeMeta.namespaces = namespaces;
 		typeMeta.name = ctx->classHead()->classHeadName()->getText();
+		namespaces.push_back(typeMeta.name);
 
 		if(ctx->classHead()->attributeSpecifierSeq())
 			typeMeta.attrs = visit(ctx->classHead()->attributeSpecifierSeq()).as<std::vector<Attr>>();
@@ -286,7 +289,6 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 		typeMeta.templateParameters = std::move(templateParameters);
 		if (!typeMeta.templateParameters.empty())
 			inTemplateType = true;
-		namespaces.push_back(typeMeta.name);
 
 		if (ctx->classHead()->classKey()->getText() == "class") {
 			accessSpecifiers.push_back(AccessSpecifier::PRIVATE);
@@ -415,17 +417,26 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 		if(auto* pro = ctx->proDeclSpecifierSeq()) {
 			if(auto* pre = pro->preDeclSpecifierSeq()) {
 				for (auto* ctxDeclSpecifier : pre->nonSimpleTypeDeclSpecifier()) {
-					DeclSpecifier declSpecifier = ctxDeclSpecifier->getText();
+					DeclSpecifier declSpecifier = {
+						code.begin() + ctxDeclSpecifier->getStart()->getStartIndex(),
+						code.begin() + ctxDeclSpecifier->getStop()->getStopIndex() + 1
+					};
 					declSpecifiers.push_back(declSpecifier);
 				}
 			}
 			{
-				DeclSpecifier declSpecifier = ctx->proDeclSpecifierSeq()->simpleTypeSpecifier()->getText();
+				DeclSpecifier declSpecifier = {
+					code.begin() + ctx->proDeclSpecifierSeq()->proSimpleTypeSpecifier()->getStart()->getStartIndex(),
+					code.begin() + ctx->proDeclSpecifierSeq()->proSimpleTypeSpecifier()->getStop()->getStopIndex() + 1
+				};
 				declSpecifiers.push_back(declSpecifier);
 			}
 			if (auto* post = pro->postDeclSpecifierSeq()) {
 				for (auto* ctxDeclSpecifier : post->nonSimpleTypeDeclSpecifier()) {
-					DeclSpecifier declSpecifier = ctxDeclSpecifier->getText();
+					DeclSpecifier declSpecifier = {
+						code.begin() + ctxDeclSpecifier->getStart()->getStartIndex(),
+						code.begin() + ctxDeclSpecifier->getStop()->getStopIndex() + 1
+					};
 					declSpecifiers.push_back(declSpecifier);
 				}
 			}
@@ -546,12 +557,10 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 	antlrcpp::Any visitBraceOrEqualInitializer(CPP14Parser::BraceOrEqualInitializerContext* ctx) override final {
 		std::string rst;
 		if(ctx->initializerClause()) {
-			rst = "{"
-			+ std::string {
-				code.begin()+ctx->initializerClause()->getStart()->getStartIndex(),
-				code.begin() + ctx->initializerClause()->getStop()->getStopIndex()+1
-			}
-			+ "}";
+			rst = std::string{
+				code.begin() + ctx->initializerClause()->getStart()->getStartIndex(),
+				code.begin() + ctx->initializerClause()->getStop()->getStopIndex() + 1
+			};
 		}
 		else {
 			rst = {
@@ -570,7 +579,10 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 		std::vector<DeclSpecifier> declSpecifiers;
 		if (ctx->declSpecifierSeq()) {
 			for (auto* ctxDeclSpecifier : ctx->declSpecifierSeq()->declSpecifier()) {
-				DeclSpecifier declSpecifier = ctxDeclSpecifier->getText();
+				DeclSpecifier declSpecifier = {
+						code.begin() + ctxDeclSpecifier->getStart()->getStartIndex(),
+						code.begin() + ctxDeclSpecifier->getStop()->getStopIndex() + 1
+				};
 				declSpecifiers.push_back(declSpecifier);
 			}
 		}
@@ -625,7 +637,10 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 			field.attrs = visit(ctx->attributeSpecifierSeq()).as<std::vector<Attr>>();
 		if (ctx->declSpecifierSeq()) {
 			for(auto* ctxDeclSpecifier : ctx->declSpecifierSeq()->declSpecifier()) {
-				DeclSpecifier declSpecifier = ctxDeclSpecifier->getText();
+				DeclSpecifier declSpecifier = {
+					code.begin() + ctxDeclSpecifier->getStart()->getStartIndex(),
+					code.begin() + ctxDeclSpecifier->getStop()->getStopIndex() + 1
+				};
 				field.declSpecifiers.push_back(std::move(declSpecifier));
 			}
 			if(ctx->declSpecifierSeq()->attributeSpecifierSeq()) {

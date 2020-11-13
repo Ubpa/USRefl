@@ -18,10 +18,8 @@ std::string Attr::GenerateValue(bool toFunction) const {
 	return value.empty() ? "0" : value;
 }
 
-std::string Attr::GenerateValue(const std::string& type, bool toFunction) const {
-	if (toFunction)
-		return "[]{ return " + type + (value.empty() ? "{}" : value) + "; }";
-	return type + (value.empty() ? "{}" : value);
+std::string Attr::GenerateValue(const std::string& type) const {
+	return "[]()->" + type + "{ return " + (value.empty() ? "{}" : value) + "; }";
 }
 
 std::string Parameter::GenerateTypeName() const {

@@ -177,7 +177,7 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 						ss
 							<< indent << indent << indent
 							<< "Attr {" << name << ", "
-							<< attr.GenerateValue(field.GenerateSimpleFieldType(), config.isInitializerToFunction) << "}," << endl;
+							<< attr.GenerateValue(field.GenerateSimpleFieldType()) << "}," << endl;
 					}
 					// [default functions]
 					if (hasDefaultFunctionsAttr) {
