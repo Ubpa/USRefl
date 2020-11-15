@@ -244,8 +244,28 @@ bool Field::IsMemberFunction() const {
 		if (declSpecifier == "static")
 			containsStatic = true;
 	}
+	bool containsFriend = false;
+	for (const auto& declSpecifier : declSpecifiers) {
+		if (declSpecifier == "friend")
+			containsFriend = true;
+	}
 	
-	return !containsStatic;
+	return !containsStatic && !containsFriend;
+}
+
+bool Field::IsFriendFunction() const {
+	if (mode != Mode::Function)
+		return false;
+
+	for (const auto& declSpecifier : declSpecifiers) {
+		if (declSpecifier == "friend")
+			return true;
+	}
+	return false;
+}
+
+bool Field::IsDeletedFunction() const {
+	return mode == Mode::Function && initializer == "delete";
 }
 
 std::string Field::GenerateParamTypeList() const {
@@ -282,8 +302,10 @@ std::string Field::GenerateNamedParameterList(size_t num) const {
 		if (parameters[i].isPacked)
 			rst += "...";
 		rst += " ";
-		if (name.empty())
+		if (parameters[i].name.empty()) {
 			rst += "_" + std::to_string(idx);
+			idx++;
+		}
 		else
 			rst += parameters[i].name;
 		if (i != num - 1)
@@ -300,7 +322,7 @@ std::string Field::GenerateForwardArgumentList(size_t num) const {
 		rst += "std::forward<";
 		rst += parameters[i].GenerateTypeName();
 		rst += ">(";
-		if(name.empty()) {
+		if(parameters[i].name.empty()) {
 			std::string name = "_" + std::to_string(idx);
 			idx++;
 			rst += name;
@@ -354,15 +376,15 @@ std::string Field::GenerateInitFunction() const {
 bool TypeMeta::IsOverloaded(std::string_view name) const {
 	size_t cnt = 0;
 	for(const auto& field : fields) {
-		if (field.name == name)
+		if (field.name == name && !field.IsFriendFunction())
 			cnt++;
 	}
 	return cnt > 1;
 }
 
-bool TypeMeta::HaveAnyPublicField() const {
+bool TypeMeta::HaveAnyOutputField() const {
 	for (const auto& field : fields) {
-		if (field.accessSpecifier == AccessSpecifier::PUBLIC)
+		if (field.accessSpecifier == AccessSpecifier::PUBLIC && !field.IsFriendFunction() && !field.IsDeletedFunction())
 			return true;
 	}
 	return false;

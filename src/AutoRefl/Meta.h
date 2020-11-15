@@ -64,8 +64,10 @@ namespace Ubpa::USRefl {
 		std::string GenerateFieldType() const;
 		// typeSpecifier + pointerOperators
 		std::string GenerateSimpleFieldType() const;
-		// Mode::Function && contains 'static'
+		// Mode::Function && contains 'static' && !friend
 		bool IsMemberFunction() const;
+		bool IsFriendFunction() const;
+		bool IsDeletedFunction() const;
 		// arg_type0, arg_type1, ..., arg_typeN
 		std::string GenerateParamTypeList() const;
 		// arg_type0, arg_type1, ..., arg_type(num-1)
@@ -115,6 +117,7 @@ namespace Ubpa::USRefl {
 		std::string GenerateTemplateList() const;
 		std::vector<size_t> GetPublicBaseIndices() const;
 		bool IsOverloaded(std::string_view name) const;
-		bool HaveAnyPublicField() const;
+		// public, non-friend, non-delete
+		bool HaveAnyOutputField() const;
 	};
 }

@@ -100,9 +100,8 @@ y : 2
 You can choose one of the following three methods
 
 - ⭐ **method 0**: add required file [USRefl_99.h](include/USRefl_99.h) 
-- run CMake (download [nameof.hpp](https://github.com/Neargye/nameof/blob/master/include/nameof.hpp) to [include/USRefl/_deps/](include/USRefl/_deps/))
-  - **method 1**: directly use [include/USRefl/](include/USRefl/) 
-  - ⭐ **method 2**: cmake install, `find package(USRefl REQUIRED)` to get imported target `Ubpa::USRefl_core` 
+- ⭐ **method 1**: directly use [include/USRefl/](include/USRefl/) 
+- ⭐ **method 2**: cmake install, `find package(USRefl REQUIRED)` to get imported target `Ubpa::USRefl_core` 
 
 ## Compiler compatibility
 
