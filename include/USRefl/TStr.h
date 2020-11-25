@@ -24,7 +24,7 @@ namespace Ubpa {
 		template<typename T>
 		static constexpr bool NameIs(T = {}) noexcept { return std::is_same_v<T, Tag>; }
 		static constexpr char name_data[]{ chars...,Char(0) };
-		static constexpr std::string_view name{ name_data };
+		static constexpr std::basic_string_view<Char> name{ name_data };
 	};
 	
 	template<typename T>

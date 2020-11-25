@@ -28,7 +28,7 @@ int main() {
     TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
         cout << field.name << ": " << var << endl;
     });
-    constexpr auto field_x = TypeInfo<Point>::fields.Find(TSTR("x"));
+    constexpr const auto& field_x = TypeInfo<Point>::fields.Find(TSTR("x"));
     cout << p.*field_x.value << endl;
     constexpr bool contains_y = TypeInfo<Point>::fields.Contains(TSTR("y"));
     static_assert(contains_y);

@@ -14,7 +14,7 @@ namespace Ubpa::USRefl {
 		constexpr ElemList(Elems... elems) : elems{ elems... } {}
 
 		template<bool... masks, typename Acc, typename Func>
-		constexpr auto Accumulate(Acc&& acc, Func&& func) const;
+		constexpr auto Accumulate(Acc acc, Func&& func) const;
 
 		template<bool... masks, typename Func>
 		constexpr void ForEach(Func&& func) const;
@@ -23,28 +23,25 @@ namespace Ubpa::USRefl {
 		constexpr size_t FindIf(Func&& func) const;
 
 		template<typename Name>
-		constexpr auto Find(Name = {}) const;
+		constexpr const auto& Find(Name = {}) const;
 
 		template<typename T>
-		constexpr size_t FindValue(T value) const;
+		constexpr size_t FindValue(const T& value) const;
 
-		template<typename T, typename Char>
-		constexpr T ValueOfName(std::basic_string_view<Char> name) const;
+		template<typename T, typename Str>
+		constexpr const T* ValuePtrOfName(Str name) const;
 
-		template<typename T>
-		constexpr T ValueOfName(std::string_view name) const { return ValueOfName<T, char>(name); }
-
-		template<typename T>
-		constexpr T ValueOfName(std::wstring_view name) const { return ValueOfName<T, wchar_t>(name); }
+		template<typename T, typename Str>
+		constexpr const T& ValueOfName(Str name) const { return *ValuePtrOfName<T>(name); }
 
 		template<typename T, typename Char = char>
-		constexpr std::basic_string_view<Char> NameOfValue(T value) const;
+		constexpr std::basic_string_view<Char> NameOfValue(const T& value) const;
 
 		template<typename Name>
 		static constexpr bool Contains(Name = {});
 
 		template<size_t N>
-		constexpr auto Get() const;
+		constexpr const auto& Get() const;
 
 		template<typename Elem>
 		constexpr auto Push(Elem e) const;
