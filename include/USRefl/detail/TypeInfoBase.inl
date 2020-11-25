@@ -3,7 +3,7 @@
 namespace Ubpa::USRefl::detail {
 	template<typename TI, typename U, typename Func>
 	constexpr void ForEachNonVirtualVarOf(TI info, U&& obj, Func&& func) {
-		info.fields.ForEach([&](auto field) {
+		info.fields.ForEach([&](const auto& field) {
 			if constexpr (!field.is_static && !field.is_func)
 				std::forward<Func>(func)(field, std::forward<U>(obj).*(field.value));
 		});
@@ -95,7 +95,7 @@ namespace Ubpa::USRefl {
 	constexpr void TypeInfoBase<T, Bases...>::ForEachVarOf(U&& obj, Func&& func) {
 		static_assert(std::is_same_v<Type, std::decay_t<U>>);
 		VirtualBases().ForEach([&](auto vb) {
-			vb.fields.ForEach([&](auto field) {
+			vb.fields.ForEach([&](const auto& field) {
 				if constexpr (!field.is_static && !field.is_func)
 					std::forward<Func>(func)(field, std::forward<U>(obj).*(field.value));
 			});

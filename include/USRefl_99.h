@@ -26,7 +26,7 @@ namespace Ubpa::USRefl::detail {
     });
   }
   template<class TI, class U, class F> constexpr void NV_Var(TI info, U&& u, F&& f) {
-    info.fields.ForEach([&](auto k){if constexpr(!k.is_static&&!k.is_func)std::forward<F>(f)(k,std::forward<U>(u).*(k.value));});
+    info.fields.ForEach([&](const auto& k){if constexpr(!k.is_static&&!k.is_func)std::forward<F>(f)(k,std::forward<U>(u).*(k.value));});
     info.bases.ForEach([&](auto b){if constexpr(!b.is_virtual)NV_Var(b.info,b.info.Forward(std::forward<U>(u)),std::forward<F>(f));});
   }
 }
@@ -88,7 +88,7 @@ namespace Ubpa::USRefl {
         [&](auto&& acc, auto vb){ return std::forward<F>(f)(std::forward<decltype(acc)>(acc), vb, 1); })); }
     template<class F>static constexpr void DFS_ForEach(F&&f){DFS_Acc(0,[&](auto,auto t,auto d){std::forward<F>(f)(t,d);return 0;});}
     template<class U, class Func> static constexpr void ForEachVarOf(U&& obj, Func&& func) {
-      VirtualBases().ForEach([&](auto vb) { vb.fields.ForEach([&](auto fld)
+      VirtualBases().ForEach([&](auto vb) { vb.fields.ForEach([&](const auto& fld)
       { if constexpr (!fld.is_static && !fld.is_func) std::forward<Func>(func)(fld, std::forward<U>(obj).*(fld.value)); }); });
       detail::NV_Var(TypeInfo<Type>{}, std::forward<U>(obj), std::forward<Func>(func)); }
   };
