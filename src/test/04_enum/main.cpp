@@ -7,8 +7,8 @@
 using namespace Ubpa::USRefl;
 using namespace std;
 
-template<size_t N>
-constexpr size_t Func() { return N; }
+template<std::size_t N>
+constexpr std::size_t Func() { return N; }
 
 enum class [[enum_attr("enum_attr_value")]] Color {
 	RED [[enumerator_attr("enumerator_attr_value"), func(&Func<1>)]] = 1,
@@ -20,9 +20,6 @@ template<>
 struct Ubpa::USRefl::TypeInfo<Color> :
     TypeInfoBase<Color>
 {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-    static constexpr char name[6] = "Color";
-#endif
     static constexpr AttrList attrs = {
         Attr {TSTR("enum_attr"), "enum_attr_value"},
     };
@@ -73,7 +70,7 @@ int main() {
         // compile-time
         static_assert(TypeInfo<Color>::fields.Find(TSTR("GREEN")).attrs.Find(TSTR("func")).value() == 2);
         // runtime
-        size_t rst = static_cast<size_t>(-1);
+        std::size_t rst = static_cast<std::size_t>(-1);
         TypeInfo<Color>::fields.FindIf([nameof_red, &rst](auto field) {
             if (field.name == nameof_red) {
                 rst = field.attrs.Find(TSTR("func")).value();
@@ -90,7 +87,7 @@ int main() {
         static_assert(USRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::GREEN).attrs.Find(TSTR("func")).value() == 2);
 
         // runtime
-        size_t rst = static_cast<size_t>(-1);
+        std::size_t rst = static_cast<std::size_t>(-1);
         TypeInfo<Color>::fields.FindIf([red, &rst](auto field) {
             if (field.value == red) {
                 rst = field.attrs.Find(TSTR("func")).value();

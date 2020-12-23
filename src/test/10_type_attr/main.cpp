@@ -59,9 +59,6 @@ template<>
 struct Ubpa::USRefl::TypeInfo<UMeta::Range> :
     TypeInfoBase<UMeta::Range>
 {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-    static constexpr char name[] = "UMeta::Range";
-#endif
     static constexpr auto tname = TSTR(name);
     static constexpr AttrList attrs = {};
     static constexpr FieldList fields = {
@@ -86,9 +83,6 @@ template<>
 struct Ubpa::USRefl::TypeInfo<Point> :
     TypeInfoBase<Point>
 {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-    static constexpr char name[6] = "Point";
-#endif
     static constexpr AttrList attrs = {};
     static constexpr FieldList fields = {
         Field {TSTR("x"), &Type::x, AttrList{
@@ -108,7 +102,7 @@ int main() {
         constexpr auto tstr_range = TSTR("UMeta::Range");
         if constexpr (decltype(field.attrs)::Contains(tstr_range)) {
              auto r = attr_init(tstr_range, field.attrs.Find(tstr_range).value);
-             cout << "[" << tstr_range.name << "] " << r.minV << ", " << r.maxV << endl;
+             cout << "[" << tstr_range.value << "] " << r.minV << ", " << r.maxV << endl;
         }
         cout << field.name << ": " << var << endl;
     });

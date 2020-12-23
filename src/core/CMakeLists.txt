@@ -1,14 +1,8 @@
 set(c_options "")
 if(MSVC)
   list(APPEND c_options "/wd5030")
-endif()
-
-set(libs "")
-set(defines "")
-if(Ubpa_USRefl_UseNameof)
-  list(APPEND libs nameof::nameof)
-else()
-  list(APPEND defines UBPA_USREFL_NOT_USE_NAMEOF)
+elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  list(APPEND c_options "-Wno-attributes")
 endif()
 
 Ubpa_AddTarget(
@@ -18,7 +12,5 @@ Ubpa_AddTarget(
   C_OPTION
     ${c_options}
   LIB
-    ${libs}
-  DEFINE
-    ${defines}
+    Ubpa::UTemplate_core
 )

@@ -20,16 +20,13 @@ struct [[size(8)]] Point {
 		return x + y + z;
 	}
 
-	static constexpr size_t id = 1024;
+	static constexpr std::size_t id = 1024;
 };
 
 template<>
 struct Ubpa::USRefl::TypeInfo<Point> :
 	TypeInfoBase<Point>
 {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-	static constexpr char name[6] = "Point";
-#endif
 	static constexpr AttrList attrs = {
 		Attr {TSTR("size"), 8},
 	};

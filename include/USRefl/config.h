@@ -1,9 +1,5 @@
 #pragma once
 
-#ifndef UBPA_USREFL_NOT_USE_NAMEOF
-  #define UBPA_USREFL_USE_NAMEOF
-#endif
-
 // AutoRefl will use these names
 namespace UMeta {
 	static constexpr char nameof_namespace[] = "UMeta";

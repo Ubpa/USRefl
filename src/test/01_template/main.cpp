@@ -17,10 +17,6 @@ template<typename T>
 struct Ubpa::USRefl::TypeInfo<Point<T>> :
 	TypeInfoBase<Point<T>>
 {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-	// [!] all instance types have the same name
-	static constexpr char name[6] = "Point";
-#endif
 	static constexpr AttrList attrs = {
 		Attr {TSTR("size"), 8},
 	};

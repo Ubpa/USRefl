@@ -71,14 +71,14 @@ namespace Ubpa::USRefl {
 		// arg_type0, arg_type1, ..., arg_typeN
 		std::string GenerateParamTypeList() const;
 		// arg_type0, arg_type1, ..., arg_type(num-1)
-		std::string GenerateParamTypeList(size_t num) const;
+		std::string GenerateParamTypeList(std::size_t num) const;
 		std::string GenerateFunctionType(std::string_view obj) const;
 		std::string GenerateInitFunction() const;
-		size_t GetDefaultParameterNum() const;
+		std::size_t GetDefaultParameterNum() const;
 		// arg_type0 arg_name0, arg_type1 arg_name1, ..., arg_type(num-1) arg_name(num-1)
-		std::string GenerateNamedParameterList(size_t num) const;
+		std::string GenerateNamedParameterList(std::size_t num) const;
 		// std::forward<arg_type0>(arg_name0), std::forward<arg_type0>(arg_name1), ..., std::forward<arg_type0>(arg_name(num-1))
-		std::string GenerateForwardArgumentList(size_t num) const;
+		std::string GenerateForwardArgumentList(std::size_t num) const;
 		std::string GenerateQualifiers() const;
 	};
 
@@ -115,7 +115,7 @@ namespace Ubpa::USRefl {
 		std::string GenerateFullName() const;
 		// templateParameter_0, templateParameter_1, ...,  templateParameter_N
 		std::string GenerateTemplateList() const;
-		std::vector<size_t> GetPublicBaseIndices() const;
+		std::vector<std::size_t> GetPublicBaseIndices() const;
 		bool IsOverloaded(std::string_view name) const;
 		// public, non-friend, non-delete
 		bool HaveAnyOutputField() const;

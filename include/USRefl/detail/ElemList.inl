@@ -5,7 +5,7 @@
 #include <array>
 
 namespace Ubpa::USRefl::detail {
-	template<typename List, typename Func, typename Acc, size_t... Ns, bool... masks>
+	template<typename List, typename Func, typename Acc, std::size_t... Ns, bool... masks>
 	constexpr auto Accumulate(const List& list, Func&& func, Acc acc, std::index_sequence<Ns...>, std::integer_sequence<bool, masks...>) {
 		if constexpr (sizeof...(Ns) > 0) {
 			using IST_N = IntegerSequenceTraits<std::index_sequence<Ns...>>;
@@ -44,15 +44,15 @@ namespace Ubpa::USRefl::detail {
 			return acc;
 	}
 
-	template<typename List, typename Func, size_t... Ns>
-	constexpr size_t FindIf(const List& list, Func&& func, std::index_sequence<Ns...>) {
+	template<typename List, typename Func, std::size_t... Ns>
+	constexpr std::size_t FindIf(const List& list, Func&& func, std::index_sequence<Ns...>) {
 		if constexpr (sizeof...(Ns) > 0) {
 			using IST = IntegerSequenceTraits<std::index_sequence<Ns...>>;
 			return std::forward<Func>(func)(list.template Get<IST::head>()) ?
 				IST::head : FindIf(list, std::forward<Func>(func), IST::tail);
 		}
 		else
-			return static_cast<size_t>(-1);
+			return static_cast<std::size_t>(-1);
 	}
 }
 
@@ -80,28 +80,32 @@ namespace Ubpa::USRefl {
 
 	template<typename... Elems>
 	template<typename Func>
-	constexpr size_t ElemList<Elems...>::FindIf(Func&& func) const {
+	constexpr std::size_t ElemList<Elems...>::FindIf(Func&& func) const {
 		return detail::FindIf(*this, std::forward<Func>(func), std::make_index_sequence<size>{});
 	}
 
 	template<typename... Elems>
 	template<typename Name>
 	constexpr const auto& ElemList<Elems...>::Find(Name) const {
-		constexpr size_t idx = []() {
-			constexpr std::array names{ Elems::name... };
-			for (size_t i = 0; i < names.size(); i++) {
-				if (Name::name == names[i])
-					return i;
-			}
-			return static_cast<size_t>(-1);
-		}();
-		static_assert(idx != static_cast<size_t>(-1));
-		return Get<idx>();
+		if constexpr (sizeof...(Elems) > 0) {
+			constexpr std::size_t idx = []() {
+				constexpr std::array names{ Elems::name... };
+				for (std::size_t i = 0; i < names.size(); i++) {
+					if (Name::value == names[i])
+						return i;
+				}
+				return static_cast<std::size_t>(-1);
+			}();
+			static_assert(idx != static_cast<std::size_t>(-1));
+			return Get<idx>();
+		}
+		else
+			return static_cast<std::size_t>(-1);
 	}
 
 	template<typename... Elems>
 	template<typename T>
-	constexpr size_t ElemList<Elems...>::FindValue(const T& value) const {
+	constexpr std::size_t ElemList<Elems...>::FindValue(const T& value) const {
 		return FindIf([&value](const auto& e) { return e.value == value; });
 	}
 
@@ -152,7 +156,7 @@ namespace Ubpa::USRefl {
 	}
 
 	template<typename... Elems>
-	template<size_t N>
+	template<std::size_t N>
 	constexpr const auto& ElemList<Elems...>::Get() const {
 		return std::get<N>(elems);
 	}

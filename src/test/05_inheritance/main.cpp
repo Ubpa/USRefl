@@ -16,9 +16,6 @@ template<>
 struct Ubpa::USRefl::TypeInfo<A> :
 	TypeInfoBase<A>
 {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-	static constexpr char name[2] = "A";
-#endif
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
 		Field {TSTR("a"), &Type::a},
@@ -29,9 +26,6 @@ template<>
 struct Ubpa::USRefl::TypeInfo<B> :
 	TypeInfoBase<B, Base<A>>
 {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-	static constexpr char name[2] = "B";
-#endif
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
 		Field {TSTR("b"), &Type::b},
@@ -42,9 +36,6 @@ template<>
 struct Ubpa::USRefl::TypeInfo<C> :
 	TypeInfoBase<C, Base<A>>
 {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-	static constexpr char name[2] = "C";
-#endif
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
 		Field {TSTR("c"), &Type::c},
@@ -58,9 +49,6 @@ struct Ubpa::USRefl::TypeInfo<D> :
 	Base<C>
 	>
 {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-	static constexpr char name[2] = "D";
-#endif
 	static constexpr AttrList attrs = {};
 	static constexpr FieldList fields = {
 		Field {TSTR("d"), &Type::d},
@@ -68,8 +56,8 @@ struct Ubpa::USRefl::TypeInfo<D> :
 };
 
 int main() {
-	TypeInfo<D>::DFS_ForEach([](auto t, size_t depth) {
-		for (size_t i = 0; i < depth; i++)
+	TypeInfo<D>::DFS_ForEach([](auto t, std::size_t depth) {
+		for (std::size_t i = 0; i < depth; i++)
 			cout << "  ";
 		cout << t.name << endl;
 	});
@@ -80,13 +68,13 @@ int main() {
 	});
 
 	cout << "[DFS]" << endl;
-	TypeInfo<D>::DFS_ForEach([](auto t, size_t) {
+	TypeInfo<D>::DFS_ForEach([](auto t, std::size_t) {
 		t.fields.ForEach([](auto field) {
 			cout << field.name << endl;
 		});
 	});
 
-	constexpr size_t fieldNum = TypeInfo<D>::DFS_Acc(0, [](auto acc, auto, auto) {
+	constexpr std::size_t fieldNum = TypeInfo<D>::DFS_Acc(0, [](auto acc, auto, auto) {
 		return acc + 1;
 	});
 	cout << "field number : " << fieldNum << endl;

@@ -63,9 +63,9 @@ std::string TypeMeta::GenerateFullName() const {
 	if (!IsTemplateType())
 		return rst;
 
-	size_t idx = 0;
+	std::size_t idx = 0;
 	rst += "<";
-	for (size_t i = 0; i < templateParameters.size(); i++) {
+	for (std::size_t i = 0; i < templateParameters.size(); i++) {
 		const auto& ele = templateParameters[i];
 		if (ele.name.empty()) {
 			rst += "_";
@@ -88,8 +88,8 @@ std::string TypeMeta::GenerateFullName() const {
 std::string TypeMeta::GenerateTemplateList() const {
 	std::string rst;
 
-	size_t idx = 0;
-	for (size_t i = 0; i < templateParameters.size(); i++) {
+	std::size_t idx = 0;
+	for (std::size_t i = 0; i < templateParameters.size(); i++) {
 		const auto& ele = templateParameters[i];
 		rst += ele.type;
 		if (ele.isPacked)
@@ -109,9 +109,9 @@ std::string TypeMeta::GenerateTemplateList() const {
 	return rst;
 }
 
-std::vector<size_t> TypeMeta::GetPublicBaseIndices() const {
-	std::vector<size_t> rst;
-	for(size_t i=0;i<bases.size();i++) {
+std::vector<std::size_t> TypeMeta::GetPublicBaseIndices() const {
+	std::vector<std::size_t> rst;
+	for(std::size_t i=0;i<bases.size();i++) {
 		const auto& base = bases[i];
 		if
 		(
@@ -163,7 +163,7 @@ bool Field::IsStaticConstexprVariable() const {
 std::string Field::GenerateFieldType() const {
 	std::string rst;
 	
-	for (size_t i = 0; i < declSpecifiers.size(); i++) {
+	for (std::size_t i = 0; i < declSpecifiers.size(); i++) {
 		rst += declSpecifiers[i];
 		if (i != declSpecifiers.size() - 1)
 			rst += " ";
@@ -172,7 +172,7 @@ std::string Field::GenerateFieldType() const {
 	if(!pointerOperators.empty()) {
 		if (!rst.empty())
 			rst += " ";
-		for (size_t i = 0; i < pointerOperators.size(); i++) {
+		for (std::size_t i = 0; i < pointerOperators.size(); i++) {
 			rst += pointerOperators[i];
 			if (i != pointerOperators.size() - 1)
 				rst += " ";
@@ -188,8 +188,8 @@ std::string Field::GenerateFieldType() const {
 std::string Field::GenerateSimpleFieldType() const {
 	std::string rst;
 
-	std::vector<size_t> filterdIndice;
-	for (size_t i = 0; i < declSpecifiers.size(); i++) {
+	std::vector<std::size_t> filterdIndice;
+	for (std::size_t i = 0; i < declSpecifiers.size(); i++) {
 		const auto& declSpecifier = declSpecifiers[i];
 		if
 		(
@@ -213,7 +213,7 @@ std::string Field::GenerateSimpleFieldType() const {
 			filterdIndice.push_back(i);
 	}
 
-	for (size_t i = 0; i < filterdIndice.size(); i++) {
+	for (std::size_t i = 0; i < filterdIndice.size(); i++) {
 		rst += declSpecifiers[filterdIndice[i]];
 		if (i != filterdIndice.size() - 1)
 			rst += " ";
@@ -222,7 +222,7 @@ std::string Field::GenerateSimpleFieldType() const {
 	if (!pointerOperators.empty()) {
 		if (!rst.empty())
 			rst += " ";
-		for (size_t i = 0; i < pointerOperators.size(); i++) {
+		for (std::size_t i = 0; i < pointerOperators.size(); i++) {
 			rst += pointerOperators[i];
 			if (i != pointerOperators.size() - 1)
 				rst += " ";
@@ -272,10 +272,10 @@ std::string Field::GenerateParamTypeList() const {
 	return GenerateParamTypeList(parameters.size());
 }
 
-std::string Field::GenerateParamTypeList(size_t num) const {
+std::string Field::GenerateParamTypeList(std::size_t num) const {
 	assert(num <= parameters.size());
 	std::string rst;
-	for (size_t i = 0; i < num; i++) {
+	for (std::size_t i = 0; i < num; i++) {
 		rst += parameters[i].GenerateTypeName();
 		if (i != num - 1)
 			rst += ", ";
@@ -283,21 +283,21 @@ std::string Field::GenerateParamTypeList(size_t num) const {
 	return rst;
 }
 
-size_t Field::GetDefaultParameterNum() const {
+std::size_t Field::GetDefaultParameterNum() const {
 	if (mode != Mode::Function)
 		return 0;
-	for(size_t i=0;i<parameters.size();i++) {
+	for(std::size_t i=0;i<parameters.size();i++) {
 		if(!parameters[i].initializer.empty())
 			return parameters.size() - i;
 	}
 	return 0;
 }
 
-std::string Field::GenerateNamedParameterList(size_t num) const {
+std::string Field::GenerateNamedParameterList(std::size_t num) const {
 	assert(num <= parameters.size());
 	std::string rst;
-	size_t idx = 0;
-	for (size_t i = 0; i < num; i++) {
+	std::size_t idx = 0;
+	for (std::size_t i = 0; i < num; i++) {
 		rst += parameters[i].GenerateTypeName();
 		if (parameters[i].isPacked)
 			rst += "...";
@@ -314,11 +314,11 @@ std::string Field::GenerateNamedParameterList(size_t num) const {
 	return rst;
 }
 
-std::string Field::GenerateForwardArgumentList(size_t num) const {
+std::string Field::GenerateForwardArgumentList(std::size_t num) const {
 	assert(num <= parameters.size());
 	std::string rst;
-	size_t idx = 0;
-	for (size_t i = 0; i < num; i++) {
+	std::size_t idx = 0;
+	for (std::size_t i = 0; i < num; i++) {
 		rst += "std::forward<";
 		rst += parameters[i].GenerateTypeName();
 		rst += ">(";
@@ -340,7 +340,7 @@ std::string Field::GenerateForwardArgumentList(size_t num) const {
 
 std::string Field::GenerateQualifiers() const {
 	std::string rst;
-	for (size_t i = 0; i < qualifiers.size(); i++) {
+	for (std::size_t i = 0; i < qualifiers.size(); i++) {
 		rst += qualifiers[i];
 		if (i != qualifiers.size() - 1)
 			rst += " ";
@@ -361,7 +361,7 @@ std::string Field::GenerateFunctionType(std::string_view obj) const {
 	rst += "(";
 	rst += GenerateParamTypeList();
 	rst += ")";
-	for (size_t i = 0; i < qualifiers.size(); i++) {
+	for (std::size_t i = 0; i < qualifiers.size(); i++) {
 		rst += qualifiers[i];
 		if (i != qualifiers.size() - 1)
 			rst += " ";
@@ -374,7 +374,7 @@ std::string Field::GenerateInitFunction() const {
 }
 
 bool TypeMeta::IsOverloaded(std::string_view name) const {
-	size_t cnt = 0;
+	std::size_t cnt = 0;
 	for(const auto& field : fields) {
 		if (field.name == name && !field.IsFriendFunction())
 			cnt++;

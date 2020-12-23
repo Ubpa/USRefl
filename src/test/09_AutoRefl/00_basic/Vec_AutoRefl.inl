@@ -8,10 +8,6 @@ template<typename T>
 struct Ubpa::USRefl::TypeInfo<Ubpa::Nested::Vec<T>> :
     TypeInfoBase<Ubpa::Nested::Vec<T>>
 {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-    // [!] all instance types have the same name
-    static constexpr char name[18] = "Ubpa::Nested::Vec";
-#endif
     static constexpr AttrList attrs = {
         Attr {TSTR("size"), sizeof(T)},
     };
@@ -27,7 +23,7 @@ struct Ubpa::USRefl::TypeInfo<Ubpa::Nested::Vec<T>> :
             Attr {TSTR("maximum"), 10.f},
         }},
         Field {TSTR("num"), &Ubpa::Nested::Vec<T>::num, AttrList {
-            Attr {TSTR(UMeta::initializer), []()->size_t{ return { 0 }; }},
+            Attr {TSTR(UMeta::initializer), []()->std::size_t{ return { 0 }; }},
         }},
         Field {TSTR("Sum"), static_cast<float(Ubpa::Nested::Vec<T>::*)()const>(&Ubpa::Nested::Vec<T>::Sum)},
         Field {TSTR("Sum"), static_cast<float(Ubpa::Nested::Vec<T>::*)(float, float)const>(&Ubpa::Nested::Vec<T>::Sum), AttrList {

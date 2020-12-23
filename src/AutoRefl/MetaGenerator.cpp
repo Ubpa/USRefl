@@ -58,8 +58,8 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 	
 	antlrcpp::Any visitChildren(antlr4::tree::ParseTree* node) override {
 		antlrcpp::Any result = defaultResult();
-		size_t n = node->children.size();
-		for (size_t i = 0; i < n; i++) {
+		std::size_t n = node->children.size();
+		for (std::size_t i = 0; i < n; i++) {
 			if (!shouldVisitNextChild(node, result)) {
 				break;
 			}
@@ -123,7 +123,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 
 				std::stringstream ss;
 				ss << "template<";
-				for (size_t i = 0; i < tparams.size(); i++) {
+				for (std::size_t i = 0; i < tparams.size(); i++) {
 					ss << tparams[i].GenerateParameterName();
 					if (i != tparams.size() - 1)
 						ss << ", ";
@@ -167,10 +167,10 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 	 */
 	antlrcpp::Any visitParameterDeclaration(CPP14Parser::ParameterDeclarationContext* ctx) override final {
 		Parameter parameter;
-		size_t start = ctx->proDeclSpecifierSeq()->preDeclSpecifierSeq() ?
+		std::size_t start = ctx->proDeclSpecifierSeq()->preDeclSpecifierSeq() ?
 			ctx->proDeclSpecifierSeq()->preDeclSpecifierSeq()->getStart()->getStartIndex()
 			: ctx->proDeclSpecifierSeq()->proSimpleTypeSpecifier()->getStart()->getStartIndex();
-		size_t stop = ctx->proDeclSpecifierSeq()->postDeclSpecifierSeq() ?
+		std::size_t stop = ctx->proDeclSpecifierSeq()->postDeclSpecifierSeq() ?
 			ctx->proDeclSpecifierSeq()->postDeclSpecifierSeq()->getStop()->getStopIndex()
 			: ctx->proDeclSpecifierSeq()->proSimpleTypeSpecifier()->getStop()->getStopIndex();
 		parameter.type = { code.begin() + start, code.begin() + stop + 1 };

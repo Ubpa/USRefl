@@ -31,7 +31,7 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 		if(!publicBaseIndice.empty()) {
 			if (publicBaseIndice.size() > 1) {
 				ss << "," << endl;
-				for (size_t i = 0; i < publicBaseIndice.size(); i++) {
+				for (std::size_t i = 0; i < publicBaseIndice.size(); i++) {
 					const auto& base = typeMeta.bases[publicBaseIndice[i]];
 					ss << indent << indent << base.GenerateText();
 					if (i != publicBaseIndice.size() - 1)
@@ -47,17 +47,6 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 		ss
 			<< ">" << endl
 			<< "{" << endl;
-
-		// name
-		ss << "#ifdef UBPA_USREFL_NOT_USE_NAMEOF" << endl;
-
-		if (typeMeta.IsTemplateType())
-			ss << indent << "// [!] all instance types have the same name" << endl;
-
-		
-		ss
-			<< indent << "static constexpr char name[" << (nsname.size() + 1) << "] = \"" << nsname << "\";" << endl
-			<< "#endif" << endl;
 		
 		// attributes
 		switch (config.attrListConstMode) {
@@ -196,10 +185,10 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 						ss
 							<< indent << indent << indent
 							<< "Attr {" << name << ", std::tuple {" << endl;
-						const size_t defaultParameterNum = field.GetDefaultParameterNum();
+						const std::size_t defaultParameterNum = field.GetDefaultParameterNum();
 						const bool isConstructor = field.name == typeMeta.name;
-						for (size_t i = 1; i <= defaultParameterNum; i++) {
-							size_t num = field.parameters.size() - i;
+						for (std::size_t i = 1; i <= defaultParameterNum; i++) {
+							std::size_t num = field.parameters.size() - i;
 							if(isConstructor) {
 								ss
 									<< indent << indent << indent << indent

@@ -13,9 +13,6 @@ template<>
 struct Ubpa::USRefl::TypeInfo<Point> :
     TypeInfoBase<Point>
 {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-    static constexpr char name[6] = "Point";
-#endif
     static constexpr AttrList attrs = {};
     static constexpr FieldList fields = {
         Field {TSTR("x"), &Type::x},

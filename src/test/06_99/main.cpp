@@ -14,7 +14,7 @@ struct [[size(8)]] Point {
 	float x;
 	[[info("hello")]]
 	float y;
-	static constexpr size_t id = 1024;
+	static constexpr std::size_t id = 1024;
 	float Sum() const { return x + y; }
 };
 
@@ -78,7 +78,7 @@ void test_basic() {
 		}
 	});
 	static_assert(TypeInfo<Point>::fields.NameOfValue(Point::id) == "id");
-	static_assert(TypeInfo<Point>::fields.ValueOfName<size_t>("id") == Point::id);
+	static_assert(TypeInfo<Point>::fields.ValueOfName<std::size_t>("id") == Point::id);
 }
 
 // ==============
@@ -180,8 +180,8 @@ void test_inheritance() {
 		<< " inheritance" << endl
 		<< "====================" << endl;
 
-	TypeInfo<D>::DFS_ForEach([](auto t, size_t depth) {
-		for (size_t i = 0; i < depth; i++)
+	TypeInfo<D>::DFS_ForEach([](auto t, std::size_t depth) {
+		for (std::size_t i = 0; i < depth; i++)
 			cout << "  ";
 		cout << t.name << endl;
 	});
@@ -192,7 +192,7 @@ void test_inheritance() {
 	});
 
 	cout << "[DFS]" << endl;
-	TypeInfo<D>::DFS_ForEach([](auto t, size_t) {
+	TypeInfo<D>::DFS_ForEach([](auto t, std::size_t) {
 		t.fields.ForEach([](auto field) {
 			cout << field.name << endl;
 		});
@@ -218,8 +218,8 @@ void test_inheritance() {
 // ==============
 //  enum
 // ==============
-template<size_t N>
-constexpr size_t Func() { return N; }
+template<std::size_t N>
+constexpr std::size_t Func() { return N; }
 
 enum class [[enum_attr("enum_attr_value")]] Color {
 	RED [[enumerator_attr("enumerator_attr_value"), func(&Func<1>)]] = 1,
@@ -286,7 +286,7 @@ void test_enum() {
 		// compile-time
 		static_assert(TypeInfo<Color>::fields.Find(TSTR("GREEN")).attrs.Find(TSTR("func")).value() == 2);
 		// runtime
-		size_t rst = static_cast<size_t>(-1);
+		std::size_t rst = static_cast<std::size_t>(-1);
 		TypeInfo<Color>::fields.FindIf([nameof_red, &rst](auto field) {
 			if (field.name == nameof_red) {
 				rst = field.attrs.Find(TSTR("func")).value();
@@ -303,7 +303,7 @@ void test_enum() {
 		static_assert(USRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::GREEN).attrs.Find(TSTR("func")).value() == 2);
 
 		// runtime
-		size_t rst = static_cast<size_t>(-1);
+		std::size_t rst = static_cast<std::size_t>(-1);
 		TypeInfo<Color>::fields.FindIf([red, &rst](auto field) {
 			if (field.value == red) {
 				rst = field.attrs.Find(TSTR("func")).value();
@@ -422,14 +422,14 @@ void test_virtual() {
 	});
 
 	cout << "[Tree]" << endl;
-	TypeInfo<VD>::DFS_ForEach([](auto t, size_t depth) {
-		for (size_t i = 0; i < depth; i++)
+	TypeInfo<VD>::DFS_ForEach([](auto t, std::size_t depth) {
+		for (std::size_t i = 0; i < depth; i++)
 			cout << "  ";
 		cout << t.name << endl;
 	});
 
 	cout << "[field]" << endl;
-	TypeInfo<VD>::DFS_ForEach([](auto t, size_t) {
+	TypeInfo<VD>::DFS_ForEach([](auto t, std::size_t) {
 		t.fields.ForEach([](auto field) {
 			cout << field.name << endl;
 			});
@@ -456,7 +456,7 @@ void test_virtual() {
 // ==============
 //  mask
 // ==============
-template<typename T, size_t... Ns>
+template<typename T, std::size_t... Ns>
 constexpr auto GetXID(std::index_sequence<Ns...>) {
 	// get fields with name "x" or "id"
 	constexpr auto masks = TypeInfo<T>::fields.Accumulate(

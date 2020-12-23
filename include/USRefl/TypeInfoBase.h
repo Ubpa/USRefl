@@ -2,17 +2,13 @@
 
 #include "BaseList.h"
 
-#ifdef UBPA_USREFL_USE_NAMEOF
-#include <nameof.hpp>
-#endif
+#include <UTemplate/Name.h>
 
 namespace Ubpa::USRefl {
 	template<typename T, typename... Bases>
 	struct TypeInfoBase {
 		using Type = T;
-#ifdef UBPA_USREFL_USE_NAMEOF
-		static constexpr std::string_view name = nameof::nameof_type<T>();
-#endif
+		static constexpr std::string_view name = type_name<T>().value;
 		static constexpr BaseList bases = { Bases{}... };
 
 		template<typename Derived>
