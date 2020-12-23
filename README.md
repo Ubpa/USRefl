@@ -10,7 +10,7 @@
 
 ```
 
-[![repo-size](https://img.shields.io/github/languages/code-size/Ubpa/USRefl?style=flat)](https://github.com/Ubpa/USRefl/archive/master.zip) [![tag](https://img.shields.io/github/v/tag/Ubpa/USRefl)](https://github.com/Ubpa/USRefl/tags) [![license](https://img.shields.io/github/license/Ubpa/USRefl)](LICENSE) [![compiler explorer](https://img.shields.io/badge/compiler_explorer-online-blue)](https://godbolt.org/z/994Gvv)
+[![repo-size](https://img.shields.io/github/languages/code-size/Ubpa/USRefl?style=flat)](https://github.com/Ubpa/USRefl/archive/master.zip) [![tag](https://img.shields.io/github/v/tag/Ubpa/USRefl)](https://github.com/Ubpa/USRefl/tags) [![license](https://img.shields.io/github/license/Ubpa/USRefl)](LICENSE) [![compiler explorer](https://img.shields.io/badge/compiler_explorer-online-blue)](https://godbolt.org/z/zzEjTx) 
 
 ⭐ Star us on GitHub — it helps!
 
@@ -40,7 +40,7 @@ Header-only, tiny (99 lines) and powerful C++17 static reflection library.
 
 ## Example
 
-run it online : [**compiler explorer**](https://godbolt.org/z/691fhj) 
+run it online : [**compiler explorer**](https://godbolt.org/z/7n6foG) 
 
 ```c++
 #include <USRefl/USRefl.h>
@@ -53,9 +53,6 @@ struct Point {
 
 template<>
 struct Ubpa::USRefl::TypeInfo<Point> : TypeInfoBase<Point> {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
-  static constexpr char name[6] = "Point";
-#endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
     Field {TSTR("x"), &Type::x},
@@ -65,9 +62,12 @@ struct Ubpa::USRefl::TypeInfo<Point> : TypeInfoBase<Point> {
 
 int main() {
   Point p{ 1.f, 2.f };
-  Ubpa::USRefl::TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
-    std::cout << field.name << ": " << var << std::endl;
-  });
+  Ubpa::USRefl::TypeInfo<Point>::ForEachVarOf(
+    p,
+    [](const auto& field, auto&& var) {
+      std::cout << field.name << ": " << var << std::endl;
+    }
+  );
 }
 ```
 
@@ -80,7 +80,7 @@ y : 2
 
 **other example** 
 
-- 99 line: [USRefl_99.h](include/USRefl_99.h), [test](src/test/06_99/main.cpp), [**online**](https://godbolt.org/z/994Gvv) (test all examples below)
+- 99 line: [USRefl_99.h](include/USRefl_99.h), [test](src/test/06_99/main.cpp), [**online**](https://godbolt.org/z/zzEjTx) (test all examples below)
 - [template](src/test/01_template/main.cpp) 
 - [static](src/test/02_static/main.cpp) 
 - [func](src/test/03_func/main.cpp) 
@@ -107,8 +107,8 @@ You can choose one of the following three methods
 ## Compiler compatibility
 
 - Clang/LLVM >= 6
-- GCC >= 7.3
-- MSVC++ >= 19.20 / VS 2019 + (not fully support virtual inheritance because of a MSVC++ bug)
+- ~~GCC >= 7.3~~ 
+- MSVC >= 19.20 / VS 2019 + (not fully support virtual inheritance because of a MSVC++ bug)
 
 ## Licensing
 

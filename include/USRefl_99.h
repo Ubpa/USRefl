@@ -24,9 +24,9 @@ namespace Ubpa::USRefl::detail {
       if constexpr (b.is_virtual) return DFS_Acc<D+1>(b.info, std::forward<F>(f), std::move(r));
       else return DFS_Acc<D+1>(b.info, std::forward<F>(f), std::forward<F>(f)(std::move(r), b.info, D+1)); });
   }
-  template<class TI, class U, class F> constexpr void NV_Var(TI info, U&& u, F&& f) {
-    info.fields.ForEach([&](const auto& k){if constexpr(!k.is_static&&!k.is_func)std::forward<F>(f)(k,std::forward<U>(u).*(k.value));});
-    info.bases.ForEach([&](auto b){if constexpr(!b.is_virtual)NV_Var(b.info,b.info.Forward(std::forward<U>(u)),std::forward<F>(f));});
+  template<class TI, class U, class F> constexpr void NV_Var(TI, U&& u, F&& f) {
+    TI::fields.ForEach([&](auto&& k){using K=std::decay_t<decltype(k)>; if constexpr(!K::is_static&&!K::is_func)std::forward<F>(f)(k,std::forward<U>(u).*(k.value));});
+    TI::bases.ForEach([&](auto b){if constexpr(!b.is_virtual)NV_Var(b.info,b.info.Forward(std::forward<U>(u)),std::forward<F>(f));});
   }
 }
 namespace Ubpa::USRefl {
@@ -88,8 +88,8 @@ namespace Ubpa::USRefl {
         [&](auto acc, auto vb){ return std::forward<F>(f)(std::move(acc), vb, 1); })); }
     template<class F>static constexpr void DFS_ForEach(F&&f){DFS_Acc(0,[&](auto,auto t,auto d){std::forward<F>(f)(t,d);return 0;});}
     template<class U, class Func> static constexpr void ForEachVarOf(U&& obj, Func&& func) {
-      VirtualBases().ForEach([&](auto vb) { vb.fields.ForEach([&](const auto& fld)
-      { if constexpr (!fld.is_static && !fld.is_func) std::forward<Func>(func)(fld, std::forward<U>(obj).*(fld.value)); }); });
+      VirtualBases().ForEach([&](auto vb) { vb.fields.ForEach([&](const auto& fld){ using Fld = std::decay_t<decltype(fld)>;
+      if constexpr (!Fld::is_static && !Fld::is_func) std::forward<Func>(func)(fld, std::forward<U>(obj).*(fld.value)); }); });
       detail::NV_Var(TypeInfo<Type>{}, std::forward<U>(obj), std::forward<Func>(func)); }
   };
   template<class Name, class Char, std::size_t N> Attr(Name, const Char(&)[N])->Attr<Name, std::basic_string_view<Char>>;
