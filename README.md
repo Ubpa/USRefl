@@ -98,16 +98,15 @@ y : 2
 
 ## Integration
 
-You can choose one of the following three methods
+You can choose one of the following two methods
 
-- ⭐ **method 0**: add required file [USRefl_99.h](include/USRefl_99.h) 
-- ⭐ **method 1**: directly use [include/USRefl/](include/USRefl/) 
-- ⭐ **method 2**: cmake install, `find package(USRefl REQUIRED)` to get imported target `Ubpa::USRefl_core` 
+- ⭐ **method 0**: add required file [USRefl_99.h](include/USRefl_99.h) (not support GCC)
+- ⭐ **method 1**: cmake install, `find package(USRefl REQUIRED)` to get imported target `Ubpa::USRefl_core` 
 
 ## Compiler compatibility
 
 - Clang/LLVM >= 6
-- ~~GCC >= 7.3~~ 
+- GCC >= 7.3 ( [USRefl_99.h](include/USRefl_99.h) is not supported by GCC )
 - MSVC >= 19.20 / VS 2019 + (not fully support virtual inheritance because of a MSVC++ bug)
 
 ## Licensing

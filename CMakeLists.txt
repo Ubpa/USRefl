@@ -15,7 +15,7 @@ if(Ubpa_USRefl_Build_AutoRefl)
   Ubpa_AddDep(UANTLR 0.2.0)
 endif()
 
-Ubpa_AddDep(UTemplate 0.5.2)
+Ubpa_AddDep(UTemplate 0.5.3)
 
 Ubpa_AddSubDirsRec(include)
 Ubpa_AddSubDirsRec(src)
