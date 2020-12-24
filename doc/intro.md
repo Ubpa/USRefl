@@ -57,8 +57,8 @@ Then we need to write a declaration for it.
 template<>
 struct TypeInfo<Point> : TypeInfoBase<Point> {
   static constexpr FieldList fields = {
-    Field{"x", &Point::x, AttrList{ Attr{ "not_serialize" } }},
-    Field{"y", &Point::y, AttrList{ Attr{ "info", "hello" } }}
+    Field{TSTR("x"), &Point::x, AttrList{ Attr{ "not_serialize" } }},
+    Field{TSTR("y"), &Point::y, AttrList{ Attr{ "info", "hello" } }}
   };
 
   static constexpr AttrList attrs = {

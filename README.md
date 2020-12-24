@@ -93,7 +93,7 @@ y : 2
 ## Documentation
 
 - [Introduction](doc/intro.md) 
-- parser (TODO)
+- parser (TODO) (check CMake option `Ubpa_USRefl_Build_AutoRefl` to generate the parser)
 
 ## Integration
 
