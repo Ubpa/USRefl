@@ -13,10 +13,10 @@ namespace Ubpa::USRefl {
 
 		constexpr ElemList(Elems... elems) : elems{ elems... } {}
 
-		template<bool... masks, typename Acc, typename Func>
+		template<typename Acc, typename Func>
 		constexpr auto Accumulate(Acc acc, Func&& func) const;
 
-		template<bool... masks, typename Func>
+		template<typename Func>
 		constexpr void ForEach(Func&& func) const;
 
 		template<typename Func>

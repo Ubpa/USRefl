@@ -11,12 +11,7 @@ namespace Ubpa::USRefl::detail {
   template<class L, class F> constexpr std::size_t FindIf(const L&, F&&, std::index_sequence<>) { return -1; }
   template<class L, class F, std::size_t N0, std::size_t... Ns> constexpr std::size_t FindIf(const L& l, F&& f, std::index_sequence<N0, Ns...>)
   { return f(l.template Get<N0>()) ? N0 : FindIf(l, std::forward<F>(f), std::index_sequence<Ns...>{}); }
-  template<class L, class F, class R> constexpr auto Acc(const L&, F&&, R&& r, std::index_sequence<>) { return std::forward<R>(r); }
-  template<bool m0, bool... ms, class L, class F, class R, std::size_t N0, std::size_t... Ns>
-  constexpr auto Acc(const L& l, F&& f, R r, std::index_sequence<N0, Ns...>) {
-    if constexpr (!m0) return Acc<ms...>(l, std::forward<F>(f), std::move(r), std::index_sequence<Ns...>{});
-    else return Acc<ms...>(l, std::forward<F>(f), f(std::move(r), l.template Get<N0>()), std::index_sequence<Ns...>{});
-  }
+  template<class L, class F, class R> constexpr auto Acc(const L&, F&&, R r, std::index_sequence<>) { return r; }
   template<class L, class F, class R, std::size_t N0, std::size_t... Ns> constexpr auto Acc(const L& l, F&& f, R r, std::index_sequence<N0, Ns...>)
   { return Acc(l, std::forward<F>(f), f(std::move(r), l.template Get<N0>()), std::index_sequence<Ns...>{}); }
   template<std::size_t D, class T, class R, class F> constexpr auto DFS_Acc(T t, F&& f, R r) {
@@ -37,10 +32,10 @@ namespace Ubpa::USRefl {
   template<typename...Es> struct ElemList {
     std::tuple<Es...> elems; static constexpr std::size_t size = sizeof...(Es);
     constexpr ElemList(Es... elems) : elems{ elems... } {}
-    template<bool... ms, class Init, class Func> constexpr auto Accumulate(Init init, Func&& func) const
-    { return detail::Acc<ms...>(*this, std::forward<Func>(func), std::move(init), std::make_index_sequence<size>{}); }
-    template<bool... ms, class Func> constexpr void ForEach(Func&& func) const
-    { Accumulate<ms...>(0, [&](auto, const auto& field) {std::forward<Func>(func)(field); return 0; }); }
+    template<class Init, class Func> constexpr auto Accumulate(Init init, Func&& func) const
+    { return detail::Acc(*this, std::forward<Func>(func), std::move(init), std::make_index_sequence<size>{}); }
+    template<class Func> constexpr void ForEach(Func&& func) const
+    { Accumulate(0, [&](auto, const auto& field) {std::forward<Func>(func)(field); return 0; }); }
     template<class S>static constexpr bool Contains(S = {}) { return (Es::template NameIs<S>() || ...); }
     template<class Func> constexpr std::size_t FindIf(Func&& func) const
     { return detail::FindIf(*this, std::forward<Func>(func), std::make_index_sequence<sizeof...(Es)>{}); }

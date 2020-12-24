@@ -5,40 +5,16 @@
 #include <array>
 
 namespace Ubpa::USRefl::detail {
-	template<typename List, typename Func, typename Acc, std::size_t... Ns, bool... masks>
-	constexpr auto Accumulate(const List& list, Func&& func, Acc acc, std::index_sequence<Ns...>, std::integer_sequence<bool, masks...>) {
+	template<typename List, typename Func, typename Acc, std::size_t... Ns>
+	constexpr auto Accumulate(const List& list, Func&& func, Acc acc, std::index_sequence<Ns...>) {
 		if constexpr (sizeof...(Ns) > 0) {
 			using IST_N = IntegerSequenceTraits<std::index_sequence<Ns...>>;
-			if constexpr (sizeof...(masks) > 0) {
-				using IST_Mask = IntegerSequenceTraits<std::integer_sequence<bool, masks...>>;
-				if constexpr (IST_Mask::head == true) {
-					return Accumulate(
-						list,
-						std::forward<Func>(func),
-						std::forward<Func>(func)(std::move(acc), list.template Get<IST_N::head>()),
-						IST_N::tail,
-						IST_Mask::tail
-					);
-				}
-				else { // mask is false
-					return Accumulate(
-						list,
-						std::forward<Func>(func),
-						std::move(acc),
-						IST_N::tail,
-						IST_Mask::tail
-					);
-				}
-			}
-			else { // default true
-				return Accumulate(
-					list,
-					std::forward<Func>(func),
-					std::forward<Func>(func)(std::move(acc), list.template Get<IST_N::head>()),
-					IST_N::tail,
-					std::integer_sequence<bool>{}
-				);
-			}
+			return Accumulate(
+				list,
+				std::forward<Func>(func),
+				std::forward<Func>(func)(std::move(acc), list.template Get<IST_N::head>()),
+				IST_N::tail
+			);
 		}
 		else
 			return acc;
@@ -58,21 +34,20 @@ namespace Ubpa::USRefl::detail {
 
 namespace Ubpa::USRefl {
 	template<typename... Elems>
-	template<bool... masks, typename Init, typename Func>
+	template<typename Init, typename Func>
 	constexpr auto ElemList<Elems...>::Accumulate(Init init, Func&& func) const {
 		return detail::Accumulate(
 			*this,
 			std::forward<Func>(func),
 			std::move(init),
-			std::make_index_sequence<size>{},
-			std::integer_sequence<bool, masks...>{}
+			std::make_index_sequence<size>{}
 		);
 	}
 
 	template<typename... Elems>
-	template<bool... masks, typename Func>
+	template<typename Func>
 	constexpr void ElemList<Elems...>::ForEach(Func&& func) const {
-		Accumulate<masks...>(0, [&](auto, const auto& field) {
+		Accumulate(0, [&](auto, const auto& field) {
 			std::forward<Func>(func)(field);
 			return 0;
 		});
