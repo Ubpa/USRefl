@@ -3,6 +3,8 @@ build/
 vs_build/
 lib/
 .vs/
+.vscode/
+bin/
 _deps/
 
 *.obj

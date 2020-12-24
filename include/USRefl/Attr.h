@@ -16,6 +16,9 @@ namespace Ubpa::USRefl {
 
 	template<typename Name>
 	Attr(Name)->Attr<Name, void>;
+
+	template<typename Name, typename Value>
+	Attr(Name, Value)->Attr<Name, Value>;
 }
 
 #include "detail/Attr.inl"

@@ -8,7 +8,8 @@ namespace Ubpa::USRefl {
 	template<typename T, typename... Bases>
 	struct TypeInfoBase {
 		using Type = T;
-		static constexpr std::string_view name = type_name<T>().value;
+		using TName = decltype(type_name<T>());
+		static constexpr std::string_view name = TName::value;
 		static constexpr BaseList bases = { Bases{}... };
 
 		template<typename Derived>

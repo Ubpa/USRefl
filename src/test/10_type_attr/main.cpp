@@ -38,10 +38,10 @@ constexpr auto attr_init(Str, Value&& v) {
         return T{ std::forward<Value>(v) };
 }
 
-#define TYPEOF_REGISTER(T)                                                \
-template<>                                                                \
-struct UMeta::Typeof<std::remove_const_t<decltype(TypeInfo<T>::tname)>> { \
-    using type = UMeta::Range;                                            \
+#define TYPEOF_REGISTER(X)                          \
+template<>                                          \
+struct UMeta::Typeof<typename TypeInfo<X>::TName> { \
+    using type = X;                                 \
 }
 
 //
@@ -59,7 +59,6 @@ template<>
 struct Ubpa::USRefl::TypeInfo<UMeta::Range> :
     TypeInfoBase<UMeta::Range>
 {
-    static constexpr auto tname = TSTR(name);
     static constexpr AttrList attrs = {};
     static constexpr FieldList fields = {
         Field {TSTR("minV"), &Type::minV},

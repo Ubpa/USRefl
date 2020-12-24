@@ -12,6 +12,7 @@ namespace Ubpa::USRefl {
 	struct NamedValueBase {
 		static_assert(IsTStr<Name>::value);
 		
+		using TName = Name;
 		static constexpr std::string_view name = Name::value;
 		static constexpr bool has_value = !std::is_void_v<T>;
 
