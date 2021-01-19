@@ -2,6 +2,8 @@
 
 #include "../Util.h"
 
+#include <UTemplate/TypeList.h>
+
 namespace Ubpa::USRefl::detail {
 	template<typename List, typename Func, typename Acc, std::size_t... Ns>
 	constexpr auto Accumulate(const List& list, Func&& func, Acc acc, std::index_sequence<Ns...>) {
@@ -28,6 +30,12 @@ namespace Ubpa::USRefl::detail {
 		else
 			return static_cast<std::size_t>(-1);
 	}
+
+	template<typename Name>
+	struct IsSameNameWith {
+		template<typename T>
+		struct Ttype : std::is_same<typename T::TName, Name> {};
+	};
 }
 
 namespace Ubpa::USRefl {
@@ -60,20 +68,18 @@ namespace Ubpa::USRefl {
 	template<typename... Elems>
 	template<typename Name>
 	constexpr const auto& ElemList<Elems...>::Find(Name) const {
-		if constexpr (sizeof...(Elems) > 0) {
-			constexpr std::size_t idx = []() {
-				constexpr decltype(Name::View()) names[]{ Elems::name... };
-				for (std::size_t i = 0; i < sizeof...(Elems); i++) {
-					if (Name::View() == names[i])
-						return i;
-				}
-				return static_cast<std::size_t>(-1);
-			}();
-			static_assert(idx != static_cast<std::size_t>(-1));
-			return Get<idx>();
-		}
-		else
+		/*static_assert(Contains<Name>());
+		constexpr std::size_t idx = []() {
+			constexpr decltype(Name::View()) names[]{ Elems::name... };
+			for (std::size_t i = 0; i < sizeof...(Elems); i++) {
+				if (Name::View() == names[i])
+					return i;
+			}
 			return static_cast<std::size_t>(-1);
+		}();
+		static_assert(idx != static_cast<std::size_t>(-1));
+		return Get<idx>();*/
+		return Get<Ubpa::FindIf_v<TypeList<Elems...>, detail::IsSameNameWith<Name>::template Ttype>>();
 	}
 
 	template<typename... Elems>
