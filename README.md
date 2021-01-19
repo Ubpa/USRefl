@@ -18,11 +18,11 @@
 
 > **U**bpa **S**tatic **R**eflection
 
-Header-only, tiny (99 lines) and powerful C++17 static reflection library.
+Header-only, tiny (99 lines) and powerful C++20 static reflection library.
 
 ## Feature
 
-- **header-only**, **tiny (99 lines)** and **powerful** ([USRefl_99.h](include/USRefl_99.h))
+- **header-only**, **tiny (99 lines)** and **powerful** ([USRefl_99.h](include/USRefl_99.h) (MSVC & GCC), [USRefl_99_clang.h](include/USRefl_99_clang.h) (Clang))
 - **noninvasive** 
 - basic
   - (non-static / static) member variable
@@ -99,14 +99,14 @@ y : 2
 
 You can choose one of the following two methods
 
-- ⭐ **method 0**: add required file [USRefl_99.h](include/USRefl_99.h) (not support GCC)
+- ⭐ **method 0**: add required file [USRefl_99.h](include/USRefl_99.h) for MSVC and GCC (use [USRefl_99_clang.h](include/USRefl_99_clang.h) for Clang)
 - ⭐ **method 1**: cmake install, `find package(USRefl REQUIRED)` to get imported target `Ubpa::USRefl_core` 
 
 ## Compiler compatibility
 
-- Clang/LLVM >= 6
-- GCC >= 7.3 ( [USRefl_99.h](include/USRefl_99.h) is not supported by GCC )
-- MSVC >= 19.20 / VS 2019 + (not fully support virtual inheritance because of a MSVC++ bug)
+- Clang/LLVM >= 10
+- GCC >= 10
+- MSVC >= 1926 (not fully support virtual inheritance because of [a MSVC bug](https://developercommunity.visualstudio.com/content/problem/1116835/member-pointer-of-a-class-with-a-virtual-base-1.html))
 
 ## Licensing
 

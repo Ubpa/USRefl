@@ -2,8 +2,6 @@
 
 #include "../Util.h"
 
-#include <array>
-
 namespace Ubpa::USRefl::detail {
 	template<typename List, typename Func, typename Acc, std::size_t... Ns>
 	constexpr auto Accumulate(const List& list, Func&& func, Acc acc, std::index_sequence<Ns...>) {
@@ -64,8 +62,8 @@ namespace Ubpa::USRefl {
 	constexpr const auto& ElemList<Elems...>::Find(Name) const {
 		if constexpr (sizeof...(Elems) > 0) {
 			constexpr std::size_t idx = []() {
-				constexpr std::array names{ Elems::name... };
-				for (std::size_t i = 0; i < names.size(); i++) {
+				constexpr decltype(Name::View()) names[]{ Elems::name... };
+				for (std::size_t i = 0; i < sizeof...(Elems); i++) {
 					if (Name::View() == names[i])
 						return i;
 				}

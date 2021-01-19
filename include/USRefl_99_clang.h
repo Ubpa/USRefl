@@ -1,15 +1,15 @@
 #pragma once                           // Ubpa Static Reflection -- 99 lines
 #include <string_view>                 // Repository: https://github.com/Ubpa/USRefl
 #include <tuple>                       // License: https://github.com/Ubpa/USRefl/blob/master/LICENSE
-#define TSTR(s) ([]{constexpr std::basic_string_view str{s};return Ubpa::detail::TStr<Ubpa::detail::fcstr<typename decltype(str)::value_type,str.size()>{str}>{};}())
+#define TSTR(s) ([] { struct tmp { static constexpr auto get() { return std::basic_string_view{s}; } }; return Ubpa::detail::TSTRH(tmp{}); }())
 namespace Ubpa::detail {
-  template<typename C, std::size_t N> struct fcstr {
-    using value_type = C; value_type data[N + 1]{}; static constexpr std::size_t size = N;
-    constexpr fcstr(std::basic_string_view<value_type> str) { for (std::size_t i{ 0 }; i < size; ++i) data[i] = str[i]; } };
-  template<fcstr str> struct TStr { using Char = typename decltype(str)::value_type;
+  template<typename C, C... chars> struct TStr { using Char = C;
     template<typename T> static constexpr bool Is(T = {}) { return std::is_same_v<T, TStr>; }
-    static constexpr auto Data() { return str.data; } static constexpr auto Size() { return str.size; }
-    static constexpr std::basic_string_view<Char> View() { return str.data; } };
+    static constexpr const Char* Data() { return data; } static constexpr std::size_t Size() { return sizeof...(chars); }
+    static constexpr std::basic_string_view<Char> View() { return data; }
+  private: static constexpr Char data[]{ chars...,Char(0) }; };
+  template <typename Char, typename T, std::size_t... Ns> constexpr auto TSTRHI(std::index_sequence<Ns...>) { return TStr<Char, T::get()[Ns]...>{}; }
+  template <typename T> constexpr auto TSTRH(T) { return TSTRHI<typename decltype(T::get())::value_type, T>(std::make_index_sequence<T::get().size()>{}); }
   template<class L, class F> constexpr std::size_t FindIf(const L&, F&&, std::index_sequence<>) { return -1; }
   template<class L, class F, std::size_t N0, std::size_t... Ns> constexpr std::size_t FindIf(const L& l, F&& f, std::index_sequence<N0, Ns...>)
   { return f(l.template Get<N0>()) ? N0 : FindIf(l, std::forward<F>(f), std::index_sequence<Ns...>{}); }

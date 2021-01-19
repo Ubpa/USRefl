@@ -1,4 +1,9 @@
+#ifdef __clang__
+#include <USRefl_99_clang.h>
+#else
 #include <USRefl_99.h>
+#endif
+
 #include <iostream>
 #include <array>
 #include <cassert>
