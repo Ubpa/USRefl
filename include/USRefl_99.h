@@ -1,13 +1,15 @@
 #pragma once                           // Ubpa Static Reflection -- 99 lines
 #include <string_view>                 // Repository: https://github.com/Ubpa/USRefl
 #include <tuple>                       // License: https://github.com/Ubpa/USRefl/blob/master/LICENSE
-#define TSTR(s) Ubpa::USRefl::detail::TNameImpl1([] { struct tmp { static constexpr decltype(auto) get() { return (s); } }; return tmp{}; }())
-namespace Ubpa::USRefl::detail {
-  template<class C, C... cs>struct TStr{using Tag=TStr; template<class T>static constexpr bool NameIs(T={}){return std::is_same_v<T,Tag>;}
-    using Char=C; static constexpr char name_data[]{cs...,C(0)}; static constexpr std::basic_string_view<C> name{name_data}; };
-  template<class C,class T,std::size_t...N>constexpr auto TNameImpl2(std::index_sequence<N...>) { return TStr<C, T::get()[N]...>(); }
-  template <typename T> constexpr auto TNameImpl1(T) { using C = std::decay_t<decltype(T::get()[0])>;
-    return TNameImpl2<C, T>(std::make_index_sequence<sizeof(T::get()) / sizeof(C) - 1>()); }
+#define TSTR(s) ([]{constexpr std::basic_string_view str{s};return Ubpa::detail::TStr<Ubpa::detail::fcstr<typename decltype(str)::value_type,str.size()>{str}>{};}())
+namespace Ubpa::detail {
+  template<typename C, std::size_t N> struct fcstr {
+    using value_type = C; value_type data[N + 1]{}; static constexpr std::size_t size = N;
+    constexpr fcstr(std::basic_string_view<value_type> str) { for (std::size_t i{ 0 }; i < size; ++i) data[i] = str[i]; } };
+  template<fcstr str> struct TStr { using Char = typename decltype(str)::value_type;
+    template<typename T> static constexpr bool Is(T = {}) { return std::is_same_v<T, TStr>; }
+    static constexpr auto Data() { return str.data; } static constexpr auto Size() { return str.size; }
+    static constexpr std::basic_string_view<Char> View() { return str.data; } };
   template<class L, class F> constexpr std::size_t FindIf(const L&, F&&, std::index_sequence<>) { return -1; }
   template<class L, class F, std::size_t N0, std::size_t... Ns> constexpr std::size_t FindIf(const L& l, F&& f, std::index_sequence<N0, Ns...>)
   { return f(l.template Get<N0>()) ? N0 : FindIf(l, std::forward<F>(f), std::index_sequence<Ns...>{}); }
@@ -25,9 +27,11 @@ namespace Ubpa::USRefl::detail {
   }
 }
 namespace Ubpa::USRefl {
-  template<class Name,class T>struct NamedValue:Name{T value;static constexpr bool has_value=true;constexpr NamedValue(T v):value{v}{}
-    template<class U>constexpr bool operator==(U v)const{if constexpr(std::is_same_v<T,U>)return value==v;else return false;} };
-  template<class Name> struct NamedValue<Name, void> : Name { /*T value;*/ static constexpr bool has_value = false;
+  template<class Name>struct NamedValueBase { using TName = Name; static constexpr std::string_view name = TName::View(); };
+  template<class Name, class T>struct NamedValue : NamedValueBase<Name> { T value; static constexpr bool has_value = true;
+    constexpr NamedValue(T v) : value{ v } {}
+    template<class U> constexpr bool operator==(U v) const { if constexpr (std::is_same_v<T, U>) return value == v; else return false; } };
+  template<class Name> struct NamedValue<Name, void> : NamedValueBase<Name> { /*T value;*/ static constexpr bool has_value = false;
     template<class U> constexpr bool operator==(U) const { return false; } };
   template<typename...Es> struct ElemList {
     std::tuple<Es...> elems; static constexpr std::size_t size = sizeof...(Es);
@@ -36,11 +40,11 @@ namespace Ubpa::USRefl {
     { return detail::Acc(*this, std::forward<Func>(func), std::move(init), std::make_index_sequence<size>{}); }
     template<class Func> constexpr void ForEach(Func&& func) const
     { Accumulate(0, [&](auto, const auto& field) {std::forward<Func>(func)(field); return 0; }); }
-    template<class S>static constexpr bool Contains(S = {}) { return (Es::template NameIs<S>() || ...); }
+    template<class S>static constexpr bool Contains(S = {}) { return (Es::TName::template Is<S>() || ...); }
     template<class Func> constexpr std::size_t FindIf(Func&& func) const
     { return detail::FindIf(*this, std::forward<Func>(func), std::make_index_sequence<sizeof...(Es)>{}); }
     template<class S> constexpr const auto& Find(S = {}) const
-    { constexpr auto idx = [](){return std::apply([](auto...n){bool b{};return((b?0:(n==S::name?(b=true,0):1))+...);},std::tuple{Es::name...});}(); return Get<idx>(); }
+    { constexpr auto idx = [](){return std::apply([](auto...n){bool b{};return((b?0:(n==S::View()?(b=true,0):1))+...);},std::tuple{Es::name...});}(); return Get<idx>(); }
     template<class T> constexpr std::size_t FindValue(const T& v) const { return FindIf([&v](auto e) { return e == v; }); }
   	template<typename T, typename S>constexpr const T* ValuePtrOfName(S n) const
   	{return Accumulate(nullptr,[n](auto r,const auto& e){if constexpr(std::is_same_v<decltype(e.value), T>)return e.name==n?&e.value:r;else return r;});}
@@ -68,7 +72,7 @@ namespace Ubpa::USRefl {
   template<typename...Ts> struct TypeInfoList : ElemList<Ts...> { constexpr TypeInfoList(Ts...ts) : ElemList<Ts...>{ ts... } {} };
   template<class T, typename... Bases> struct TypeInfoBase {
     using Type = T; static constexpr BaseList bases{ Bases{}... };
-    template<class U> static constexpr auto&& Forward(U&& derived) noexcept {
+    template<class U> static constexpr auto&& Forward(U&& derived) {
       if constexpr (std::is_same_v<std::decay_t<U>, U>) return static_cast<Type&&>(derived); // right
       else if constexpr (std::is_same_v<std::decay_t<U>&, U>) return static_cast<Type&>(derived); // left
       else return static_cast<const std::decay_t<U>&>(derived); // std::is_same_v<const std::decay_t<U>&, U>

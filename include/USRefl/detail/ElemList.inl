@@ -66,7 +66,7 @@ namespace Ubpa::USRefl {
 			constexpr std::size_t idx = []() {
 				constexpr std::array names{ Elems::name... };
 				for (std::size_t i = 0; i < names.size(); i++) {
-					if (Name::value == names[i])
+					if (Name::View() == names[i])
 						return i;
 				}
 				return static_cast<std::size_t>(-1);

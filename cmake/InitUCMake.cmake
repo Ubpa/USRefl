@@ -1,6 +1,22 @@
 macro(Ubpa_InitUCMake)
+  cmake_parse_arguments(
+    "ARG" # prefix
+    "" #<options> # TRUE / FALSE
+    "VERSION" # <one_value_keywords>
+    "" #<multi_value_keywords> # list
+    ${ARGN}
+  )
+  # 结果为 ARG_*
+  # - ARG_<option>
+  # - ARG_<one_value_keyword>
+  # - ARG_<multi_value_keyword>
+  
+  if("${ARG_VERSION}" STREQUAL "")
+    message(FATAL_ERROR "not provide argument <VERSION>")
+  endif()
+  
   include(FetchContent)
-  set(UCMake_VERSION 0.6.3)
+  set(UCMake_VERSION ${ARG_VERSION})
   message(STATUS "find package: UCMake ${UCMake_VERSION}")
   find_package(UCMake ${UCMake_VERSION} EXACT QUIET)
   if(NOT UCMake_FOUND)

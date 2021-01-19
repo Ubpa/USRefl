@@ -101,7 +101,7 @@ int main() {
         constexpr auto tstr_range = TSTR("UMeta::Range");
         if constexpr (decltype(field.attrs)::Contains(tstr_range)) {
              auto r = attr_init(tstr_range, field.attrs.Find(tstr_range).value);
-             cout << "[" << tstr_range.value << "] " << r.minV << ", " << r.maxV << endl;
+             cout << "[" << tstr_range.View() << "] " << r.minV << ", " << r.maxV << endl;
         }
         cout << field.name << ": " << var << endl;
     });
