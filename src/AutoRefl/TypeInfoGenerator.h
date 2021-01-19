@@ -32,7 +32,8 @@ namespace Ubpa::USRefl {
 			ConstMode fieldListConstMode{ ConstMode::Constepxr };
 		};
 
-		TypeInfoGenerator(Config config = Config{}) : config{ std::move(config) } {}
+		TypeInfoGenerator() = default;
+		TypeInfoGenerator(Config config ) : config{ std::move(config) } {}
 
 		std::string Generate(const std::vector<TypeMeta>& typeMetas);
 	private:

@@ -1,8 +1,8 @@
 #include "MetaGenerator.h"
 
 #include <_deps/antlr4/antlr4-runtime.h>
-#include <UANTLR/ParserCPP14/CPP14Lexer.h>
-#include <UANTLR/ParserCPP14/CPP14ParserBaseVisitor.h>
+#include <UANTLR/ParserCpp14/CPP14Lexer.h>
+#include <UANTLR/ParserCpp14/CPP14ParserBaseVisitor.h>
 
 #include <sstream>
 
