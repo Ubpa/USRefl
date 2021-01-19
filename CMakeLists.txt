@@ -12,7 +12,7 @@ Ubpa_InitProject()
 
 option(Ubpa_USRefl_Build_AutoRefl "build AutoRefl" OFF)
 if(Ubpa_USRefl_Build_AutoRefl)
-  Ubpa_AddDep(UANTLR 0.2.0)
+  Ubpa_AddDep(UANTLR 0.2.1)
 endif()
 
 Ubpa_AddDep(UTemplate 0.6.0)

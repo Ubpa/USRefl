@@ -3,6 +3,7 @@ if(NOT Ubpa_USRefl_Build_AutoRefl)
 endif()
 
 Ubpa_AddTarget(
+  CXX_STANDARD 17
   MODE EXE
   OUTPUT_NAME AutoRefl
   LIB
