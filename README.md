@@ -10,7 +10,7 @@
 
 ```
 
-[![repo-size](https://img.shields.io/github/languages/code-size/Ubpa/USRefl?style=flat)](https://github.com/Ubpa/USRefl/archive/master.zip) [![tag](https://img.shields.io/github/v/tag/Ubpa/USRefl)](https://github.com/Ubpa/USRefl/tags) [![license](https://img.shields.io/github/license/Ubpa/USRefl)](LICENSE) [![compiler explorer](https://img.shields.io/badge/compiler_explorer-online-blue)](https://godbolt.org/z/h4zWEM) 
+[![repo-size](https://img.shields.io/github/languages/code-size/Ubpa/USRefl?style=flat)](https://github.com/Ubpa/USRefl/archive/master.zip) [![tag](https://img.shields.io/github/v/tag/Ubpa/USRefl)](https://github.com/Ubpa/USRefl/tags) [![license](https://img.shields.io/github/license/Ubpa/USRefl)](LICENSE) [![compiler explorer](https://img.shields.io/badge/compiler_explorer-online-blue)](https://godbolt.org/z/ecKvx3) 
 
 ⭐ Star us on GitHub — it helps!
 
@@ -40,7 +40,7 @@ Header-only, tiny (99 lines) and powerful C++20 static reflection library.
 
 ## Example
 
-run it online : [**compiler explorer**](https://godbolt.org/z/7n6foG) 
+run it online : [**compiler explorer**](https://godbolt.org/z/hhjnfE) 
 
 ```c++
 #include <USRefl/USRefl.h>
@@ -80,7 +80,7 @@ y : 2
 
 **other example** 
 
-- 99 line: [USRefl_99.h](include/USRefl_99.h), [test](src/test/06_99/main.cpp), [**online**](https://godbolt.org/z/h4zWEM) (test all examples below)
+- 99 line: [USRefl_99.h](include/USRefl_99.h), [test](src/test/06_99/main.cpp), [**online**](https://godbolt.org/z/ecKvx3) (test all examples below)
 - [template](src/test/01_template/main.cpp) 
 - [static](src/test/02_static/main.cpp) 
 - [func](src/test/03_func/main.cpp) 
@@ -99,8 +99,10 @@ y : 2
 
 You can choose one of the following two methods
 
-- ⭐ **method 0**: add required file [USRefl_99.h](include/USRefl_99.h) for MSVC and GCC (use [USRefl_99_clang.h](include/USRefl_99_clang.h) for Clang)
-- ⭐ **method 1**: cmake install, `find package(USRefl REQUIRED)` to get imported target `Ubpa::USRefl_core` 
+- ⭐ **method 0**: add the required file
+  - MSVC and GCC: [USRefl_99.h](include/USRefl_99.h) 
+  - Clang : [USRefl_99_clang.h](include/USRefl_99_clang.h) 
+- ⭐ **method 1**: cmake install,  use `find package(USRefl REQUIRED)` to get imported target `Ubpa::USRefl_core` 
 
 ## Compiler compatibility
 
