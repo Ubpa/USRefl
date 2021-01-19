@@ -19,7 +19,7 @@ namespace Ubpa::USRefl {
 
 			std::string_view nameof_namespace = UMeta::nameof_namespace;
 
-			bool isInitializerAsAttr{ true };
+			bool isInitializerAsAttr{ false };
 
 			std::string_view nameof_initializer = UMeta::nameof_initializer;
 

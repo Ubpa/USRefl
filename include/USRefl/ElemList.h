@@ -49,8 +49,6 @@ namespace Ubpa::USRefl {
 		template<typename Elem>
 		constexpr auto Insert(Elem e) const;
 
-// value must be constexpr
-// C++20 support string literal as template arguments
 #define USRefl_ElemList_GetByValue(list, value) list.Get<list.FindValue(value)>()
 	};
 }

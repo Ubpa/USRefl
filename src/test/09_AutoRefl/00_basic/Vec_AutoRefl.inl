@@ -22,13 +22,11 @@ struct Ubpa::USRefl::TypeInfo<Ubpa::Nested::Vec<T>> :
             Attr {TSTR("info"), "hello"},
             Attr {TSTR("maximum"), 10.f},
         }},
-        Field {TSTR("num"), &Ubpa::Nested::Vec<T>::num, AttrList {
-            Attr {TSTR(UMeta::initializer), []()->std::size_t{ return { 0 }; }},
-        }},
+        Field {TSTR("num"), &Ubpa::Nested::Vec<T>::num},
         Field {TSTR("Sum"), static_cast<float(Ubpa::Nested::Vec<T>::*)()const>(&Ubpa::Nested::Vec<T>::Sum)},
         Field {TSTR("Sum"), static_cast<float(Ubpa::Nested::Vec<T>::*)(float, float)const>(&Ubpa::Nested::Vec<T>::Sum), AttrList {
             Attr {TSTR(UMeta::default_functions), std::tuple {
-                [](Ubpa::Nested::Vec<T> const* __this, float z){ return __this->Sum(std::forward<float>(z)); }
+                [](Ubpa::Nested::Vec<T> const* this_, float z){ return this_->Sum(std::forward<float>(z)); }
             }},
         }},
         Field {TSTR("Dot"), &Ubpa::Nested::Vec<T>::Dot},
