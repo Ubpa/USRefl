@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
-project(USRefl VERSION 0.9.0)
+project(USRefl VERSION 0.8.0)
 message(STATUS "[Project] ${PROJECT_NAME}")
 
 include(cmake/InitUCMake.cmake)
@@ -12,7 +12,10 @@ Ubpa_InitProject()
 
 option(Ubpa_USRefl_Build_AutoRefl "build AutoRefl" OFF)
 if(Ubpa_USRefl_Build_AutoRefl)
+  message(STATUS "USRefl build AutoRefl")
   Ubpa_AddDep(UANTLR 0.2.1)
+else()
+  message(STATUS "USRefl doesn't build AutoRefl")
 endif()
 
 Ubpa_AddDep(UTemplate 0.6.0)
@@ -22,13 +25,14 @@ Ubpa_AddSubDirsRec(src)
 
 set(installFiles "")
 if(Ubpa_USRefl_Build_AutoRefl)
-  list(APPEND installFiles "cmake/UbpaUSReflAutoRefl.cmake")
+  list(APPEND installFiles "${PROJECT_SOURCE_DIR}/cmake/UbpaUSReflAutoRefl.cmake")
 endif()
 
+Ubpa_PackageName(package_name)
 install(
   FILES
     ${installFiles}
-  DESTINATION "${package_name}/cmake"
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/${package_name}/cmake"
 )
 
 Ubpa_Export(
