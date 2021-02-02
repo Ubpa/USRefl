@@ -8,7 +8,7 @@ using namespace Ubpa::USRefl;
 struct Vec {
     float x;
     float y;
-    float norm() const noexcept {
+    float norm() const {
         return std::sqrt(x * x + y * y);
     }
 };
@@ -28,7 +28,7 @@ struct Ubpa::USRefl::TypeInfo<Vec> :
 int main() {
     TypeInfo<Vec>::fields.ForEach([](const auto& field) {
         std::cout << field.name << std::endl;
-        });
+    });
 
     Vec v;
 

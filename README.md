@@ -48,9 +48,7 @@ Suppose you need to reflect `struct Vec`
 struct Vec {
   float x;
   float y;
-  float norm() const noexcept {
-    return std::sqrt(x * x + y * y);
-  }
+  float norm() const { return std::sqrt(x*x + y*y); }
 };
 ```
 
@@ -63,8 +61,8 @@ struct Ubpa::USRefl::TypeInfo<Vec> :
 {
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-    Field {TSTR("x"), &Type::x},
-    Field {TSTR("y"), &Type::y},
+    Field {TSTR("x")   , &Type::x   },
+    Field {TSTR("y")   , &Type::y   },
     Field {TSTR("norm"), &Type::norm},
   };
 };
@@ -89,18 +87,18 @@ TypeInfo<Vec>::fields.ForEach([](const auto& field) {
 std::invoke(TypeInfo<Vec>::fields.Find(TSTR("y")).value, v) = 4.f;
 std::invoke(TypeInfo<Vec>::fields.Find(TSTR("x")).value, v) = 3.f;
 std::cout
-    << "x: "
-    << std::invoke(TypeInfo<Vec>::fields.Find(TSTR("x")).value, v)
-    << std::endl;
+  << "x: "
+  << std::invoke(TypeInfo<Vec>::fields.Find(TSTR("x")).value, v)
+  << std::endl;
 ```
 
 ### Invoke Methods
 
 ```c++
 std::cout
-    << "norm: "
-    << std::invoke(TypeInfo<Vec>::fields.Find(TSTR("norm")).value, v)
-    << std::endl;
+  << "norm: "
+  << std::invoke(TypeInfo<Vec>::fields.Find(TSTR("norm")).value, v)
+  << std::endl;
 ```
 
 ### Iterate over variables
