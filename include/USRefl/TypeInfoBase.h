@@ -2,7 +2,7 @@
 
 #include "BaseList.h"
 
-#include <UTemplate/Name.h>
+#include <UTemplate/Name.hpp>
 
 namespace Ubpa::USRefl {
 	template<typename T, typename... Bases>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <UTemplate/TStr.h>
+#include <UTemplate/TStr.hpp>
 
 #include <string_view>
 

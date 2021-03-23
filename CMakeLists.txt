@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
-project(USRefl VERSION 0.8.0)
+project(USRefl VERSION 0.8.1)
 message(STATUS "[Project] ${PROJECT_NAME}")
 
 include(cmake/InitUCMake.cmake)
@@ -18,7 +18,7 @@ else()
   message(STATUS "USRefl doesn't build AutoRefl")
 endif()
 
-Ubpa_AddDep(UTemplate 0.6.0)
+Ubpa_AddDep(UTemplate 0.7.2)
 
 Ubpa_AddSubDirsRec(include)
 Ubpa_AddSubDirsRec(src)

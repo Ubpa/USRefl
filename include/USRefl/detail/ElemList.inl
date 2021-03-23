@@ -2,7 +2,7 @@
 
 #include "../Util.h"
 
-#include <UTemplate/TypeList.h>
+#include <UTemplate/TypeList.hpp>
 
 namespace Ubpa::USRefl::detail {
 	template<typename List, typename Func, typename Acc, std::size_t... Ns>
